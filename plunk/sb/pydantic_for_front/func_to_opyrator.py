@@ -1,4 +1,6 @@
 # launch as : opyrator launch-ui opyrator_front_dispatch:wrapped_func
+# launch as : opyrator launch-api opyrator_front_dispatch:wrapped_func
+
 
 import streamlit as st
 import streamlit_pydantic as sp
