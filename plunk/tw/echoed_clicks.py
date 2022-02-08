@@ -1,4 +1,3 @@
-from i2 import Pipe
 from collections import deque
 from itertools import islice
 from functools import partial
