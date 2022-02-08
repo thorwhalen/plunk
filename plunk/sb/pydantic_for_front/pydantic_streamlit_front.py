@@ -1,3 +1,5 @@
+# streamlit run pydantic_streamlit_front.py
+
 import streamlit as st
 import streamlit_pydantic as sp
 from streamlitfront.base import dispatch_funcs, BasePageFunc

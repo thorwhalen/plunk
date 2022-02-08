@@ -1,3 +1,5 @@
+# streamlit run pydantic_dispatch_enum.py
+
 import streamlit_pydantic as sp
 import streamlit as st
 from typing_extensions import TypedDict

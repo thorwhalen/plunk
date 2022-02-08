@@ -1,3 +1,5 @@
+# streamlit run pydantic_streamlit_input.py
+
 import streamlit as st
 from pydantic import BaseModel
 from typing import List, Dict
