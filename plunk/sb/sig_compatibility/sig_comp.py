@@ -101,3 +101,17 @@ def call_is_compatible(d: DefinitionSig, c=CallSig):
     cond = point_is_in_region(point_c, segment_d, region_type_d)
 
     return cond
+
+
+def invert_dict(d):
+    inv_map = {}
+    for k, v in d.items():
+        inv_map[v] = inv_map.get(v, []) + [k]
+    return inv_map
+
+
+def var_names_by_kind(sig):
+    d = invert_dict(sig.kinds)
+    func = kind_to_symbol_func
+    result = transform_key(d, func)
+    return result
