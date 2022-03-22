@@ -115,3 +115,8 @@ def var_names_by_kind(sig):
     func = kind_to_symbol_func
     result = transform_key(d, func)
     return result
+
+
+def possible_named_args(sig):
+    d = var_names_by_kind(sig)
+    return d["PK"] + d["KO"]
