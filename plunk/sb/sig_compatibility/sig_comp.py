@@ -3,6 +3,8 @@ from typing import Optional
 from collections import Counter
 from i2 import Sig
 from i2.signatures import PK, VP, VK, PO, KO
+from inspect import getcallargs
+from typing import List
 
 
 def transform_key(d, func):
@@ -120,3 +122,50 @@ def var_names_by_kind(sig):
 def possible_named_args(sig):
     d = var_names_by_kind(sig)
     return d["PK"] + d["KO"]
+
+
+def sig_to_func(sig):
+    @Sig(sig)
+    def func(*args, **kwargs):
+        pass
+
+    return func
+
+
+def args_compatible_with_sig(sig, *args, **kwargs):
+    func = sig_to_func(sig)
+    return getcallargs(func, *args, **kwargs)
+
+
+def possible_named_args(sig):
+    d = var_names_by_kind(sig)
+    print(d)
+    return d.get("PK", []) + d.get("KO", [])
+
+
+def named_args_are_valid(named_args1: List[str], vk2: int, named_args2: List[str]):
+    if vk2 > 0:
+        return True
+    excess = set(named_args1) - set(named_args2)
+    if excess:
+        ValueError(
+            f"The following named arguments cannot be accepted by the second function: {excess}"
+        )
+    else:
+        return True
+
+
+def is_compatible_func(f, g):
+    sig1 = Sig(f)
+    sig2 = Sig(g)
+    named_args1 = possible_named_args(sig1)
+    named_args2 = possible_named_args(sig2)
+    vk2 = param_kind_counter(g).get("VK", 0)
+
+    d1 = DefinitionSig(**param_kind_counter(sig1))
+    d2 = DefinitionSig(**param_kind_counter(sig2))
+
+    named_cond = named_args_are_valid(named_args1, vk2, named_args2)
+    arg_count_cond = is_compatible_with(d1, d2)
+
+    return named_cond and arg_count_cond
