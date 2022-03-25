@@ -9,11 +9,11 @@ from i2.tests.util import sig_to_inputs
 from i2.signatures import var_param_kinds
 
 
+kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
+
+
 def transform_key(d, func):
     return {func(k): v for k, v in d.items()}
-
-
-kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
 
 
 def param_kind_counter_for_func(func):
@@ -43,7 +43,31 @@ class CallSig:
     k: int = 0
 
 
-def point_is_in_region(point, segment, region_type):
+def region_type(d: DefinitionSig) -> int:
+    """Classifies a definition sig into 4 types
+
+    Args:
+        d (DefinitionSig)
+
+    Returns:
+        int: an integer in [0,1,2,3]
+    """
+    vp, vk = d.VP, d.VK
+    return 2 * vk + vp
+
+
+def point_is_in_region(point, segment, region_type) -> bool:
+    """Check whether a point is in an (infinite) region
+       defined by a segment and a region type
+
+    Args:
+        point: Tuple[int, int]
+        segment: List[point]
+        region_type: int
+
+    Returns:
+        bool : is in region or not
+    """
     x, y = point
     po, pk, ko = segment
 
@@ -73,12 +97,11 @@ def segment_from_definition_sig(d: DefinitionSig):
     return segment
 
 
-def region_type(d: DefinitionSig):
-    vp, vk = d.VP, d.VK
-    return 2 * vk + vp
-
-
 def is_compatible_with(d: DefinitionSig, e: DefinitionSig):
+    """Check whether ways of calling a function having a given signature,
+    are allowed for the second signature. Names of the variables are not checked.
+
+    """
     region_type_d = region_type(d)
     region_type_e = region_type(e)
     if (region_type_d, region_type_e) in [
@@ -98,6 +121,7 @@ def is_compatible_with(d: DefinitionSig, e: DefinitionSig):
 
 
 def call_is_compatible(d: DefinitionSig, c=CallSig):
+    """Check is a particular way of calling a function having signature size d is allowed"""
     point_c = (c.pos, c.k)
     region_type_d = region_type(d)
     segment_d = segment_from_definition_sig(d)
@@ -119,11 +143,6 @@ def var_names_by_kind(sig):
     func = kind_to_symbol_func
     result = transform_key(d, func)
     return result
-
-
-def possible_named_args(sig):
-    d = var_names_by_kind(sig)
-    return d["PK"] + d["KO"]
 
 
 def sig_to_func(sig):  # check Thor's function
@@ -182,6 +201,7 @@ def sig_to_func(sig):  # check Thor's function: could not find it
 
 
 def variadic_compatibility(vp1, vp2, vk1, vk2):
+    # True False or None: much better
     early_return = False
     early_result = None
     if vp1 and not vp2:
@@ -195,13 +215,6 @@ def variadic_compatibility(vp1, vp2, vk1, vk2):
         early_result = True
 
     return early_return, early_result
-
-
-# def transform_key(d, func):
-#    return {func(k): v for k, v in d.items()}
-
-
-# kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
 
 
 def param_kind_counter(sig):
@@ -241,12 +254,12 @@ def remove_variadics_from_sig(sig):
     return new_sig
 
 
-def comp(sig1, sig2):
+def comp(sig1, sig2):  # <= __leq__
     vp1, vk1 = variadics_from_sig(sig1)  # example: (True, False)
     vp2, vk2 = variadics_from_sig(sig2)
 
     early_return, early_result = variadic_compatibility(vp1, vp2, vk1, vk2)
-    if early_return:
+    if early_return:  # early_result := not None etc...
         return early_result
 
     new_sig1 = remove_variadics_from_sig(sig1)
