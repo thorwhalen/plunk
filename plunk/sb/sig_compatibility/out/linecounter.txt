@@ -1,0 +1,26 @@
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2022-03-23 19:22:11
+count workspace : /Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/sig_compatibility
+total files : 8
+total code lines : 873
+total comment lines : 1
+total blank lines : 108
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |            .py|            123|              1|             50|     14|
+   |         .ipynb|            750|              0|             58|     86|
+   -------------------------------------------------------------------------
+__init__.py, code is 0, comment is 0, blank is 0.
+__pycache__/__init__.cpython-38.pyc, it is a binary file.
+__pycache__/sig_comp.cpython-38.pyc, it is a binary file.
+notebook.ipynb, code is 492, comment is 0, blank is 37.
+notebook2.ipynb, code is 258, comment is 0, blank is 21.
+sig_comp.py, code is 121, comment is 1, blank is 50.
+sig_script.py, code is 0, comment is 0, blank is 0.
+tests/test_sig_comp.py, code is 2, comment is 0, blank is 0.
+===============================================================================

@@ -5,6 +5,8 @@ from i2 import Sig
 from i2.signatures import PK, VP, VK, PO, KO
 from inspect import getcallargs
 from typing import List
+from i2.tests.util import sig_to_inputs
+from i2.signatures import var_param_kinds
 
 
 def transform_key(d, func):
@@ -14,7 +16,7 @@ def transform_key(d, func):
 kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
 
 
-def param_kind_counter(func):
+def param_kind_counter_for_func(func):
     sig = Sig(func)
     param_list = [param.kind for param in sig.parameters.values()]
     cc = Counter(param_list)
@@ -124,10 +126,10 @@ def possible_named_args(sig):
     return d["PK"] + d["KO"]
 
 
-def sig_to_func(sig):
+def sig_to_func(sig):  # check Thor's function
     @Sig(sig)
     def func(*args, **kwargs):
-        pass
+        return args, kwargs
 
     return func
 
@@ -169,3 +171,90 @@ def is_compatible_func(f, g):
     arg_count_cond = is_compatible_with(d1, d2)
 
     return named_cond and arg_count_cond
+
+
+def sig_to_func(sig):  # check Thor's function: could not find it
+    @Sig(sig)
+    def func(*args, **kwargs):
+        return args, kwargs
+
+    return func
+
+
+def variadic_compatibility(vp1, vp2, vk1, vk2):
+    early_return = False
+    early_result = None
+    if vp1 and not vp2:
+        early_return = True
+        early_result = False
+    if vk1 and not vk2:
+        early_return = True
+        early_result = False
+    if vp2 and vk2:
+        early_return = True
+        early_result = True
+
+    return early_return, early_result
+
+
+# def transform_key(d, func):
+#    return {func(k): v for k, v in d.items()}
+
+
+# kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
+
+
+def param_kind_counter(sig):
+    param_list = [param.kind for param in sig.parameters.values()]
+    cc = Counter(param_list)
+    res = transform_key(dict(cc), kind_to_symbol_func)
+    return res
+
+
+def kind_to_symbol_func(k):
+    return kind_to_symbol[k]
+
+
+def variadics_from_sig(sig):
+    d = param_kind_counter(sig)
+    vp = "VP" in d
+    vk = "VK" in d
+
+    return vp, vk
+
+
+def is_valid_input_for_func(func, input):
+    args, kwargs = input
+    try:
+        func(*args, **kwargs)
+        return True
+    except TypeError:
+        return False
+
+
+def remove_variadics_from_sig(sig):
+    non_variadics_params = [
+        param for param in sig.params if param.kind not in var_param_kinds
+    ]
+    new_sig = Sig.from_params(non_variadics_params)
+
+    return new_sig
+
+
+def comp(sig1, sig2):
+    vp1, vk1 = variadics_from_sig(sig1)
+    vp2, vk2 = variadics_from_sig(sig2)
+
+    early_return, early_result = variadic_compatibility(vp1, vp2, vk1, vk2)
+    if early_return:
+        return early_result
+
+    new_sig1 = remove_variadics_from_sig(sig1)
+    new_sig2 = remove_variadics_from_sig(sig2)
+    func1 = sig_to_func(new_sig1)
+    func2 = sig_to_func(new_sig2)
+    inputs = sig_to_inputs(new_sig1)
+    # assert valid for func1 !
+    is_valid = all([is_valid_input_for_func(func2, input) for input in inputs])
+
+    return is_valid

@@ -1,0 +1,79 @@
+{
+    "extension": "linecounter",
+    "version": "0.2.7",
+    "workspace": "/Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/sig_compatibility",
+    "linecount": [
+        {
+            "version": "0.2.7",
+            "counttime": "2022-03-23 19:22:11",
+            "filesum": 8,
+            "codesum": 873,
+            "commentsum": 1,
+            "blanksum": 108,
+            "statistics": {
+                ".py": {
+                    "code": 123,
+                    "comment": 1,
+                    "blank": 50
+                },
+                ".ipynb": {
+                    "code": 750,
+                    "comment": 0,
+                    "blank": 58
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": "__init__.py"
+                },
+                {
+                    "filename": "__pycache__/__init__.cpython-38.pyc",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "__pycache__/sig_comp.cpython-38.pyc",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 37,
+                    "code": 492,
+                    "comment": 0,
+                    "filename": "notebook.ipynb"
+                },
+                {
+                    "blank": 21,
+                    "code": 258,
+                    "comment": 0,
+                    "filename": "notebook2.ipynb"
+                },
+                {
+                    "blank": 50,
+                    "code": 121,
+                    "comment": 1,
+                    "filename": "sig_comp.py"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": "sig_script.py"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "tests/test_sig_comp.py"
+                }
+            ]
+        }
+    ]
+}
