@@ -242,7 +242,7 @@ def remove_variadics_from_sig(sig):
 
 
 def comp(sig1, sig2):
-    vp1, vk1 = variadics_from_sig(sig1)
+    vp1, vk1 = variadics_from_sig(sig1)  # example: (True, False)
     vp2, vk2 = variadics_from_sig(sig2)
 
     early_return, early_result = variadic_compatibility(vp1, vp2, vk1, vk2)
