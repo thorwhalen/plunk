@@ -9,10 +9,6 @@ from plunk.sb.sig_compatibility.sig_comp import (
 )
 
 
-def test_sig_to_func():
-    sig = Sig("a b")
-
-
 def test_transform_key():
     d = {"key1": 12, "key2": 23}
     func = lambda x: x.upper()
@@ -36,4 +32,8 @@ def test_variadics_from_sig():
 
 def test_variadic_compatibility():
     vpk = True, False, True, True
+    assert not variadic_compatibility(*vpk)
+    vpk = True, True, True, True
+    assert variadic_compatibility(*vpk) is None
+    vpk = True, True, True, False
     assert not variadic_compatibility(*vpk)

@@ -202,19 +202,19 @@ def sig_to_func(sig):  # check Thor's function: could not find it
 
 def variadic_compatibility(vp1, vp2, vk1, vk2):
     # True False or None: much better
-    early_return = False
+    # early_return = False
     early_result = None
     if vp1 and not vp2:
-        early_return = True
+        # early_return = True
         early_result = False
     if vk1 and not vk2:
-        early_return = True
+        # early_return = True
         early_result = False
-    if vp2 and vk2:
-        early_return = True
-        early_result = True
+    # if vp2 and vk2:
+    #    early_return = True
+    #    early_result = True
 
-    return early_return, early_result
+    return early_result
 
 
 def param_kind_counter(sig):
@@ -258,8 +258,8 @@ def comp(sig1, sig2):  # <= __leq__
     vp1, vk1 = variadics_from_sig(sig1)  # example: (True, False)
     vp2, vk2 = variadics_from_sig(sig2)
 
-    early_return, early_result = variadic_compatibility(vp1, vp2, vk1, vk2)
-    if early_return:  # early_result := not None etc...
+    early_result = variadic_compatibility(vp1, vp2, vk1, vk2)
+    if early_result is not None:  # early_result := not None etc...
         return early_result
 
     new_sig1 = remove_variadics_from_sig(sig1)
