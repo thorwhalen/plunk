@@ -1,5 +1,5 @@
 import pytest
-from typing import List, Dict, Callable, Iterable, Union
+from typing import List, Dict, Callable, Iterable, Union, Tuple
 from plunk.sb.type_compatibility.compatible import has_compatible_type, builtins
 
 
@@ -35,6 +35,12 @@ def test_classes():
         pass
 
     assert has_compatible_type(A, B)
+
+
+def test_tuple():
+    t1 = Tuple[int, float]
+    t2 = Tuple[float, float]
+    assert has_compatible_type(t1, t2)
 
 
 def test_callable():

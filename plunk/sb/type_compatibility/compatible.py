@@ -31,6 +31,16 @@ def compatible_unions(union1, union2):
     return True
 
 
+def compatible_tuples(tuple1, tuple2):
+    args1 = typing.get_args(tuple1)
+    args2 = typing.get_args(tuple2)
+    return all([has_compatible_type(arg1, arg2) for arg1, arg2 in zip(args1, args2)])
+
+
+def compatible_callables(callable1, callable2):
+    return True
+
+
 def has_compatible_type(typing_inst1, typing_inst2):
     # types are compatible if equal
     if typing_inst1 == typing_inst2:
@@ -57,6 +67,8 @@ def has_compatible_type(typing_inst1, typing_inst2):
     if origin1 == Union and origin2 == Union:
         return compatible_unions(typing_inst1, typing_inst2)
 
+    if origin1 == Callable and origin2 == Callable:
+        return True
     # roots must be compatible
     origin_comp = has_compatible_type(origin1, origin2)
 
