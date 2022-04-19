@@ -88,5 +88,7 @@ if __name__ == "__main__":
     b2.bar(3)
     b2.bar2(3)
     # (variable) bar: MethodType
-    a.bar.func()
+    a.bar.func)
     c.bar()
+
+

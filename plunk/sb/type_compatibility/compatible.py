@@ -34,6 +34,7 @@ def compatible_unions(union1, union2):
 def compatible_tuples(tuple1, tuple2):
     args1 = typing.get_args(tuple1)
     args2 = typing.get_args(tuple2)
+
     return all([has_compatible_type(arg1, arg2) for arg1, arg2 in zip(args1, args2)])
 
 
@@ -50,6 +51,7 @@ def has_compatible_type(typing_inst1, typing_inst2):
     if typing_inst1 == int and typing_inst2 == float:
         return True
 
+    # both types are classes
     if safe_issubclass(typing_inst1, typing_inst2):
         return True
 
@@ -60,7 +62,7 @@ def has_compatible_type(typing_inst1, typing_inst2):
     ):
         return False
 
-    # split into root and leaves
+    # split into root and leaves 
     origin1, args1 = typing.get_origin(typing_inst1), typing.get_args(typing_inst1)
     origin2, args2 = typing.get_origin(typing_inst2), typing.get_args(typing_inst2)
 
