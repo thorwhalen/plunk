@@ -4,10 +4,11 @@ kwargs are heavily modified by a dag
 """
 
 from meshed import DAG, FuncNode
+from typing import Union
 
 
 def maybe_first(items):
-    return items[0] if items else None
+    return next(iter(items), None)
 
 
 def name_of_var_kw_argument(sig):
@@ -18,8 +19,10 @@ def name_of_var_kw_argument(sig):
 
 def map_action_on_cond(kvs, cond, expand):
     for k, v in kvs:
-        if cond(k):
-            yield from expand(v)
+        if cond(
+            k
+        ):  # make a conditional on (k,v), use type KV, Iterable[KV], expand:KV -> Iterable[KV]
+            yield from expand(v)  # expand should result in (k,v)
         else:
             yield k, v
 
@@ -40,7 +43,7 @@ def kwargs_from_args_and_kwargs(
     allow_partial=False,
     allow_excess=False,
     ignore_kind=False,
-    post_process=False,
+    debug=False,
 ):
     """Extracts a dict of input argument values for target signature, from args
     and kwargs.
@@ -199,7 +202,7 @@ def kwargs_from_args_and_kwargs(
             excess_str = ", ".join(excess)
             raise TypeError(f"Got unexpected keyword arguments: {excess_str}")
 
-    if post_process:
+    if debug:
         var_kw_name = name_of_var_kw_argument(self)
 
         kvs = b.arguments.items()
@@ -208,8 +211,166 @@ def kwargs_from_args_and_kwargs(
         result = dict(flattened_kvs)
 
     else:
-        result = b.arguments
+        result = dict(b.arguments)
     return result
+
+
+def args_and_kwargs_from_kwargs(
+    self,
+    kwargs,
+    apply_defaults=False,
+    allow_partial=False,
+    allow_excess=False,
+    ignore_kind=False,
+    args_limit: Union[int, None] = 0,
+):
+    """Extract args and kwargs such that func(*args, **kwargs) can be called,
+    where func has instance's signature.
+
+    :param kwargs: The {argname: argval,...} dict to process
+    :param args_limit: How "far" in the params should args (positional arguments)
+        be searched for.
+        - args_limit==0: Take the minimum number possible of args (positional
+            arguments). Only those that are position only or before a var-positional.
+        - args_limit is None: Take the maximum number of args (positional arguments).
+            The only kwargs (keyword arguments) you should have are keyword-only
+            and var-keyword arguments.
+        - args_limit positive integer: Take the args_limit first argument names
+            (of signature) as args, and the rest as kwargs.
+
+    >>> def foo(w, /, x: float, y=1, *, z: int = 1):
+    ...     return ((w + x) * y) ** z
+    >>> foo_sig = Sig(foo)
+    >>> args, kwargs = foo_sig.args_and_kwargs_from_kwargs(
+    ...     dict(w=4, x=3, y=2, z=1)
+    ... )
+    >>> assert (args, kwargs) == ((4,), {"x": 3, "y": 2, "z": 1})
+    >>> assert foo(*args, **kwargs) == foo(4, 3, 2, z=1) == 14
+
+    The `args_limit` begs explanation.
+    Consider the signature of `def foo(w, /, x: float, y=1, *, z: int = 1): ...`
+    for instance. We could call the function with the following (args, kwargs) pairs:
+    - ((1,), {'x': 2, 'y': 3, 'z': 4})
+    - ((1, 2), {'y': 3, 'z': 4})
+    - ((1, 2, 3), {'z': 4})
+    The two other combinations (empty args or empty kwargs) are not valid
+    because of the / and * constraints.
+
+    But when asked for an (args, kwargs) pair, which of the three valid options
+    should be returned? This is what the `args_limit` argument controls.
+
+    If `args_limit == 0`, the least args (positional arguments) will be returned.
+    It's the default.
+
+    >>> kwargs = dict(w=4, x=3, y=2, z=1)
+    >>> foo_sig.args_and_kwargs_from_kwargs(kwargs, args_limit=0)
+    ((4,), {'x': 3, 'y': 2, 'z': 1})
+
+    If `args_limit is None`, the least kwargs (keyword arguments) will be returned.
+
+    >>> foo_sig.args_and_kwargs_from_kwargs(kwargs, args_limit=None)
+    ((4, 3, 2), {'z': 1})
+
+    If `args_limit` is a positive integer, the first `args_limit` arguments
+    will be returned (not checking at all if this is valid!).
+
+    >>> foo_sig.args_and_kwargs_from_kwargs(kwargs, args_limit=1)
+    ((4,), {'x': 3, 'y': 2, 'z': 1})
+    >>> foo_sig.args_and_kwargs_from_kwargs(kwargs, args_limit=2)
+    ((4, 3), {'y': 2, 'z': 1})
+    >>> foo_sig.args_and_kwargs_from_kwargs(kwargs, args_limit=3)
+    ((4, 3, 2), {'z': 1})
+
+    Note that 'args_limit''s behavior is consistent with list behvior in the sense
+    that:
+
+    >>> args = (0, 1, 2, 3)
+    >>> args[:0]
+    ()
+    >>> args[:None]
+    (0, 1, 2, 3)
+    >>> args[2]
+    2
+
+    By default, only the arguments that were given in the kwargs input will be
+    returned in the (args, kwargs) output.
+    If you also want to get those that have defaults (according to signature),
+    you need to specify it with the `apply_defaults=True` argument.
+
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3))
+    ((4,), {'x': 3})
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3), apply_defaults=True)
+    ((4,), {'x': 3, 'y': 1, 'z': 1})
+
+    By default, all required arguments must be given.
+    Not doing so will lead to a `TypeError`.
+    If you want to process your arguments anyway, specify `allow_partial=True`.
+
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4))
+    Traceback (most recent call last):
+      ...
+    TypeError: missing a required argument: 'x'
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4), allow_partial=True)
+    ((4,), {})
+
+    Specifying argument names that are not recognized by the signature will
+    lead to a `TypeError`.
+    If you want to avoid this (and just take from the input `kwargs` what ever you
+    can), specify this with `allow_excess=True`.
+
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3, extra='stuff'))
+    Traceback (most recent call last):
+        ...
+    TypeError: Got unexpected keyword arguments: extra
+    >>> foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3, extra='stuff'),
+    ...     allow_excess=True)
+    ((4,), {'x': 3})
+
+    An edge case: When a `VAR_POSITIONAL` follows a `POSITION_OR_KEYWORD`...
+
+    >>> Sig(lambda a, *b, c=2: None).args_and_kwargs_from_kwargs(
+    ...     {"a": 1, "b": [2, 3], "c": 4}
+    ... )
+    ((1, [2, 3]), {'c': 4})
+
+    See `kwargs_from_args_and_kwargs` (namely for the description of the arguments.
+    """
+
+    if args_limit is None:
+        # Take the maximum number of args (positional arguments).
+        # The only kwargs (keyword arguments) you should have are keyword-only
+        # and var-keyword arguments.
+        idx = next((i for i, p in enumerate(self.params) if p.kind > VP), None)
+        names_for_args = self.names[:idx]
+    elif args_limit == 0:
+        # Take the minimum number possible of args (positional arguments)
+        # Only those that are position only or before a var-positional.
+        vp_idx = self.index_of_var_positional
+        if vp_idx is None:
+            names_for_args = self.names_of_kind[PO]
+        else:
+            # When there's a VP present, all arguments before it can only be
+            # expressed positionally if the VP argument is non-empty.
+            # So, here we just consider all arguments positionally up to the VP arg.
+            names_for_args = self.names[: (vp_idx + 1)]
+    else:
+        names_for_args = self.names[:args_limit]
+
+    args = tuple(kwargs[name] for name in names_for_args if name in kwargs)
+    kwargs = {name: kwargs[name] for name in kwargs if name not in names_for_args}
+
+    kwargs = self.kwargs_from_args_and_kwargs(
+        args,
+        kwargs,
+        apply_defaults=apply_defaults,
+        allow_partial=allow_partial,
+        allow_excess=allow_excess,
+        ignore_kind=ignore_kind,
+        debug=True,
+    )
+    kwargs = {name: kwargs[name] for name in kwargs if name not in names_for_args}
+
+    return args, kwargs
 
 
 if __name__ == "__main__":
@@ -237,8 +398,16 @@ if __name__ == "__main__":
     def foo(w, /, x: float, y="YY", *, z: str = "ZZ", **rest):
         pass
 
-    sig = Sig(foo)
-    res = kwargs_from_args_and_kwargs(
-        sig, (11, 22, "you"), dict(z="zoo", other="stuff"), post_process=True
-    )
-    assert res == {"w": 11, "x": 22, "y": "you", "z": "zoo", "other": "stuff"}
+    # sig = Sig(foo)
+    # res = kwargs_from_args_and_kwargs(
+    #    sig, (11, 22, "you"), dict(z="zoo", other="stuff"), debug=True
+    # )
+    # print(res)
+    # assert res == {"w": 11, "x": 22, "y": "you", "z": "zoo", "other": "stuff"}
+    # do the reverse one args_from_etc....
+    def foo(w, /, x: float, y=1, *args, z: int = 1, **rest):
+        return ((w + x) * y) ** z
+
+    foo_sig = Sig(foo)
+    args, kwargs = foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3, y=2, z=1, t=12))
+    print(f"args:{args}, kwargs: {kwargs}")
