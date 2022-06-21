@@ -1,7 +1,11 @@
 from distutils.command.config import config
-
+import streamlit as st
 from streamlitfront.base import mk_app
-from front.elements import InputComponentFlag
+from front.elements import InputComponentFlag, InputBase
+from streamlitfront.elements.elements import implement_component_with_init_value
+
+
+FileInput = implement_component_with_init_value(InputBase, st.file_uploader)
 
 
 def foo(a: int = 1, b: int = 2, c=3):
