@@ -1,18 +1,29 @@
 from metaflow import FlowSpec, step
+from sklearn.datasets import make_classification
+
+
+def mk_Xy():
+    X, y = make_classification(
+        n_features=2,
+        n_redundant=0,
+        n_informative=2,
+        random_state=1,
+        n_clusters_per_class=1,
+    )
+    return X, y
 
 
 class ClassifierTrainFlow(FlowSpec):
     @step
     def start(self):  # A
-        from sklearn import datasets
         from sklearn.model_selection import train_test_split
 
-        X, y = datasets.load_wine(return_X_y=True)
+        X, y = mk_Xy()
         (
-            self.train_data,
-            self.test_data,
-            self.train_labels,
-            self.test_labels,
+            self.X_train,
+            self.X_test,
+            self.y_train,
+            self.y_test,
         ) = train_test_split(X, y, test_size=0.4, random_state=0)
         self.next(self.train_knn, self.train_svm)
 
@@ -21,7 +32,7 @@ class ClassifierTrainFlow(FlowSpec):
         from sklearn.neighbors import KNeighborsClassifier
 
         self.model = KNeighborsClassifier()
-        self.model.fit(self.train_data, self.train_labels)
+        self.model.fit(self.X_train, self.y_train)
         self.next(self.choose_model)
 
     @step
@@ -29,13 +40,13 @@ class ClassifierTrainFlow(FlowSpec):
         from sklearn import svm
 
         self.model = svm.SVC(kernel="poly")  # D
-        self.model.fit(self.train_data, self.train_labels)
+        self.model.fit(self.X_train, self.y_train)
         self.next(self.choose_model)
 
     @step
     def choose_model(self, inputs):  # B
         def score(inp):
-            return inp.model, inp.model.score(inp.test_data, inp.test_labels)
+            return inp.model, inp.model.score(inp.X_test, inp.y_test)
 
         self.results = sorted(map(score, inputs), key=lambda x: -x[1])
         self.model = self.results[0][0]

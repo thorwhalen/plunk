@@ -1,0 +1,1 @@
+{"flow_id": "ClassifierTrainFlow", "run_number": "1655910575328469", "step_name": "train_knn", "task_id": "2", "field_name": "ds-root", "type": "ds-root", "value": "/Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/metaflow_practice/.metaflow", "tags": ["attempt_id:0"], "user_name": "sylvain", "ts_epoch": 1655910578358}
