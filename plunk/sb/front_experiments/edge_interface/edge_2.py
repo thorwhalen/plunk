@@ -4,7 +4,7 @@ import numpy as np
 import soundfile as sf
 
 
-from front.spec_maker import APP_KEY, RENDERING_KEY, ELEMENT_KEY
+from front.spec_maker import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from streamlitfront.base import mk_app
 from meshed import code_to_dag, DAG
 from front.elements import (
