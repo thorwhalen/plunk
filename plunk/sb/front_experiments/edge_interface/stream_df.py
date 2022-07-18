@@ -1,57 +1,45 @@
-import time  # to simulate a real time data, time loop
-
-import numpy as np  # np mean, np random
-import pandas as pd  # read csv, df manipulation
-import plotly.express as px  # interactive charts
-import streamlit as st  # 🎈 data web app development
+import time
+import pandas as pd
+import plotly.express as px
+import streamlit as st
 
 st.set_page_config(
     page_title="Stream a dataframe",
     layout="wide",
 )
 
-# read csv from a github repo
-dataset_url = "data/accel_data.csv"
+# read csv from local folder
+dataset_path = "data/accel_data.csv"
 
 
 @st.experimental_memo
-def get_data() -> pd.DataFrame:
-    return pd.read_csv(dataset_url)
+def get_data(filepath) -> pd.DataFrame:
+    return pd.read_csv(filepath, sep=";")
 
 
-df = get_data()
+df = get_data(dataset_path)
+min_data = df["ACC_Y"].min()
+max_data = df["ACC_Y"].max()
 
 # dashboard title
 st.title("Stream a dataframe")
 
-# top-level filters
-job_filter = st.selectbox("Select the Job", pd.unique(df["job"]))
 
 # creating a single-element container
 placeholder = st.empty()
 
-# dataframe filter
-# df = df[df["job"] == job_filter]
-ddf = df.copy().iloc[:10]
-# near real-time / live feed simulation
+# simulate live data
 for seconds in range(200):
 
-    ddf["ACC_X"] = df["ACC_X"].iloc[seconds * 10 : (seconds + 1) * 10]
-
+    vals = df["ACC_Y"].iloc[seconds : seconds + 30].values
+    d = {"ACC_Y": vals}
     with placeholder.container():
+        fig = px.line(
+            data_frame=pd.DataFrame(d),
+            x=range(30),
+            y="ACC_Y",
+            range_y=[min_data, max_data],
+        )
+        st.write(fig)
 
-        # create two columns for charts
-        fig_col1, fig_col2 = st.columns(2)
-        with fig_col1:
-            st.markdown("### First Chart")
-            fig = px.histogram(data_frame=ddf, x="ACC_X")
-            st.write(fig)
-
-        with fig_col2:
-            st.markdown("### Second Chart")
-            fig2 = px.histogram(data_frame=ddf, x="ACC_X")
-            st.write(fig2)
-
-        st.markdown("### Detailed Data View")
-        st.dataframe(ddf)
-        time.sleep(1)
+        time.sleep(0.1)
