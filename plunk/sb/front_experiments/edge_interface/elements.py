@@ -26,14 +26,14 @@ class SimpleList(FrontComponentBase):
 class SimpleText(FrontComponentBase):
     def __init__(
         self,
-        word: str,
+        obj: str,
         name: FrontElementName = None,
         use_container_width: bool = False,
     ):
-        super().__init__(word=word, name=name)
+        super().__init__(obj=obj, name=name)
         self.use_container_width = use_container_width
 
     def render(self):
         with st.expander(self.name, True):
-            word: str = self.word
-            st.write(f"length = {word.len}")
+            obj: str = self.obj
+            st.write(f"length = {obj.len}")
