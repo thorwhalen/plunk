@@ -1,8 +1,8 @@
 import streamlit as st
 from meshed import DAG
 from front.types import FrontElementName
-from front.elements import FrontComponentBase
-from typing import List
+from front.elements import FrontComponentBase, TextInputBase
+from typing import List, Any
 
 WaveForm = List[int]
 
@@ -23,17 +23,37 @@ class SimpleList(FrontComponentBase):
             st.write(arr.len)
 
 
-class SimpleText(FrontComponentBase):
+class SimpleText(TextInputBase):
     def __init__(
         self,
         obj: str,
         name: FrontElementName = None,
         use_container_width: bool = False,
+        input_key: str = None,
+        init_value=None,
     ):
-        super().__init__(obj=obj, name=name)
+        super().__init__(obj=obj, name=name, input_key=input_key)
         self.use_container_width = use_container_width
 
     def render(self):
-        with st.expander(self.name, True):
-            obj: str = self.obj
-            st.write(f"length = {obj.len}")
+        # with st.expander(self.name, True): No nesting of expanders
+        input_key: str = self.input_key
+        st.write(f"length of text entered= {len(input_key)}")
+
+
+class SimpleDataframe(FrontComponentBase):
+    def __init__(
+        self,
+        obj: str,
+        name: FrontElementName = None,
+        use_container_width: bool = False,
+        input_key: str = None,
+        init_value=None,
+    ):
+        super().__init__(obj=obj, name=name, input_key=input_key)
+        self.use_container_width = use_container_width
+
+    def render(self):
+        # with st.expander(self.name, True): No nesting of expanders
+        input_key: str = self.input_key
+        st.write(f"length of text entered= {len(input_key)}")
