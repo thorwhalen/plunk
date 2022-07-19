@@ -2,6 +2,7 @@ import io
 import numpy as np
 import soundfile as sf
 import streamlit as st
+import pyaudio
 
 
 def discretize(arr, num_windows=200, func=np.mean):
@@ -30,3 +31,17 @@ def bytes_from_uploaded(uploaded_file):
     result = io.BytesIO(uploaded_file.read())
 
     return result
+
+
+def mk_audio_stream():
+    p = pyaudio.PyAudio()
+    stream = p.open(
+        format=pyaudio.paInt16,
+        channels=1,
+        rate=44100,
+        input=True,
+        output=True,
+        frames_per_buffer=1024,
+        output_device_index=3,
+    )
+    return stream
