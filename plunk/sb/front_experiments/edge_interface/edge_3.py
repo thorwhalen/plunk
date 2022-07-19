@@ -11,10 +11,7 @@ from streamlitfront.elements import implement_input_component
 from typing import Iterable
 from streamlitfront.examples.graph_component import Graph
 from utils import (
-    discretize,
     wav_complex_display,
-    arr_from_bytes,
-    bytes_from_uploaded,
 )
 
 WaveForm = Iterable[int]

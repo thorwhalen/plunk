@@ -4,9 +4,9 @@ import soundfile as sf
 import streamlit as st
 
 
-def discretize(arr, num_windows=200):
+def discretize(arr, num_windows=200, func=np.mean):
     step = len(arr) // num_windows
-    dis = [np.mean(arr[i * step : i * (step + 1)]) for i in range(num_windows)]
+    dis = [func(arr[i * step : i * (step + 1)]) for i in range(num_windows)]
     return np.array(dis)
 
 
