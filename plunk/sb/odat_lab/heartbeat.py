@@ -1,8 +1,9 @@
 from py2store import myconfigs
 from plunk.sb.odat_lab.guns import Dacc
 
+# DFLT_CHUNKER = partial(fixed_step_chunker, chk_size=2048)
 
-config_filename = "hamlet.json"
+config_filename = "heartbeat.json"
 DFLT_LOCAL_SOURCE_DIR = myconfigs.get_config_value(config_filename, "local_source_dir")
 
 
