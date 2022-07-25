@@ -1,5 +1,5 @@
-from hear import WavLocalFileStore
 from forged.clickify import clickify, pad_to_length
+from hear import WavLocalFileStore
 
 # data prep
 my_wav_store = WavLocalFileStore("./data/ClickDetection")
