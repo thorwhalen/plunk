@@ -22,7 +22,7 @@ def mk_dacc(root_dir=DFLT_LOCAL_SOURCE_DIR):
 
 
 def wf_from_bytes(bytes):
-    return sf.read(BytesIO(bytes))[0]
+    return sf.read(BytesIO(bytes), dtype="float32")[0]
 
 
 def WfStore(root_store):
