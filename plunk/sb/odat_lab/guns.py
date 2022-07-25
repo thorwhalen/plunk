@@ -6,8 +6,9 @@ from functools import partial
 from sklearn.preprocessing import normalize, RobustScaler
 from graze import graze
 from hear import WavLocalFileStore
-
-
+from dol import wrap_kvs
+import soundfile as sf
+from io import BytesIO
 from odat.utils.chunkers import fixed_step_chunker
 
 DFLT_CHUNKER = partial(fixed_step_chunker, chk_size=2048)
@@ -20,10 +21,19 @@ def mk_dacc(root_dir=DFLT_LOCAL_SOURCE_DIR):
     return Dacc(root_dir=root_dir)
 
 
+def wf_from_bytes(bytes):
+    return sf.read(BytesIO(bytes))[0]
+
+
+def WfStore(root_store):
+    obj_of_data = wf_from_bytes
+    return wrap_kvs(root_store, obj_of_data=obj_of_data)
+
+
 class Dacc:
     def __init__(self, root_dir=DFLT_LOCAL_SOURCE_DIR):
-        self.store = WavLocalFileStore(root_dir)
-        self.wfs = self.store  # consistency alias
+        self.root_store = WavLocalFileStore(root_dir)
+        self.wfs = WfStore(self.root_store)
 
 
 #     def wf_tag_gen(self):
