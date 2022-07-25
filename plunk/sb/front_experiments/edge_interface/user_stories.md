@@ -1,3 +1,8 @@
+
+The maintenance of this file has moved to https://github.com/otosense/know/wiki/User-Stories.
+
+
+
 # User stories
 
 ## Data exploration
