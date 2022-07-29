@@ -1,10 +1,11 @@
+from dataclasses import dataclass
 from typing import Iterable
 from meshed import code_to_dag, DAG
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
 from collections.abc import Callable
 from front.crude import prepare_for_crude_dispatch
 from streamlitfront.elements import TextInput, SelectBox
-
+from front.elements import OutputBase
 from streamlitfront.base import mk_app
 from streamlitfront.examples.util import Graph
 from streamlitfront.elements import (
@@ -43,6 +44,16 @@ def crudify(funcs):
 WaveForm = Iterable[int]
 
 
+@dataclass
+class TaggedAudioPlayer(OutputBase):
+    def render(self):
+        sound, tag = self.output
+        if not isinstance(sound, str):
+            sound = sound.getvalue()
+
+        st.audio(sound)
+
+
 # @code_to_dag
 @prepare_for_crude_dispatch(mall=mall, output_store="tag_sound_output")
 def tag_sound(train_audio: WaveForm, tag: str):
@@ -54,13 +65,6 @@ def tag_sound(train_audio: WaveForm, tag: str):
 def display_tag_sound(result):
     return result
 
-
-# crudified_tag_sound = prepare_for_crude_dispatch(
-#     tag_sound, mall=mall, output_store="tag_sound_output"
-# )
-# crudified_display_tag_sound = prepare_for_crude_dispatch(
-#     display_tag_sound, mall=mall, param_to_mall_map={"result": "tag_sound_output"}
-# )
 
 print(type(tag_sound))
 from i2 import Sig
@@ -96,7 +100,10 @@ config_ = {
                         ELEMENT_KEY: SelectBox,
                         "options": mall["tag_sound_output"],
                     },
-                }
+                },
+                "output": {
+                    ELEMENT_KEY: TaggedAudioPlayer,
+                },
             },
         },
         DAG: {
@@ -120,4 +127,5 @@ config_ = {
 
 app = mk_app([tag_sound, display_tag_sound], config=config_)
 app()
-st.write(mall)
+
+# st.audio(mall["tag_sound_output"]["s3"][0])
