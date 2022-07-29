@@ -2,5 +2,6 @@ import streamlit as st
 
 st.title("Load")
 
-if "shared" not in st.session_state:
-    st.session_state["shared"] = "has been changed"
+
+if "tagged_sounds" not in st.session_state:
+    st.session_state["tagged_sounds"] = []
