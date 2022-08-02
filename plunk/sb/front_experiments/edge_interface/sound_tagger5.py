@@ -75,9 +75,9 @@ class TaggedAudioVisualizer(OutputBase):
 @dataclass
 class DfVisualizer(OutputBase):
     def render(self):
-        m = self.output
+        # m = self.output
 
-        st.dataframe(m)
+        st.dataframe(mall["tag_sound_output"])
 
 
 # @code_to_dag
