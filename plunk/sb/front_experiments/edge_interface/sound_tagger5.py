@@ -4,7 +4,7 @@ from meshed import code_to_dag, DAG
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
 from collections.abc import Callable
 from front.crude import prepare_for_crude_dispatch
-from streamlitfront.elements import TextInput, SelectBox
+from streamlitfront.elements import TextInput, SelectBox, FloatSliderInput
 from front.elements import OutputBase
 from streamlitfront.base import mk_app
 from streamlitfront.examples.util import Graph
@@ -106,9 +106,9 @@ def explore_dataset(result):
     return mall["tag_sound_output"]
 
 
-@prepare_for_crude_dispatch(mall=mall, param_to_mall_map={"result": "train_test_label"})
-def train_test_split(result):
-    return result
+def set_train_test_proportion(train_proportion):
+    mall["train_test_proportion"] = train_proportion
+    return train_proportion
 
 
 config_ = {
@@ -172,6 +172,15 @@ config_ = {
                 },
             },
         },
+        "set_train_test_proportion": {
+            "execution": {
+                "inputs": {
+                    "train_proportion": {
+                        ELEMENT_KEY: FloatSliderInput,
+                    },
+                }
+            },
+        },
         DAG: {
             "graph": {
                 ELEMENT_KEY: Graph,
@@ -191,7 +200,11 @@ config_ = {
     },
 }
 
-app = mk_app([tag_sound, display_tag_sound, visualize_tag_sound], config=config_)
+app = mk_app(
+    [tag_sound, display_tag_sound, visualize_tag_sound, set_train_test_proportion],
+    config=config_,
+)
 app()
 # st.audio(mall["tag_sound_output"]["s3"][0])
 #'execution': {'inputs': {'p': {ELEMENT_KEY: FloatSliderInput,}},}
+st.write(mall)
