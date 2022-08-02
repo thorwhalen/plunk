@@ -97,9 +97,13 @@ def visualize_tag_sound(result):
     return result
 
 
-# @prepare_for_crude_dispatch(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
-# def explore_dataset(result):
-#     return result
+def mall_to_df(mall):
+    names = list(mall["tag_sound_output"].keys())
+    # pd.DataFrame
+
+
+def explore_dataset(result):
+    return mall["tag_sound_output"]
 
 
 config_ = {
@@ -150,19 +154,19 @@ config_ = {
                 },
             },
         },
-        # "explore_dataset": {
-        #     "execution": {
-        #         "inputs": {
-        #             "result": {
-        #                 ELEMENT_KEY: SelectBox,
-        #                 "options": "list",
-        #             },
-        #         },
-        #         "output": {
-        #             ELEMENT_KEY: DfVisualizer,
-        #         },
-        #     },
-        # },
+        "explore_dataset": {
+            "execution": {
+                "inputs": {
+                    "result": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": "list",
+                    },
+                },
+                "output": {
+                    ELEMENT_KEY: DfVisualizer,
+                },
+            },
+        },
         DAG: {
             "graph": {
                 ELEMENT_KEY: Graph,
@@ -184,7 +188,4 @@ config_ = {
 
 app = mk_app([tag_sound, display_tag_sound, visualize_tag_sound], config=config_)
 app()
-
 # st.audio(mall["tag_sound_output"]["s3"][0])
-url = "blob:http://localhost:8501/1f599a27-587f-471d-b973-1984d510da21"
-st.write(UploadedFile(url))
