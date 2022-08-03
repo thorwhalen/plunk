@@ -55,6 +55,7 @@ def display_selected_rows(wf_store, selected):
 wf_store, df = mk_store_and_annots()
 
 # The App
+st.set_page_config(layout="wide")
 st.title("Wav Store explorer")
 
 gb = GridOptionsBuilder.from_dataframe(df)
@@ -83,19 +84,27 @@ return_mode_value = DataReturnMode.__members__[return_mode]
 update_mode = "MODEL_CHANGED"
 update_mode_value = GridUpdateMode.__members__[update_mode]
 
-grid_response = AgGrid(
-    df,
-    gridOptions=gridOptions,
-    width="100%",
-    data_return_mode=return_mode_value,
-    update_mode=update_mode_value,
-)
 
-df_r = grid_response["data"]
-selected = grid_response["selected_rows"]
-selected_df = pd.DataFrame(selected).apply(pd.to_numeric, errors="coerce")
+col1, col2 = st.columns(2)
 
-if selected:
+with col1:
+    st.header("Display data")
+
+    grid_response = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        width="100%",
+        data_return_mode=return_mode_value,
+        update_mode=update_mode_value,
+    )
+
+    df_r = grid_response["data"]
+    selected = grid_response["selected_rows"]
+    selected_df = pd.DataFrame(selected).apply(pd.to_numeric, errors="coerce")
+
+with col2:
     st.header("Display selection")
 
-    display_selected_rows(wf_store, selected)
+    if selected:
+
+        display_selected_rows(wf_store, selected)
