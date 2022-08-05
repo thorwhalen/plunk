@@ -7,7 +7,7 @@ from dol import FilesOfZip, wrap_kvs, filt_iter
 from io import BytesIO
 from st_aggrid import GridOptionsBuilder, AgGrid, DataReturnMode, GridUpdateMode
 from front.elements import OutputBase, InputBase
-from streamlitfront.elements import TextInput
+from streamlitfront.elements import TextInput, IntInput
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
 from dataclasses import dataclass
 from streamlitfront.base import mk_app
@@ -22,7 +22,7 @@ class AggTable(InputBase):
         st.dataframe(self.df)
 
 
-class SimpleInput(TextInput):
+class SimpleInput(IntInput):
     def render(self):
         st.write(f"What has been entered={self.output}")
 
@@ -43,7 +43,7 @@ config_ = {
             "execution": {
                 "inputs": {
                     "result": {
-                        ELEMENT_KEY: SimpleInput,
+                        ELEMENT_KEY: IntInput,
                         # "options": mall["tag_sound_output"],
                     },
                 },
