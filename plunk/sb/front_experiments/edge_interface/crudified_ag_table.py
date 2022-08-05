@@ -71,7 +71,6 @@ def table_show(df):
 
 mall = {"df_store": {"stored_wf": df}}
 
-# Crudify = partial(Crudifier, mall=mall, verbose=False)
 
 crudify = Crudifier(param_to_mall_map={"df": "df_store"}, mall=mall)
 f = crudify(display_df)
