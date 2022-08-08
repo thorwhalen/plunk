@@ -39,13 +39,6 @@ mall = st.session_state["mall"]
 # )
 
 
-def crudify(funcs):
-    for func in funcs:
-        yield prepare_for_crude_dispatch(
-            func, param_to_mall_map=param_to_mall_map, mall=mall
-        )
-
-
 WaveForm = Iterable[int]
 
 
@@ -85,7 +78,10 @@ class DfVisualizer(OutputBase):
 # crudify = Crudifier(mall=mall, output_store="tag_sound_output")
 # f = crudify(display_df)
 
-# @code_to_dag
+
+# May be partialize the mall argument?
+
+
 @Crudifier(mall=mall, output_store="tag_sound_output")
 def tag_sound(train_audio: WaveForm, tag: str):
     # mall["tag_store"] = tag

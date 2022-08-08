@@ -40,6 +40,11 @@ def show_sound(fname):
     return fname
 
 
+@crudify(output_store="tagged_wf")
+def tag_wf(wf: WaveForm, tag: str):
+    return (wf, tag)
+
+
 config_ = {
     APP_KEY: {"title": "Show audio"},
     # OBJ_KEY: {"trans": crudify},
