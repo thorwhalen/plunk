@@ -17,6 +17,8 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import soundfile as sf
 from io import BytesIO
+from front.crude import Crudifier
+
 
 param_to_mall_maps = dict(train_audio="train_audio", tag="tag_store")
 
@@ -80,19 +82,22 @@ class DfVisualizer(OutputBase):
         st.dataframe(mall["tag_sound_output"])
 
 
+# crudify = Crudifier(mall=mall, output_store="tag_sound_output")
+# f = crudify(display_df)
+
 # @code_to_dag
-@prepare_for_crude_dispatch(mall=mall, output_store="tag_sound_output")
+@Crudifier(mall=mall, output_store="tag_sound_output")
 def tag_sound(train_audio: WaveForm, tag: str):
     # mall["tag_store"] = tag
     return (train_audio, tag)
 
 
-@prepare_for_crude_dispatch(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
+@Crudifier(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
 def display_tag_sound(result):
     return result
 
 
-@prepare_for_crude_dispatch(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
+@Crudifier(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
 def visualize_tag_sound(result):
     return result
 
