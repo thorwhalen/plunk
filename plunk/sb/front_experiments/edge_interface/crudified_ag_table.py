@@ -84,6 +84,7 @@ app = mk_app(
             "f": {
                 "execution": {
                     "output": {ELEMENT_KEY: TableOutput},
+                    # "options": mall["df_store"],
                 }
             },
         },
