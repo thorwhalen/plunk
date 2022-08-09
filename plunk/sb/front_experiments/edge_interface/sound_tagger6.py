@@ -80,6 +80,8 @@ class DfVisualizer(OutputBase):
 
 
 # May be partialize the mall argument?
+# make a separate crudifier, with some defaults specified
+# check "verbose"
 
 
 @Crudifier(mall=mall, output_store="tag_sound_output")
