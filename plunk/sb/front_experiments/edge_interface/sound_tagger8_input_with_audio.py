@@ -5,7 +5,7 @@ from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
 from collections.abc import Callable
 from front.crude import prepare_for_crude_dispatch
 from streamlitfront.elements import TextInput, SelectBox, FloatSliderInput
-from front.elements import OutputBase
+from front.elements import OutputBase, FileUploaderBase
 from streamlitfront.base import mk_app
 from streamlitfront.examples.util import Graph
 from streamlitfront.elements import (
@@ -43,13 +43,9 @@ WaveForm = Iterable[int]
 
 
 @dataclass
-class TaggedAudioPlayer(OutputBase):
+class InputAudioPlayer(FileUploaderBase):
     def render(self):
-        sound, tag = self.output
-        if not isinstance(sound, str):
-            sound = sound.getvalue()
-
-        st.audio(sound)
+        print("done")
 
 
 @dataclass
@@ -91,7 +87,7 @@ config_ = {
             "execution": {
                 "inputs": {
                     "train_audio": {
-                        ELEMENT_KEY: FileUploader,
+                        ELEMENT_KEY: InputAudioPlayer,
                         "type": "wav",
                     },
                     # "tag": {
