@@ -6,7 +6,7 @@ from collections.abc import Callable
 from front.crude import prepare_for_crude_dispatch
 from streamlitfront.elements import TextInput, SelectBox, FloatSliderInput, TextOutput
 from front.elements import OutputBase, FileUploaderBase
-from streamlitfront.base import mk_app
+from streamlitfront import mk_app
 from streamlitfront.examples.util import Graph
 from streamlitfront.elements import (
     AudioRecorder,
