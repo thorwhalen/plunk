@@ -1,5 +1,5 @@
 import pytest
-from sig_code_to_dag import is_compatible
+from plunk.sb.sig_compatibility.sig_code_to_dag import is_compatible
 from i2 import Sig
 
 
