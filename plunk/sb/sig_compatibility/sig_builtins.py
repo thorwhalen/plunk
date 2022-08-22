@@ -35,7 +35,7 @@ def enclosed_text(text):
     return result
 
 
-def args_for_builtin(builtin_func):
+def args_for_builtin(builtin_func, prepare_for_Sig=False):
     """Extract the args from builtin doc"""
 
     docstr = builtin_func.__doc__
@@ -46,6 +46,8 @@ def args_for_builtin(builtin_func):
     for line in doc:
         s = line.replace(name, "", 1)
         args = enclosed_text(s)
+        if prepare_for_Sig:
+            args = args.replace(",", "")
         result.append(args)
 
     return result
