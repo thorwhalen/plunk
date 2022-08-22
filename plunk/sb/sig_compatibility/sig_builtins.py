@@ -17,7 +17,7 @@ def get_lines_from_string(text):
 
 def extract_doc(doc):
     lines = get_lines_from_string(doc)
-    result = []
+    result = []  # better: yield and do list()
     for line in lines:
         if line.strip():
             result.append(line)
