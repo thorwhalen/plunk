@@ -179,40 +179,77 @@ def test_min():
 
 
 def test_next():
-    pass
+    name = "next"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, [1, 2, 3, 4])
 
 
 def test_range():
-    pass
+    name = "range"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, 3)
 
 
 def test_set():
-    pass
+    name = "set"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, [1, 2, 3, 4])
 
 
-def test_slice():
-    pass
+# def test_slice():
+#     name = "slice"
+#     f = builtin_func_from_name(name)
+
+#     assert is_valid_call(f, 2, 4)
 
 
 def test_staticmethod():
-    pass
+    name = "staticmethod"
+    f = builtin_func_from_name(name)
+
+    def g(*args, **kwargs):
+        return args, kwargs
+
+    assert is_valid_call(f, g)
 
 
 def test_str():
-    pass
+    name = "str"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, 12)
 
 
 def test_super():
-    pass
+    name = "super"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, "a_type")
+    assert is_valid_call(f, "a_type", obj="an_obj")
 
 
 def test_type():
-    pass
+    name = "type"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, "a_name")
+    assert is_valid_call(f, name="a_name")
+
+    assert is_valid_call(f, name="a_type", bases="an_obj", dict="a_dict")
 
 
 def test_vars():
-    pass
+    name = "vars"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, ["obj_1", "obj_2"])
 
 
 def test_zip():
-    pass
+    name = "zip"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, ["obj_1", "obj_2"])
