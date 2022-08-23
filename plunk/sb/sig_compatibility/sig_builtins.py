@@ -51,3 +51,8 @@ def args_for_builtin(builtin_func, prepare_for_Sig=False):
         result.append(args)
 
     return result
+
+
+def sig_for_builtin(func):
+    args_list = args_for_builtin(iter, prepare_for_Sig=True)
+    pass
