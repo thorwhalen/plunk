@@ -74,18 +74,18 @@ class names:
 def is_valid_call(func, *args, **kwargs):
     try:
         func(*args, **kwargs)
-        return True
-    except ValueError:
+    except BaseException as err:
         return False
+    return True
 
 
 def builtin_func_from_name(name):
     sig = Sig(names[name])
 
-    @sig
     def f(*args, **kwargs):
         return args, kwargs
 
+    f = sig(f)
     return f
 
 
@@ -99,8 +99,120 @@ def test_bool():
 
 def test_breakpoint():
     name = "breakpoint"
-    sig = Sig(names[name])
-    inputs = sig_to_inputs(sig)
+    # sig = Sig(names[name])
+    # inputs = sig_to_inputs(sig)
     # f = builtin_func_from_name(name)
     # assert is_valid_call(f, "12")
     # assert is_valid_call(f, 5)
+
+
+def test_bytearray():
+    name = "bytearray"
+    f = builtin_func_from_name(name)
+    assert is_valid_call(f, [1, 2, 4])
+    # assert is_valid_call(f, 5)
+
+
+def test_bytes():
+    name = "bytes"
+    f = builtin_func_from_name(name)
+    assert is_valid_call(f, [1, 2, 4])
+    # assert is_valid_call(f, 5)
+
+
+def test_classmethod():
+    name = "classmethod"
+    f = builtin_func_from_name(name)
+
+    def g(*args, **kwargs):
+        return args, kwargs
+
+    assert is_valid_call(f, g)
+
+
+def test_dict():
+    name = "dict"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, {"a": 12, "b": 5})
+    assert is_valid_call(f, 3)
+
+
+def test_frozenset():
+    name = "frozenset"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, None)
+    assert is_valid_call(f, [1, 2, 3])
+
+
+def test_int():
+    name = "int"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, "12")
+    assert is_valid_call(f, "01001", base=2)
+
+
+def test_iter():
+    name = "iter"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, [1, 2, 3, 4])
+    assert is_valid_call(f, 12)
+    assert is_valid_call(f, 12, "sentinel")
+    assert is_valid_call(f, 12, sentinel=14)
+
+
+def test_max():
+    name = "max"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, [1, 2, 3, 4])
+
+
+def test_min():
+    name = "min"
+    f = builtin_func_from_name(name)
+
+    assert is_valid_call(f, [1, 2, 3, 4])
+
+
+def test_next():
+    pass
+
+
+def test_range():
+    pass
+
+
+def test_set():
+    pass
+
+
+def test_slice():
+    pass
+
+
+def test_staticmethod():
+    pass
+
+
+def test_str():
+    pass
+
+
+def test_super():
+    pass
+
+
+def test_type():
+    pass
+
+
+def test_vars():
+    pass
+
+
+def test_zip():
+    pass
