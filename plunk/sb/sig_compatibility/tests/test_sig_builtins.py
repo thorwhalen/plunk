@@ -1,10 +1,16 @@
 import pytest
-from plunk.sb.sig_compatibility.sig_builtins import args_for_builtin
+from plunk.sb.sig_compatibility.sig_builtins import (
+    args_for_builtin,
+    args_str_from_sig,
+    sig_to_lambda,
+    builtin_func_from_name,
+)
 from i2 import Sig
 from i2.tests.util import sig_to_inputs
 
 from typing import Iterable, Iterator, Callable
 from i2.signatures import dict_of_attribute_signatures
+from i2.tests.util import call_raises_signature_error
 
 
 @dict_of_attribute_signatures
@@ -51,7 +57,9 @@ class names:
     def set(iterable: Iterable = None):
         ...
 
-    # def slice(start = None, stop, step=None):...  #TODO !!
+    def slice(start=None, stop=None, step=None):
+        ...  # TODO incorrect !!
+
     def staticmethod(function: Callable):
         ...
 
@@ -74,27 +82,26 @@ class names:
 def is_valid_call(func, *args, **kwargs):
     try:
         func(*args, **kwargs)
-    except BaseException as err:
+    except BaseException:
         return False
     return True
 
 
-def builtin_func_from_name(name):
-    sig = Sig(names[name])
-
-    def f(*args, **kwargs):
-        return args, kwargs
-
-    f = sig(f)
-    return f
+foo_bool = None
 
 
 def test_bool():
     name = "bool"
+    names_dict = names
 
-    f = builtin_func_from_name(name)
-    assert is_valid_call(f, "12")
-    assert is_valid_call(f, 5)
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    exec(f"global foo_bool\ndef foo_bool({args}):\n  return None")
+    f = foo_bool
+    assert not call_raises_signature_error(f, "12")
+    # assert not call_raises_signature_error(f, "12")
+    assert not call_raises_signature_error(f, 5)
 
 
 def test_breakpoint():
@@ -102,154 +109,278 @@ def test_breakpoint():
     # sig = Sig(names[name])
     # inputs = sig_to_inputs(sig)
     # f = builtin_func_from_name(name)
-    # assert is_valid_call(f, "12")
-    # assert is_valid_call(f, 5)
+    # assert not call_raises_signature_error(f, "12")
+    # assert not call_raises_signature_error(f, 5)
 
 
 def test_bytearray():
     name = "bytearray"
-    f = builtin_func_from_name(name)
-    assert is_valid_call(f, [1, 2, 4])
-    # assert is_valid_call(f, 5)
+    names_dict = names
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    exec(f"global foo_bytearray\ndef foo_bytearray({args}):\n  return None")
+    f = foo_bytearray
+    assert not call_raises_signature_error(f, [1, 2, 4])
+    # assert not call_raises_signature_error(f, 5)
 
 
 def test_bytes():
     name = "bytes"
-    f = builtin_func_from_name(name)
-    assert is_valid_call(f, [1, 2, 4])
-    # assert is_valid_call(f, 5)
+    names_dict = names
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    exec(f"global foo_bytes\ndef foo_bytes({args}):\n  return None")
+    f = foo_bytes
+    assert not call_raises_signature_error(f, [1, 2, 4])
 
 
 def test_classmethod():
     name = "classmethod"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    exec(f"global foo_classmethod\ndef foo_classmethod({args}):\n  return None")
+    f = foo_classmethod
 
     def g(*args, **kwargs):
         return args, kwargs
 
-    assert is_valid_call(f, g)
+    assert not call_raises_signature_error(f, g)
 
 
 def test_dict():
     name = "dict"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, {"a": 12, "b": 5})
-    assert is_valid_call(f, 3)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_dict\ndef foo_dict({args}):\n  return None")
+    f = foo_dict
+
+    assert not call_raises_signature_error(f, {"a": 12, "b": 5})
+    assert not call_raises_signature_error(f, 3)
 
 
 def test_frozenset():
     name = "frozenset"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, None)
-    assert is_valid_call(f, [1, 2, 3])
+    args = args_str_from_sig(sig)
+    exec(f"global foo_frozenset\ndef foo_frozenset({args}):\n  return None")
+    f = foo_frozenset
+
+    assert not call_raises_signature_error(f, None)
+    assert not call_raises_signature_error(f, [1, 2, 3])
 
 
 def test_int():
     name = "int"
-    f = builtin_func_from_name(name)
+    # f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, "12")
-    assert is_valid_call(f, "01001", base=2)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_int\ndef foo_int({args}):\n  return None")
+    f = foo_int
+
+    assert not call_raises_signature_error(f, "12")
+    assert not call_raises_signature_error(f, [12])
+
+    assert not call_raises_signature_error(f, "01001", base=2)
 
 
 def test_iter():
     name = "iter"
-    f = builtin_func_from_name(name)
-
-    assert is_valid_call(f, [1, 2, 3, 4])
-    assert is_valid_call(f, 12)
-    assert is_valid_call(f, 12, "sentinel")
-    assert is_valid_call(f, 12, sentinel=14)
+    names_dict = names
+    sig = Sig(names_dict[name])
+    print(sig)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_iter\ndef foo_iter({args}):\n  return None")
+    f = foo_iter
+    assert not call_raises_signature_error(f, [1, 2, 3, 4])
+    assert not call_raises_signature_error(f, 12)
+    assert not call_raises_signature_error(f, 12, "sentinel")
+    assert not call_raises_signature_error(f, 12, sentinel=14)
+    pytest.raises(TypeError, f)
+    print(f(42, 42))
+    # pytest.raises(TypeError, f, 42, 42)
 
 
 def test_max():
     name = "max"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    # f = builtin_func_from_name(name)
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, [1, 2, 3, 4])
+    args = args_str_from_sig(sig)
+    # exec(f"global foo_{name}")
+    exec(f"global foo_max\ndef foo_max({args}):\n  return None")
+    assert not call_raises_signature_error(foo_max, [1, 2, 3, 4])
+    assert not call_raises_signature_error(foo_max, "fake")
 
 
 def test_min():
     name = "min"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    # f = builtin_func_from_name(name)
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, [1, 2, 3, 4])
+    args = args_str_from_sig(sig)
+    # exec(f"global foo_{name}")
+    exec(f"global foo_min\ndef foo_min({args}):\n  return None")
+    f = foo_min
+    assert not call_raises_signature_error(f, [1, 2, 3, 4])
+    assert not call_raises_signature_error(f, "fake")
 
 
 def test_next():
     name = "next"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, [1, 2, 3, 4])
+    args = args_str_from_sig(sig)
+    exec(f"global foo_next\ndef foo_next({args}):\n  return None")
+    f = foo_next
+
+    assert not call_raises_signature_error(f, [1, 2, 3, 4])
 
 
 def test_range():
     name = "range"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, 3)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_range\ndef foo_range({args}):\n  return None")
+    f = foo_range
+
+    assert not call_raises_signature_error(f, 3)
 
 
 def test_set():
     name = "set"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, [1, 2, 3, 4])
+    args = args_str_from_sig(sig)
+    exec(f"global foo_set\ndef foo_set({args}):\n  return None")
+    f = foo_set
+    assert not call_raises_signature_error(f, [1, 2, 3, 4])
 
 
-# def test_slice():
-#     name = "slice"
-#     f = builtin_func_from_name(name)
+def test_slice():
+    name = "slice"
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-#     assert is_valid_call(f, 2, 4)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_slice\ndef foo_slice({args}):\n  return None")
+    f = foo_slice
+
+    assert not call_raises_signature_error(f, 2, 4)
 
 
 def test_staticmethod():
     name = "staticmethod"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    exec(f"global foo_staticmethod\ndef foo_staticmethod({args}):\n  return None")
+    f = foo_staticmethod
 
     def g(*args, **kwargs):
         return args, kwargs
 
-    assert is_valid_call(f, g)
+    assert not call_raises_signature_error(f, g)
 
 
 def test_str():
     name = "str"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, 12)
+    args = args_str_from_sig(sig)
+    exec(f"global foo_str\ndef foo_str({args}):\n  return None")
+    f = foo_str
+    assert not call_raises_signature_error(f, 12)
 
 
 def test_super():
     name = "super"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, "a_type")
-    assert is_valid_call(f, "a_type", obj="an_obj")
+    args = args_str_from_sig(sig)
+    exec(f"global foo_super\ndef foo_super({args}):\n  return None")
+    f = foo_super
+    assert not call_raises_signature_error(f, "a_type")
+    assert not call_raises_signature_error(f, "a_type", obj="an_obj")
 
 
 def test_type():
     name = "type"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, "a_name")
-    assert is_valid_call(f, name="a_name")
+    args = args_str_from_sig(sig)
+    exec(f"global foo_type\ndef foo_type({args}):\n  return None")
+    f = foo_type
+    assert not call_raises_signature_error(f, "a_name")
+    assert not call_raises_signature_error(f, name="a_name")
 
-    assert is_valid_call(f, name="a_type", bases="an_obj", dict="a_dict")
+    assert not call_raises_signature_error(
+        f, name="a_type", bases="an_obj", dict="a_dict"
+    )
 
 
 def test_vars():
     name = "vars"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, ["obj_1", "obj_2"])
+    args = args_str_from_sig(sig)
+    exec(f"global foo_vars\ndef foo_vars({args}):\n  return None")
+    f = foo_vars
+    assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
 
 
 def test_zip():
     name = "zip"
-    f = builtin_func_from_name(name)
+    names_dict = names
+    sig = Sig(names_dict[name])
 
-    assert is_valid_call(f, ["obj_1", "obj_2"])
+    args = args_str_from_sig(sig)
+    exec(f"global foo_zip\ndef foo_zip({args}):\n  return None")
+    f = foo_zip
+    assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
+
+
+def test_call_raises():
+    assert call_raises_signature_error(lambda x, /, y: None, x=1, y=2)
+
+
+if __name__ == "__main__":
+    test_bool()
+    test_bytearray()
+    test_bytes()
+    test_classmethod()
+    test_dict()
+    test_int()
+    test_frozenset()
+    test_max()
+    test_min()
+    test_next()
+    test_iter()
+    test_set()
+    test_slice()
+    test_staticmethod()
+    test_str()
+    test_super()
+    test_type()
+    test_vars()
+    test_zip()

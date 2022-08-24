@@ -1,5 +1,7 @@
 import builtins
 import types
+from typing import Iterable
+from i2 import Sig
 
 
 def get_builtin_function_types():
@@ -53,6 +55,30 @@ def args_for_builtin(builtin_func, prepare_for_Sig=False):
     return result
 
 
-def sig_for_builtin(func):
-    args_list = args_for_builtin(iter, prepare_for_Sig=True)
-    pass
+def args_str_from_sig(sig):
+    return str(sig)[1:-1]
+
+
+def sig_to_lambda(sig):
+    args = args_str_from_sig(sig)
+    lambda_func = eval(f"lambda {args}:  None")
+    return lambda_func
+
+
+def builtin_func_from_name(name, names_dict):
+    sig = Sig(names_dict[name])
+
+    # func = sig_to_func(name, names_dict)
+    func = sig_to_lambda(sig)
+
+    return func
+
+
+def sig_to_func(name, names_dict):
+    sig = Sig(names_dict[name])
+
+    args = args_str_from_sig(sig)
+    # exec(f"global foo_{name}")
+    exec(f"global foo_{name}\n\ndef foo_{name}({args}):\n  return None")
+    func = eval(f"global foo_{name}")
+    return func
