@@ -1,5 +1,6 @@
 from functools import partial
-
+# from typing import Callable
+from collections.abc import Callable
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
@@ -34,6 +35,7 @@ def foo(x):
 
 if __name__ == '__main__':
     from streamlitfront import mk_app
+    from front.util import deep_merge
     from streamlitfront import dispatch_funcs
 
     # app = dispatch_funcs([factory])
@@ -41,7 +43,23 @@ if __name__ == '__main__':
     import front as f
     import streamlitfront.elements as sf
 
-    config = {
+    # my_convention = {
+    #     # f.APP_KEY: {'title': 'apply_func_to_wf'},
+    #     f.RENDERING_KEY: {
+    #         Callable: {
+    #             'execution': {
+    #                 'inputs': {
+    #                     'func': {
+    #                         f.ELEMENT_KEY: sf.SelectBox,
+    #                         'options': list(mall['func'])
+    #                     },
+    #                 },
+    #             }
+    #         },
+    #     }
+    # }
+
+    my_config = {
         # f.APP_KEY: {'title': 'apply_func_to_wf'},
         f.RENDERING_KEY: {
             'factory': {
@@ -56,7 +74,24 @@ if __name__ == '__main__':
             },
         }
     }
-    app = mk_app([factory], config)
+
+    from i2 import Sig
+
+    @Sig(KMeans)
+    def kmeans(*args, **kwargs):
+        return KMeans(*args, **kwargs)
+
+
+    def change_types_to_callable(x):
+        if isinstance(x, type):
+            x = partial(x)
+        return x
+
+
+    app = mk_app(
+        [factory, kmeans],
+        config=my_config,
+    )
     app()
 
     import streamlit as st
