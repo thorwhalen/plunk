@@ -1,85 +1,71 @@
+import asyncio
+from websockets import connect
+from stream2py.simply import mk_stream_buffer
+import pandas as pd
 import streamlit as st
-from front.elements import InputBase, OutputBase
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
-from dataclasses import dataclass
-from streamlitfront.elements import TextInput, SelectBox, FloatSliderInput
-from typing import Callable
-from streamlitfront.base import mk_app
+import json
+from collections import deque
+
+df = pd.DataFrame()
+df["value"] = 0.0
+
+URI = "ws://192.168.1.3:8081/sensor/connect?type=android.sensor.accelerometer"
 
 
-fname = "/Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/front_experiments/edge_interface/data/phone_small/1_2.wav"
-
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
-        # train_audio={},
-        # tag={},
-        # unused_store={"to": "illustrate"},
-        sound_list={"file": fname}
-    )
-
-mall = st.session_state["mall"]
-# mall = dict(
-#     # train_audio={},
-#     # tag={},
-#     # unused_store={"to": "illustrate"},
-#     tag_sound_output={}
-# )
+def init_deque(maxlen=20):
+    zeros = [0 for _ in range(maxlen)]
+    d = deque(zeros, maxlen=maxlen)
+    return d
 
 
-@dataclass
-class TaggedAudioPlayer(OutputBase):
-    def render(self):
-        sound, tag = self.output
-        if not isinstance(sound, str):
-            sound = sound.getvalue()
+st.title("Accelerometer")
 
-        st.audio(sound)
+data_deque = init_deque()
+df["value"] = data_deque
+# st.session_state["d"] = df
+# st.write(st.session_state["d"])
 
 
-def show_sound(fname):
-    return fname
+async def accelerometer(uri=URI):
+    # st.write(df)
+    async with connect(uri) as websocket:
+        while True:
+            data = await websocket.recv()
+            result = json.loads(data)["values"][0]
+            data_deque.append(result)
+            df["value"] = data_deque
+            # st.session_state["d"] = df
+            # st.write(data_deque)
+            # st.write(df)
+
+            # print(data)
+            # with mk_stream_buffer(
+            #     read_stream=lambda open_inst: data,
+            #     open_stream=lambda: print("open"),
+            #     close_stream=lambda open_inst: print("close"),
+            #     auto_drop=False,
+            #     maxlen=200,
+            # ) as count_stream_buffer:
+            #     count_reader = count_stream_buffer.mk_reader()
+            #     print(f"start reading {count_reader.source_reader_info}")
+            #     for i in count_reader:
+            #         # do stuff with read data
+            #         print(i)
+            #         if count_stream_buffer.auto_drop is False:
+            #             count_stream_buffer.drop()
+
+            #     print("done reading")
 
 
-@crudify(output_store="tagged_wf")
-def tag_wf(wf: WaveForm, tag: str):
-    return (wf, tag)
+# test = st.empty()
+# status = st.empty()
+# start = st.checkbox("Connect to WS Server")
 
+# asyncio.run(accelerometer(test))
+start = True
+if start:
+    asyncio.run(accelerometer())
 
-config_ = {
-    APP_KEY: {"title": "Show audio"},
-    # OBJ_KEY: {"trans": crudify},
-    RENDERING_KEY: {
-        "display_tag_sound": {
-            "execution": {
-                "inputs": {
-                    "result": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": mall["sound_list"],
-                    },
-                },
-                "output": {
-                    ELEMENT_KEY: TaggedAudioPlayer,
-                },
-            },
-        },
-        Callable: {
-            "execution": {
-                "inputs": {
-                    "save_name": {
-                        ELEMENT_KEY: TextInput,
-                        NAME_KEY: "Save output as",
-                    },
-                }
-            },
-        },
-    },
-}
-
-app = mk_app(
-    [show_sound],
-    config=config_,
-)
-app()
-# st.audio(mall["tag_sound_output"]["s3"][0])
-#'execution': {'inputs': {'p': {ELEMENT_KEY: FloatSliderInput,}},}
-st.write(mall)
+placeholder = st.empty()
+with placeholder.container():
+    st.write(df)
