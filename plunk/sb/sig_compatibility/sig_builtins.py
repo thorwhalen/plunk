@@ -2,6 +2,9 @@ import builtins
 import types
 from typing import Iterable
 from i2 import Sig
+from i2.signatures import _remove_variadics_from_sig
+from i2.tests.util import sig_to_inputs, _sig_to_inputs, sig_to_func
+from i2.signatures import VP, VK
 
 
 def get_builtin_function_types():
@@ -82,3 +85,24 @@ def sig_to_func(name, names_dict):
     exec(f"global foo_{name}\n\ndef foo_{name}({args}):\n  return None")
     func = eval(f"global foo_{name}")
     return func
+
+
+def remove_kind(sig, excluded=[VP]):
+    params = [param for param in sig.params if param.kind not in excluded]
+    return Sig(params)
+
+
+def dispatch_variadics(sig):
+    result = []
+    for excluded in [[], [VP], [VK], [VP, VK]]:
+        result.append(Sig(_remove_variadics_from_sig(remove_kind(sig, excluded))))
+
+    return result
+
+
+def sig_with_variadics_to_inputs(sig):
+    all_sigs = dispatch_variadics(sig)
+    print(all_sigs)
+    # for s in all_sigs:
+    #     print(list(sig_to_inputs(s)))
+    pass
