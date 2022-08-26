@@ -10,23 +10,25 @@ from i2.tests.util import sig_to_inputs
 from i2.tests.util import sig_to_inputs, _sig_to_inputs, sig_to_func
 
 
-from typing import Iterable, Iterator, Callable
+from typing import Iterable, Iterator, Callable, Any
 from i2.signatures import dict_of_attribute_signatures
 from i2.tests.util import call_raises_signature_error
 
 
 @dict_of_attribute_signatures
 class names:
-    def bool(x) -> bool:
+    def bool(x: Any) -> bool:
         ...
 
     def breakpoint(*args, **kwargs):
         ...
 
-    def bytearray(iterable_of_ints: Iterable[int]):
+    def bytearray(iterable_of_ints: Iterable[int]):  # no sig possible without wrapping
         ...
 
-    def bytes(string: str, encoding=None, errors=None):
+    def bytes(
+        string: str, encoding=None, errors=None
+    ):  # no sig possible without wrapping
         ...
 
     def classmethod(function: Callable):
@@ -35,13 +37,15 @@ class names:
     def dict(**kwargs):
         ...
 
-    def frozenset(iterable: Iterable = None):
+    def frozenset(
+        iterable: Iterable = None,
+    ):  # no sig possible without wrapping: zero or one argument
         ...
 
-    def int(x, base=10):
+    def int(x, base=10):  #
         ...
 
-    def iter(callable: Callable, sentinel=None):
+    def iter(callable: Callable, sentinel=None):  # TODO check
         ...
 
     def max(*args, **keywords):
@@ -50,16 +54,16 @@ class names:
     def min(*args, **keywords):
         ...
 
-    def next(iterator: Iterator, default=None):
+    def next(iterator: Iterator, default=None):  # No Sig possible without wrapping
         ...
 
-    def range(stop):
+    def range(stop):  # No sig possible without wrapping
         ...  # TODO treat range(start, stop)
 
-    def set(iterable: Iterable = None):
+    def set(iterable: Iterable = None):  # No sig possible without wrapping
         ...
 
-    def slice(start=None, stop=None, step=None):
+    def slice(start=None, stop=None, step=None):  # No sig possible without wrapping
         ...  # TODO incorrect !!
 
     def staticmethod(function: Callable):
