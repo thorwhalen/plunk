@@ -69,7 +69,7 @@ class names:
     def staticmethod(function: Callable, /):
         ...
 
-    def str(bytes_or_buffer, encoding=None, errors=None):
+    def str(bytes_or_buffer, encoding=None, errors=None, /):
         ...
 
     def super(type_, obj=None, /):
@@ -447,12 +447,12 @@ if __name__ == "__main__":
     # test_frozenset()
     # test_max() #check
     # test_min() # check
-    # test_next()
+    test_next()
     test_iter()
     # test_set()
     # test_slice()
     test_staticmethod()
-    # test_str() # check
+    test_str()  # check
     test_super()
     test_type()
     # test_vars()
