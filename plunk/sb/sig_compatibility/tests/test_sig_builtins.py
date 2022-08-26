@@ -6,7 +6,7 @@ from plunk.sb.sig_compatibility.sig_builtins import (
     builtin_func_from_name,
 )
 from i2 import Sig
-from i2.tests.util import sig_to_inputs
+from i2.tests.util import sig_to_inputs, function_is_compatible_with_signature
 from i2.tests.util import sig_to_inputs, _sig_to_inputs, sig_to_func
 
 
@@ -17,7 +17,7 @@ from i2.tests.util import call_raises_signature_error
 
 @dict_of_attribute_signatures
 class names:
-    def bool(x: Any) -> bool:
+    def bool(x: Any, /) -> bool:
         ...
 
     def breakpoint(*args, **kwargs):
@@ -31,7 +31,7 @@ class names:
     ):  # no sig possible without wrapping
         ...
 
-    def classmethod(function: Callable):
+    def classmethod(function: Callable, /):
         ...
 
     def dict(**kwargs):
@@ -45,7 +45,7 @@ class names:
     def int(x, base=10):  #
         ...
 
-    def iter(callable: Callable, sentinel=None):  # TODO check
+    def iter(callable: Callable, sentinel=None, /):  # TODO check
         ...
 
     def max(*args, **keywords):
@@ -66,16 +66,16 @@ class names:
     def slice(start=None, stop=None, step=None):  # No sig possible without wrapping
         ...  # TODO incorrect !!
 
-    def staticmethod(function: Callable):
+    def staticmethod(function: Callable, /):
         ...
 
     def str(bytes_or_buffer, encoding=None, errors=None):
         ...
 
-    def super(type_, obj=None):
+    def super(type_, obj=None, /):
         ...
 
-    def type(name, bases=None, dict=None):
+    def type(name, bases=None, dict=None, /):
         ...
 
     def vars(*obj):
@@ -109,15 +109,19 @@ def test_bool():
     assert not call_raises_signature_error(f, "12")
     # assert not call_raises_signature_error(f, "12")
     assert not call_raises_signature_error(f, 5)
+    assert function_is_compatible_with_signature(bool, sig)
 
 
 def test_breakpoint():
     name = "breakpoint"
-    # sig = Sig(names[name])
-    # inputs = sig_to_inputs(sig)
-    # f = builtin_func_from_name(name)
-    # assert not call_raises_signature_error(f, "12")
-    # assert not call_raises_signature_error(f, 5)
+    names_dict = names
+
+    sig = Sig(names_dict[name])
+    f = sig_to_func(sig)
+
+    assert not call_raises_signature_error(f, "12")
+    assert not call_raises_signature_error(f, 5)
+    assert function_is_compatible_with_signature(breakpoint, sig)
 
 
 def test_bytearray():
@@ -177,6 +181,7 @@ def test_classmethod():
         return args, kwargs
 
     assert not call_raises_signature_error(f, g)
+    assert function_is_compatible_with_signature(classmethod, sig)
 
 
 def test_dict():
@@ -191,6 +196,7 @@ def test_dict():
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, {"a": 12, "b": 5})
     assert not call_raises_signature_error(f, 3)
+    assert function_is_compatible_with_signature(dict, sig)
 
 
 def test_frozenset():
@@ -222,6 +228,7 @@ def test_int():
     assert not call_raises_signature_error(f, [12])
 
     assert not call_raises_signature_error(f, "01001", base=2)
+    assert function_is_compatible_with_signature(int, sig)
 
 
 def test_iter():
@@ -237,8 +244,10 @@ def test_iter():
     assert not call_raises_signature_error(f, [1, 2, 3, 4])
     assert not call_raises_signature_error(f, 12)
     assert not call_raises_signature_error(f, 12, "sentinel")
-    assert not call_raises_signature_error(f, 12, sentinel=14)
+    # assert not call_raises_signature_error(f, 12, sentinel=14)
     pytest.raises(TypeError, f)
+    assert function_is_compatible_with_signature(iter, sig)
+
     # print(f(42, 42))
     # pytest.raises(TypeError, f, 42, 42)
 
@@ -257,6 +266,7 @@ def test_max():
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, [1, 2, 3, 4])
     assert not call_raises_signature_error(f, "fake")
+    assert function_is_compatible_with_signature(max, sig)
 
 
 def test_min():
@@ -273,6 +283,7 @@ def test_min():
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, [1, 2, 3, 4])
     assert not call_raises_signature_error(f, "fake")
+    assert function_is_compatible_with_signature(min, sig)
 
 
 def test_next():
@@ -342,6 +353,7 @@ def test_staticmethod():
         return args, kwargs
 
     assert not call_raises_signature_error(f, g)
+    assert function_is_compatible_with_signature(staticmethod, sig)
 
 
 def test_str():
@@ -355,6 +367,7 @@ def test_str():
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, 12)
+    assert function_is_compatible_with_signature(str, sig)
 
 
 def test_super():
@@ -367,8 +380,9 @@ def test_super():
     # f = foo_super
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
-    assert not call_raises_signature_error(f, "a_type")
-    assert not call_raises_signature_error(f, "a_type", obj="an_obj")
+    # assert not call_raises_signature_error(f, "a_type")
+    # assert not call_raises_signature_error(f, "a_type", obj="an_obj")
+    assert function_is_compatible_with_signature(super, sig)
 
 
 def test_type():
@@ -381,12 +395,13 @@ def test_type():
     # f = foo_type
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
-    assert not call_raises_signature_error(f, "a_name")
-    assert not call_raises_signature_error(f, name="a_name")
+    # assert not call_raises_signature_error(f, "a_name")
+    # assert not call_raises_signature_error(f, name="a_name")
 
-    assert not call_raises_signature_error(
-        f, name="a_type", bases="an_obj", dict="a_dict"
-    )
+    # assert not call_raises_signature_error(
+    #     f, name="a_type", bases="an_obj", dict="a_dict"
+    # )
+    assert function_is_compatible_with_signature(type, sig)
 
 
 def test_vars():
@@ -400,6 +415,7 @@ def test_vars():
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
+    assert function_is_compatible_with_signature(vars, sig)
 
 
 def test_zip():
@@ -413,6 +429,7 @@ def test_zip():
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
+    assert function_is_compatible_with_signature(zip, sig)
 
 
 def test_call_raises():
@@ -421,21 +438,22 @@ def test_call_raises():
 
 if __name__ == "__main__":
     test_bool()
+    # test_breakpoint() # calls the debugger
     test_bytearray()
-    test_bytes()
+    # test_bytes()
     test_classmethod()
     test_dict()
     test_int()
-    test_frozenset()
+    # test_frozenset()
     test_max()
     test_min()
-    test_next()
+    # test_next()
     test_iter()
-    test_set()
-    test_slice()
+    # test_set()
+    # test_slice()
     test_staticmethod()
     test_str()
     test_super()
     test_type()
-    test_vars()
+    # test_vars()
     test_zip()
