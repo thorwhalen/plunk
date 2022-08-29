@@ -35,6 +35,8 @@ from front.crude import Crudifier
 chunker = DFLT_CHUNKER
 featurizer = DFLT_FEATURIZER
 learner = RandomForestClassifier(max_depth=2, random_state=0)
+dflt_wfsrc = lambda: DFLT_LOCAL_SOURCE_DIR
+dflt_wfsrc.__defaults__ = ()
 
 
 @dataclass
@@ -120,14 +122,15 @@ d = {
 
 if "mall" not in st.session_state:
     st.session_state["mall"] = dict(
-        learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)}
+        learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)},
+        wfsource={"wf_src": [dflt_wfsrc]},
     )
 
 
 mall = st.session_state["mall"]
 
 
-@Crudifier(mall=mall, param_to_mall_map={"learner": "learner"})
+@Crudifier(mall=mall, param_to_mall_map={"learner": "learner", "wf_src": "wfsource"})
 def classify(wf_src, learner):
     wf_store = get_wfs(wf_src)  # better tuple wfs_train, wfs_test
     annots = get_annots(wf_store)
@@ -147,7 +150,8 @@ config_ = {
             "execution": {
                 "inputs": {
                     "wf_src": {
-                        ELEMENT_KEY: TextInput,
+                        ELEMENT_KEY: SelectBox,
+                        "options": mall["wfsource"],
                     },
                     "learner": {
                         ELEMENT_KEY: SelectBox,
@@ -167,3 +171,4 @@ app = mk_app(
     config=config_,
 )
 app()
+st.write(mall)
