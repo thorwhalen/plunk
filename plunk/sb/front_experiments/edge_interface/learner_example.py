@@ -11,15 +11,26 @@ from front import APP_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY, RENDERING_KEY
 from front.crude import Crudifier, prepare_for_crude_dispatch
 from front.elements import FileUploaderBase, OutputBase
 from meshed import DAG, code_to_dag
-from odat.mdat.vacuum import (DFLT_ANNOTS_COLS, DFLT_CHUNKER, DFLT_FEATURIZER,
-                              DFLT_LOCAL_SOURCE_DIR, Dacc, annot_columns)
+from odat.mdat.vacuum import (
+    DFLT_ANNOTS_COLS,
+    DFLT_CHUNKER,
+    DFLT_FEATURIZER,
+    DFLT_LOCAL_SOURCE_DIR,
+    Dacc,
+    annot_columns,
+)
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import normalize
 from streamlitfront import mk_app
-from streamlitfront.elements import (AudioRecorder, FileUploader,
-                                     FloatSliderInput,
-                                     MultiSourceInputContainer, SelectBox,
-                                     TextInput, TextOutput)
+from streamlitfront.elements import (
+    AudioRecorder,
+    FileUploader,
+    FloatSliderInput,
+    MultiSourceInputContainer,
+    SelectBox,
+    TextInput,
+    TextOutput,
+)
 from streamlitfront.examples.util import Graph
 
 chunker = DFLT_CHUNKER
@@ -161,4 +172,3 @@ app = mk_app(
     config=config_,
 )
 app()
-st.write(mall)
