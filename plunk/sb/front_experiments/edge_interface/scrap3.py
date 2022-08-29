@@ -1,10 +1,8 @@
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
-from streamlitfront.elements import SelectBox
-from streamlitfront import mk_app
 import streamlit as st
+from front import APP_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY, RENDERING_KEY
 from front.crude import Crudifier
-from front.crude import Crudifier
-
+from streamlitfront import mk_app
+from streamlitfront.elements import SelectBox
 
 DFLT_INPUT = "my text"
 

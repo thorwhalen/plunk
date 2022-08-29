@@ -1,36 +1,26 @@
-from dataclasses import dataclass
-from typing import Iterable
-from meshed import code_to_dag, DAG
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
 from collections.abc import Callable
-from front.crude import prepare_for_crude_dispatch
-from streamlitfront.elements import TextInput, SelectBox, FloatSliderInput, TextOutput
-from front.elements import OutputBase, FileUploaderBase
-from streamlitfront import mk_app
-from streamlitfront.examples.util import Graph
-from streamlitfront.elements import (
-    AudioRecorder,
-    FileUploader,
-    MultiSourceInputContainer,
-)
-import streamlit as st
-import matplotlib.pyplot as plt
-import soundfile as sf
+from dataclasses import dataclass
 from io import BytesIO
-from front.crude import Crudifier
-from odat.mdat.vacuum import (
-    Dacc,
-    DFLT_ANNOTS_COLS,
-    annot_columns,
-    DFLT_LOCAL_SOURCE_DIR,
-    DFLT_CHUNKER,
-    DFLT_FEATURIZER,
-)
-from sklearn.preprocessing import normalize
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from front.crude import Crudifier
+from typing import Iterable
 
+import matplotlib.pyplot as plt
+import numpy as np
+import soundfile as sf
+import streamlit as st
+from front import APP_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY, RENDERING_KEY
+from front.crude import Crudifier, prepare_for_crude_dispatch
+from front.elements import FileUploaderBase, OutputBase
+from meshed import DAG, code_to_dag
+from odat.mdat.vacuum import (DFLT_ANNOTS_COLS, DFLT_CHUNKER, DFLT_FEATURIZER,
+                              DFLT_LOCAL_SOURCE_DIR, Dacc, annot_columns)
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import normalize
+from streamlitfront import mk_app
+from streamlitfront.elements import (AudioRecorder, FileUploader,
+                                     FloatSliderInput,
+                                     MultiSourceInputContainer, SelectBox,
+                                     TextInput, TextOutput)
+from streamlitfront.examples.util import Graph
 
 chunker = DFLT_CHUNKER
 featurizer = DFLT_FEATURIZER
