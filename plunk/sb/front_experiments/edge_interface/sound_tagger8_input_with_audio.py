@@ -11,7 +11,7 @@ from streamlitfront.examples.util import Graph
 from streamlitfront.elements import (
     AudioRecorder,
     FileUploader,
-    MultiSourceInputContainer,
+    MultiSourceInput,
 )
 import streamlit as st
 import matplotlib.pyplot as plt
