@@ -1,29 +1,31 @@
+import os
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
 from io import BytesIO
-import os
 from pathlib import Path
-import time
 from typing import Iterable
-from dol import Files
-from front.elements import DEFAULT_INPUT_KEY, OutputBase
-from meshed import code_to_dag, DAG
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY
-from collections.abc import Callable
-from front.crude import Crudifier, prepare_for_crude_dispatch
-from streamlitfront.elements import TextInput, SelectBox
-from dol.appendable import appendable
-import soundfile as sf
 import matplotlib.pyplot as plt
+import soundfile as sf
+import streamlit as st
+from dol import Files
+from dol.appendable import appendable
+from front import APP_KEY, ELEMENT_KEY, NAME_KEY, OBJ_KEY, RENDERING_KEY
+from front.crude import Crudifier, prepare_for_crude_dispatch
+from front.elements import DEFAULT_INPUT_KEY, OutputBase
+from meshed import DAG, code_to_dag
 
-from streamlitfront import mk_app, binder as b
-from streamlitfront.examples.util import Graph
+from streamlitfront import binder as b
+from streamlitfront import mk_app
 from streamlitfront.elements import (
     AudioRecorder,
     FileUploader,
     MultiSourceInput,
+    SelectBox,
+    TextInput,
 )
-import streamlit as st
+from streamlitfront.examples.util import Graph
 
 # ============ BACKEND ============
 WaveForm = Iterable[int]
@@ -77,7 +79,9 @@ def timestamped_kv(value):
 
 AppendableFiles = appendable(Files, item2kv=timestamped_kv, return_keys=True)
 
-rootdir = os.path.join(Path("~").expanduser(), ".front", "edge_impluse_like")
+
+rootdir = os.path.join(Path("~").expanduser(), ".front", "edge_impulse_like")
+Path(rootdir).mkdir(parents=True, exist_ok=True)
 
 
 @dataclass

@@ -38,7 +38,6 @@ chunker = DFLT_CHUNKER
 featurizer = DFLT_FEATURIZER
 learner = RandomForestClassifier(max_depth=2, random_state=0)
 dflt_wfsrc = DFLT_LOCAL_SOURCE_DIR
-# dflt_wfsrc.__defaults__ = ()
 
 
 @dataclass
@@ -96,7 +95,7 @@ def get_wfs(wf_src):
 def get_annots(wf_store):
     srefs = wf_store.keys()
     annots = annot_columns(srefs)
-    return annots  # may be display small table of results: OutputTable
+    return annots
 
 
 def disp_results(results):
@@ -112,24 +111,6 @@ d = {
     "apply": apply,
 }
 
-
-# @code_to_dag(func_src=d)
-# def classify():
-#     wf_store = get_wfs(wf_src)  # better tuple wfs_train, wfs_test
-#     annots = get_annots(wf_store)  # annots_src: may be a dataframe
-#     X_train, y_train, X_test, y_test = mk_Xy(wf_store, annots)
-#     model, preprocessor = train(learner, X_train, y_train)
-#     results = apply(model, preprocessor, X_test)  # may be loaded by user
-
-
-# if "mall" not in st.session_state:
-#     st.session_state["mall"] = dict(
-#         learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)},
-#         wfsource={"wf_src": [dflt_wfsrc]},
-#     )
-
-
-# mall = st.session_state["mall"]
 
 if not b.mall():
     b.mall = dict(
@@ -147,15 +128,12 @@ mall = b.mall()
     output_store="output",
 )
 def classify(wf_src, learner):
-    wf_store = get_wfs(wf_src)  # better tuple wfs_train, wfs_test
+    wf_store = get_wfs(wf_src)
     annots = get_annots(wf_store)
-    # st.write(annots)
     X_train, y_train, X_test, y_test = mk_Xy(wf_store, annots)
     model, preprocessor = train(learner, X_train, y_train)
     results = apply(model, preprocessor, X_test)
     return results
-    # st.write(type(results))
-    # output = disp_results(results)
 
 
 config_ = {
