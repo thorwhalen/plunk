@@ -32,12 +32,13 @@ from streamlitfront.elements import (
     TextOutput,
 )
 from streamlitfront.examples.util import Graph
+from streamlitfront import binder as b
 
 chunker = DFLT_CHUNKER
 featurizer = DFLT_FEATURIZER
 learner = RandomForestClassifier(max_depth=2, random_state=0)
-dflt_wfsrc = lambda: DFLT_LOCAL_SOURCE_DIR
-dflt_wfsrc.__defaults__ = ()
+dflt_wfsrc = DFLT_LOCAL_SOURCE_DIR
+# dflt_wfsrc.__defaults__ = ()
 
 
 @dataclass
@@ -121,17 +122,30 @@ d = {
 #     results = apply(model, preprocessor, X_test)  # may be loaded by user
 
 
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
+# if "mall" not in st.session_state:
+#     st.session_state["mall"] = dict(
+#         learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)},
+#         wfsource={"wf_src": [dflt_wfsrc]},
+#     )
+
+
+# mall = st.session_state["mall"]
+
+if not b.mall():
+    b.mall = dict(
         learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)},
-        wfsource={"wf_src": [dflt_wfsrc]},
+        wfsource={"wf_src": dflt_wfsrc},
+        output={},
     )
 
+mall = b.mall()
 
-mall = st.session_state["mall"]
 
-
-@Crudifier(mall=mall, param_to_mall_map={"learner": "learner", "wf_src": "wfsource"})
+@Crudifier(
+    mall=mall,
+    param_to_mall_map={"learner": "learner", "wf_src": "wfsource"},
+    output_store="output",
+)
 def classify(wf_src, learner):
     wf_store = get_wfs(wf_src)  # better tuple wfs_train, wfs_test
     annots = get_annots(wf_store)

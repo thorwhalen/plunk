@@ -18,19 +18,26 @@ import matplotlib.pyplot as plt
 import soundfile as sf
 from io import BytesIO
 from front.crude import Crudifier
+from streamlitfront import binder as b
 
 
 param_to_mall_maps = dict(train_audio="train_audio", tag="tag_store")
 
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
-        # train_audio={},
-        # tag={},
-        # unused_store={"to": "illustrate"},
-        tag_sound_output={}
-    )
+# if "mall" not in st.session_state:
+#     st.session_state["mall"] = dict(
+#         # train_audio={},
+#         # tag={},
+#         # unused_store={"to": "illustrate"},
+#         tag_sound_output={}
+#     )
 
-mall = st.session_state["mall"]
+# mall = st.session_state["mall"]
+
+if not b.mall():
+    b.mall = dict(tag_sound_output={})
+
+mall = b.mall()
+
 # mall = dict(
 #     # train_audio={},
 #     # tag={},
