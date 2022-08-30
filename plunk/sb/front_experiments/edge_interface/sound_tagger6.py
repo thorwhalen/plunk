@@ -11,7 +11,7 @@ from streamlitfront.examples.util import Graph
 from streamlitfront.elements import (
     AudioRecorder,
     FileUploader,
-    MultiSourceInputContainer,
+    MultiSourceInput,
 )
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -123,7 +123,7 @@ config_ = {
             "execution": {
                 "inputs": {
                     "train_audio": {
-                        ELEMENT_KEY: MultiSourceInputContainer,
+                        ELEMENT_KEY: MultiSourceInput,
                         "From a file": {
                             ELEMENT_KEY: FileUploader,
                             "type": "wav",

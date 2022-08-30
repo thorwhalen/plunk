@@ -12,7 +12,7 @@ import base64
 from streamlitfront.elements import (
     AudioRecorder,
     FileUploader,
-    MultiSourceInputContainer,
+    MultiSourceInput,
 )
 import streamlit as st
 import matplotlib.pyplot as plt

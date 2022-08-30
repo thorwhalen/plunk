@@ -26,7 +26,7 @@ from streamlitfront.elements import (
     AudioRecorder,
     FileUploader,
     FloatSliderInput,
-    MultiSourceInputContainer,
+    MultiSourceInput,
     SelectBox,
     TextInput,
     TextOutput,
