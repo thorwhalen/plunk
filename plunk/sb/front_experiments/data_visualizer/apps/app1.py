@@ -9,20 +9,20 @@ from typing import Any
 # from plunk.sb.front_experiments.data_visualizer.dags.wfstore_and_annots_to_dataset import (
 #     load_dataset,
 # )
-from plunk.sb.front_experiments.data_visualizer.components.elements import (
-    # DataLoader,
-    # DataLoader2,
-    ZipWavDataLoader,
-)
-from functools import partial
+# from plunk.sb.front_experiments.data_visualizer.components.elements import (
+#     # DataLoader,
+#     # DataLoader2,
+#     ZipWavDataLoader,
+# )
+# from functools import partial
 from plunk.sb.front_experiments.data_visualizer.utils.tools import (
     store_to_key_fvs,
     key_fvs_to_tag_fvs,
     mk_Xy,
 )
 from streamlitfront import mk_app, binder as b
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
-from streamlitfront.elements import TextInput, SelectBox
+from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
+from streamlitfront.elements import SelectBox
 from front.elements import OutputBase
 import umap
 import umap.plot
