@@ -38,7 +38,7 @@ class SimpleText(TextInputBase):
     def render(self):
         # with st.expander(self.name, True): No nesting of expanders
         input_key: str = self.input_key
-        st.write(f"length of text entered= {len(input_key)}")
+        st.write(f'length of text entered= {len(input_key)}')
 
 
 class SimpleDataframe(FrontComponentBase):
@@ -56,4 +56,4 @@ class SimpleDataframe(FrontComponentBase):
     def render(self):
         # with st.expander(self.name, True): No nesting of expanders
         input_key: str = self.input_key
-        st.write(f"length of text entered= {len(input_key)}")
+        st.write(f'length of text entered= {len(input_key)}')

@@ -4,9 +4,7 @@ import streamlit as st
 from front.spec_maker import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from streamlitfront.base import mk_app
 from meshed import code_to_dag, DAG
-from front.elements import (
-    FileUploaderBase,
-)
+from front.elements import FileUploaderBase
 from streamlitfront.elements import implement_input_component
 from typing import Iterable
 from streamlitfront.examples.graph_component import Graph
@@ -32,22 +30,19 @@ def display_wf(wf: WaveForm):
 
 
 config_ = {
-    APP_KEY: {"title": "Simple Load and Display"},
+    APP_KEY: {'title': 'Simple Load and Display'},
     RENDERING_KEY: {
         DAG: {
-            "execution": {
-                "inputs": {
-                    "wf": {
+            'execution': {
+                'inputs': {
+                    'wf': {
                         # ELEMENT_KEY: FILE_UPLOADER_COMPONENT,
                         ELEMENT_KEY: WavUploader,
-                        "type": "wav",
+                        'type': 'wav',
                     },
                 }
             },
-            "graph": {
-                ELEMENT_KEY: Graph,
-                NAME_KEY: "Flow",
-            },
+            'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',},
         }
     },
 }

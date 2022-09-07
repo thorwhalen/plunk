@@ -27,12 +27,11 @@ p = Pipeline(chunker, iterize(featurizer))
 
 # page config
 st.set_page_config(
-    page_title="Stream a dataframe",
-    layout="wide",
+    page_title='Stream a dataframe', layout='wide',
 )
 
 # dashboard title
-st.title("Stream a dataframe")
+st.title('Stream a dataframe')
 
 # creating a single-element container
 placeholder = st.empty()
@@ -49,7 +48,7 @@ with LiveWf() as live_wf:
             # chks = p(live_wf[i : i + 100])
 
             dataL = chks
-            d = {"sound": dataL}
+            d = {'sound': dataL}
             # fig = px.line(
             #     data_frame=pd.DataFrame(d),
             #     x=range(200),

@@ -19,12 +19,9 @@ class ClassifierTrainFlow(FlowSpec):
         from sklearn.model_selection import train_test_split
 
         X, y = mk_Xy()
-        (
-            self.X_train,
-            self.X_test,
-            self.y_train,
-            self.y_test,
-        ) = train_test_split(X, y, test_size=0.4, random_state=0)
+        (self.X_train, self.X_test, self.y_train, self.y_test,) = train_test_split(
+            X, y, test_size=0.4, random_state=0
+        )
         self.next(self.train_knn, self.train_svm)
 
     @step
@@ -39,7 +36,7 @@ class ClassifierTrainFlow(FlowSpec):
     def train_svm(self):  # B
         from sklearn import svm
 
-        self.model = svm.SVC(kernel="poly")  # D
+        self.model = svm.SVC(kernel='poly')  # D
         self.model.fit(self.X_train, self.y_train)
         self.next(self.choose_model)
 
@@ -54,9 +51,9 @@ class ClassifierTrainFlow(FlowSpec):
 
     @step
     def end(self):  # C
-        print("Scores:")
-        print("\n".join("%s %f" % res for res in self.results))
+        print('Scores:')
+        print('\n'.join('%s %f' % res for res in self.results))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ClassifierTrainFlow()

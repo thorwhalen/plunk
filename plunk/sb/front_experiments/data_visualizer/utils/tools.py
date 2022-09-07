@@ -28,7 +28,7 @@ def key_fvs_to_tag_fvs(key_fvs, annots_df):
 
 
 def key_to_tag_from_annots(key, annots_df):
-    tag = annots_df["tag"][annots_df["key"] == key].values[0]
+    tag = annots_df['tag'][annots_df['key'] == key].values[0]
     return tag
 
 

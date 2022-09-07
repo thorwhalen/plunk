@@ -13,12 +13,12 @@ def foo(a, b: float, c: int):
     return a + b * c
 
 
-param_to_mall_map = dict(a="a", b="b_store", c="c_store")
+param_to_mall_map = dict(a='a', b='b_store', c='c_store')
 mall = dict(
-    a={"one": 1, "two": 2},
-    b_store={"three": 3, "four": 4},
-    unused_store={"to": "illustrate"},
-    c_store={"value": 4},
+    a={'one': 1, 'two': 2},
+    b_store={'three': 3, 'four': 4},
+    unused_store={'to': 'illustrate'},
+    c_store={'value': 4},
 )
 
 
@@ -32,32 +32,24 @@ def crudify(funcs):
 app = mk_app(
     [foo],
     config={
-        APP_KEY: {"title": "Crude App"},
-        OBJ_KEY: {"trans": crudify},
+        APP_KEY: {'title': 'Crude App'},
+        OBJ_KEY: {'trans': crudify},
         RENDERING_KEY: {
-            "foo": {
-                "execution": {
-                    "inputs": {
-                        "a": {
-                            "options": mall["a"],
-                        },
-                        "b": {
-                            "options": mall["b_store"],
-                        },
-                        "c": {
-                            "options": mall["c_store"],
-                        },
-                        str: {
-                            ELEMENT_KEY: SelectBox,
-                        },
+            'foo': {
+                'execution': {
+                    'inputs': {
+                        'a': {'options': mall['a'],},
+                        'b': {'options': mall['b_store'],},
+                        'c': {'options': mall['c_store'],},
+                        str: {ELEMENT_KEY: SelectBox,},
                     }
                 },
-                "code": {
+                'code': {
                     ELEMENT_KEY: TextSection,
-                    NAME_KEY: "Source Code",
-                    "kind": "code",
-                    "language": "python",
-                    "content": get_code_of_current_file(),
+                    NAME_KEY: 'Source Code',
+                    'kind': 'code',
+                    'language': 'python',
+                    'content': get_code_of_current_file(),
                 },
             }
         },

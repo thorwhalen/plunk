@@ -65,11 +65,12 @@ def test_decorated_funcs():
     # this shows that they exist (but)
 
     import plunk.tw.things_decorators_break as m
+
     expected_func_names = (
-        "foo_my_deco",
-        "foo_wraps",
-        "foo_wrap",
-        "foo_double_up_as_factory"
+        'foo_my_deco',
+        'foo_wraps',
+        'foo_wrap',
+        'foo_double_up_as_factory',
     )
     assert all(x in dir(m) for x in expected_func_names)
     dir(m)
@@ -79,7 +80,7 @@ def test_decorated_funcs():
         foo_my_deco,
         foo_wraps,
         foo_wrap,
-        foo_double_up_as_factory
+        foo_double_up_as_factory,
     )
 
     # But in jupyter notebook, can't tab-complete with that idiom (but can tab

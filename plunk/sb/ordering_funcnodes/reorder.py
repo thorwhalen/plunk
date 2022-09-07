@@ -19,7 +19,7 @@ def mk_mock_funcnode(arg, out):
         pass
 
     # name = "_mock_" + str(arg) + "_" + str(out)  # f-string
-    name = f"_mock_{str(arg)}_{str(out)}"  # f-string
+    name = f'_mock_{str(arg)}_{str(out)}'  # f-string
 
     return FuncNode(func=func, out=out, name=name)
 
@@ -50,7 +50,7 @@ def reorder_on_constraints(funcnodes, outs):
     funcnodes += extra_nodes
     graph = _func_nodes_to_graph_dict(funcnodes)
     nodes = topological_sort(graph)
-    print("after ordering:", nodes)
+    print('after ordering:', nodes)
     ordered_nodes = [node for node in nodes if node not in extra_nodes]
     func_nodes, var_nodes = _separate_func_nodes_and_var_nodes(ordered_nodes)
 

@@ -20,19 +20,24 @@ def deprecate_attr(attr_name, attr_replacement_name):
     >>> foo.valid_attr
     'Got deprected attribute'
     """
+
     def wrapper(cls):
         def warn_deprecated_sig_attr():
             warn(
                 f'"{cls.__qualname__}.{attr_name}" is deprecated, consider using "{cls.__qualname__}.{attr_replacement_name}" instead.',
                 DeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
+
         def get_attr(self):
             warn_deprecated_sig_attr()
             return getattr(self, attr_replacement_name)
+
         def set_attr(self, value):
             setattr(self, attr_replacement_name, value)
+
         prop = property(get_attr, set_attr)
         setattr(cls, attr_name, prop)
         return cls
+
     return wrapper

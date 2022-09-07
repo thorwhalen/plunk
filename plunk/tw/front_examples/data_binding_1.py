@@ -9,7 +9,7 @@ import numpy as np
 
 
 def apply_func_to_wf(wf, func):
-    print(f"{wf=}, {func=}")
+    print(f'{wf=}, {func=}')
     return func(wf)
 
 
@@ -25,11 +25,11 @@ from recode import decode_wav_bytes
 
 class MyFileUploader(sf.FileUploader):
     def render(self):
-        print("... in render with {self=} and {uploaded_file=}")
+        print('... in render with {self=} and {uploaded_file=}')
         uploaded_file = super().render()
         if uploaded_file is not None:
             b = decode_wav_bytes(uploaded_file.read())
-            print(f"{len(b)=}, {type(b)=}")
+            print(f'{len(b)=}, {type(b)=}')
             return decode_wav_bytes(uploaded_file.read())
 
 

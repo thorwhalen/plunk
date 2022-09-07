@@ -6,8 +6,7 @@ from utils import discretize, mk_audio_stream
 import time
 
 st.set_page_config(
-    page_title="Stream a dataframe",
-    layout="wide",
+    page_title='Stream a dataframe', layout='wide',
 )
 
 # create live stream from microphone
@@ -15,7 +14,7 @@ stream = mk_audio_stream()
 
 
 # dashboard title
-st.title("Stream a dataframe")
+st.title('Stream a dataframe')
 
 
 # creating a single-element container
@@ -29,7 +28,7 @@ while True:
 
     dataL = discretize(data[0::2], func=np.std)
 
-    d = {"sound": dataL}
+    d = {'sound': dataL}
     with placeholder.container():
         # fig = px.line(
         #     data_frame=pd.DataFrame(d),

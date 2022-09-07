@@ -97,7 +97,7 @@ foo_bool = None
 
 
 def test_bool():
-    name = "bool"
+    name = 'bool'
     names_dict = names
 
     sig = Sig(names_dict[name])
@@ -106,26 +106,26 @@ def test_bool():
     # args = args_str_from_sig(sig)
     # exec(f"global foo_bool\ndef foo_bool({args}):\n  return None")
     # f = foo_bool
-    assert not call_raises_signature_error(f, "12")
+    assert not call_raises_signature_error(f, '12')
     # assert not call_raises_signature_error(f, "12")
     assert not call_raises_signature_error(f, 5)
     assert function_is_compatible_with_signature(bool, sig)
 
 
 def test_breakpoint():
-    name = "breakpoint"
+    name = 'breakpoint'
     names_dict = names
 
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
 
-    assert not call_raises_signature_error(f, "12")
+    assert not call_raises_signature_error(f, '12')
     assert not call_raises_signature_error(f, 5)
     assert function_is_compatible_with_signature(breakpoint, sig)
 
 
 def test_bytearray():
-    name = "bytearray"
+    name = 'bytearray'
     names_dict = names
     sig = Sig(names_dict[name])
 
@@ -139,7 +139,7 @@ def test_bytearray():
 
 
 def test_bytes():
-    name = "bytes"
+    name = 'bytes'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -152,7 +152,7 @@ def test_bytes():
 
 
 def test_classmethod():
-    name = "classmethod"
+    name = 'classmethod'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -185,7 +185,7 @@ def test_classmethod():
 
 
 def test_dict():
-    name = "dict"
+    name = 'dict'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -194,13 +194,13 @@ def test_dict():
     # f = foo_dict
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
-    assert not call_raises_signature_error(f, {"a": 12, "b": 5})
+    assert not call_raises_signature_error(f, {'a': 12, 'b': 5})
     assert not call_raises_signature_error(f, 3)
     assert function_is_compatible_with_signature(dict, sig)
 
 
 def test_frozenset():
-    name = "frozenset"
+    name = 'frozenset'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -214,7 +214,7 @@ def test_frozenset():
 
 
 def test_int():
-    name = "int"
+    name = 'int'
     # f = builtin_func_from_name(name)
     names_dict = names
     # sig = Sig(names_dict[name])
@@ -232,7 +232,7 @@ def test_int():
 
 
 def test_iter():
-    name = "iter"
+    name = 'iter'
     names_dict = names
     # sig = Sig(names_dict[name])
     # print(sig)
@@ -253,7 +253,7 @@ def test_iter():
 
 
 def test_max():
-    name = "max"
+    name = 'max'
     names_dict = names
     # f = builtin_func_from_name(name)
     # sig = Sig(names_dict[name])
@@ -265,12 +265,12 @@ def test_max():
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, [1, 2, 3, 4])
-    assert not call_raises_signature_error(f, "fake")
+    assert not call_raises_signature_error(f, 'fake')
     assert function_is_compatible_with_signature(max, sig)
 
 
 def test_min():
-    name = "min"
+    name = 'min'
     names_dict = names
     # f = builtin_func_from_name(name)
     # sig = Sig(names_dict[name])
@@ -282,12 +282,12 @@ def test_min():
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
     assert not call_raises_signature_error(f, [1, 2, 3, 4])
-    assert not call_raises_signature_error(f, "fake")
+    assert not call_raises_signature_error(f, 'fake')
     assert function_is_compatible_with_signature(min, sig)
 
 
 def test_next():
-    name = "next"
+    name = 'next'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -300,7 +300,7 @@ def test_next():
 
 
 def test_range():
-    name = "range"
+    name = 'range'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -313,7 +313,7 @@ def test_range():
 
 
 def test_set():
-    name = "set"
+    name = 'set'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -326,7 +326,7 @@ def test_set():
 
 
 def test_slice():
-    name = "slice"
+    name = 'slice'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -339,7 +339,7 @@ def test_slice():
 
 
 def test_staticmethod():
-    name = "staticmethod"
+    name = 'staticmethod'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -357,7 +357,7 @@ def test_staticmethod():
 
 
 def test_str():
-    name = "str"
+    name = 'str'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -371,7 +371,7 @@ def test_str():
 
 
 def test_super():
-    name = "super"
+    name = 'super'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -386,7 +386,7 @@ def test_super():
 
 
 def test_type():
-    name = "type"
+    name = 'type'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -405,7 +405,7 @@ def test_type():
 
 
 def test_vars():
-    name = "vars"
+    name = 'vars'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -414,12 +414,12 @@ def test_vars():
     # f = foo_vars
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
-    assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
+    assert not call_raises_signature_error(f, ['obj_1', 'obj_2'])
     assert function_is_compatible_with_signature(vars, sig)
 
 
 def test_zip():
-    name = "zip"
+    name = 'zip'
     names_dict = names
     # sig = Sig(names_dict[name])
 
@@ -428,7 +428,7 @@ def test_zip():
     # f = foo_zip
     sig = Sig(names_dict[name])
     f = sig_to_func(sig)
-    assert not call_raises_signature_error(f, ["obj_1", "obj_2"])
+    assert not call_raises_signature_error(f, ['obj_1', 'obj_2'])
     assert function_is_compatible_with_signature(zip, sig)
 
 
@@ -436,7 +436,7 @@ def test_call_raises():
     assert call_raises_signature_error(lambda x, /, y: None, x=1, y=2)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_bool()
     # test_breakpoint() # calls the debugger
     test_bytearray()

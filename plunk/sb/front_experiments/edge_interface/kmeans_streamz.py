@@ -12,7 +12,7 @@ import holoviews as hv
 from panel.pane.holoviews import HoloViews
 import panel as pn
 
-hv.extension("bokeh")
+hv.extension('bokeh')
 
 model = cluster.KMeans(n_clusters=3, sigma=0.1, mu=0.5)
 centres = [[random.random(), random.random()] for _ in range(3)]
@@ -25,8 +25,8 @@ def gen(move_chance=0.05):
         centres[centre][0] += random.random() / 5 - 0.1
         centres[centre][1] += random.random() / 5 - 0.1
     value = {
-        "x": random.random() / 20 + centres[centre][0],
-        "y": random.random() / 20 + centres[centre][1],
+        'x': random.random() / 20 + centres[centre][0],
+        'y': random.random() / 20 + centres[centre][1],
     }
     count[0] += 1
     return value
@@ -34,14 +34,14 @@ def gen(move_chance=0.05):
 
 def get_clusters(model):
     # return [{"x": xcen, "y": ycen}, ...] for each centre
-    data = [{"x": v["x"], "y": v["y"]} for k, v in model.centers.items()]
+    data = [{'x': v['x'], 'y': v['y']} for k, v in model.centers.items()]
     return pd.DataFrame(data, index=range(3))
 
 
 def main(viz=True):
     cadance = 0.01
 
-    ex = pd.DataFrame({"x": [0.5], "y": [0.5]})
+    ex = pd.DataFrame({'x': [0.5], 'y': [0.5]})
     pipe_in = hv.streams.Pipe(data=ex)
     pipe_out = hv.streams.Pipe(data=ex)
 
@@ -80,15 +80,15 @@ def main(viz=True):
     # start things
     s.emit(gen())  # set initial model
     for i, (x, y) in enumerate(centres):
-        model.centers[i]["x"] = x
-        model.centers[i]["y"] = y
+        model.centers[i]['x'] = x
+        model.centers[i]['y'] = y
 
-    print("starting")
+    print('starting')
 
     if viz:
         # plot
-        button_start = pn.widgets.Button(name="Start")
-        button_stop = pn.widgets.Button(name="Stop")
+        button_start = pn.widgets.Button(name='Start')
+        button_stop = pn.widgets.Button(name='Stop')
 
         t0 = 0
 
@@ -98,22 +98,22 @@ def main(viz=True):
             t0 = time.time()
 
         def stop(event):
-            print(count, "events")
+            print(count, 'events')
             global t0
             t_spent = time.time() - t0
-            print("frequency", count[0] / t_spent, "Hz")
-            print("Current centres", centres)
-            print("Output centres", [list(c.values()) for c in model.centers.values()])
+            print('frequency', count[0] / t_spent, 'Hz')
+            print('Current centres', centres)
+            print('Output centres', [list(c.values()) for c in model.centers.values()])
             s.stop()
 
         button_start.on_click(start)
         button_stop.on_click(stop)
 
         scatter_dmap_input = hv.DynamicMap(hv.Scatter, streams=[pipe_in]).opts(
-            color="blue"
+            color='blue'
         )
         scatter_dmap_output = hv.DynamicMap(hv.Scatter, streams=[pipe_out]).opts(
-            color="red"
+            color='red'
         )
         pl = scatter_dmap_input * scatter_dmap_output
         pl.opts(xlim=(-0.2, 1.2), ylim=(-0.2, 1.2), height=600, width=600)
@@ -124,12 +124,12 @@ def main(viz=True):
     else:
         s.start()
         time.sleep(5)
-        print(count, "events")
-        print("frequency", count[0] / 5, "Hz")
-        print("Current centres", centres)
-        print("Output centres", [list(c.values()) for c in model.centers.values()])
+        print(count, 'events')
+        print('frequency', count[0] / 5, 'Hz')
+        print('Current centres', centres)
+        print('Output centres', [list(c.values()) for c in model.centers.values()])
         s.stop()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(viz=True)

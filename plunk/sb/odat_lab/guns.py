@@ -10,8 +10,8 @@ from odat.utils.chunkers import fixed_step_chunker
 
 DFLT_CHUNKER = partial(fixed_step_chunker, chk_size=2048)
 
-config_filename = "guns.json"
-DFLT_LOCAL_SOURCE_DIR = myconfigs.get_config_value(config_filename, "local_source_dir")
+config_filename = 'guns.json'
+DFLT_LOCAL_SOURCE_DIR = myconfigs.get_config_value(config_filename, 'local_source_dir')
 
 
 def mk_dacc(root_dir=DFLT_LOCAL_SOURCE_DIR):
@@ -19,7 +19,7 @@ def mk_dacc(root_dir=DFLT_LOCAL_SOURCE_DIR):
 
 
 def wf_from_bytes(bytes):
-    return sf.read(BytesIO(bytes), dtype="float32")[0]
+    return sf.read(BytesIO(bytes), dtype='float32')[0]
 
 
 def WfStore(root_store):
@@ -44,6 +44,6 @@ class Dacc:
                 yield chk, tag
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     dacc = mk_dacc()
     print(next(dacc.chk_tag_gen()))

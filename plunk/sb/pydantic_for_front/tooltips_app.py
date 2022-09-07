@@ -24,11 +24,11 @@ SalaryKey = str  # or some type that will resolve in store-fed key selector
 SalaryMapping = Mapping[SalaryKey, ComplexType]
 
 salary_store: SalaryMapping
-salary_store = {"sylvain": 10000, "christian": 2000, "thor": 50000}
+salary_store = {'sylvain': 10000, 'christian': 2000, 'thor': 50000}
 
 
 def mk_choices_from_store(store):
-    choices = Enum("Choices", {key: key for key in store.keys()})
+    choices = Enum('Choices', {key: key for key in store.keys()})
     return choices
 
 
@@ -37,7 +37,7 @@ class SimplePageFuncPydanticWrite(BasePageFunc):
         self.prepare_view(state)
         mymodel = func_to_pyd_input_model_cls(self.func)
         name = name_of_obj(self.func)
-        data = sp.pydantic_form(key=f"my_form_{name}", model=mymodel)
+        data = sp.pydantic_form(key=f'my_form_{name}', model=mymodel)
         # data = sp.pydantic_input(key=f"my_form_{name}", model=mymodel)
 
         if data:
@@ -85,7 +85,7 @@ def func_to_pyd_model_specs(func: Callable, dflt_type=Any):
                 yield p.name, (dflt_type, Field(...))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from streamlitfront.base import dispatch_funcs
     from pydantic import BaseModel, Field, ValidationError, parse_obj_as
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     #        ..., description="Only select a single item from a set."
     #    )
 
-    configs = {"page_factory": SimplePageFuncPydanticWrite}
+    configs = {'page_factory': SimplePageFuncPydanticWrite}
 
     app = dispatch_funcs([func], configs=configs)
     app()

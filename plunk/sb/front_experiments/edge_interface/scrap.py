@@ -7,9 +7,9 @@ import json
 from collections import deque
 
 df = pd.DataFrame()
-df["value"] = 0.0
+df['value'] = 0.0
 
-URI = "ws://192.168.1.3:8081/sensor/connect?type=android.sensor.accelerometer"
+URI = 'ws://192.168.1.3:8081/sensor/connect?type=android.sensor.accelerometer'
 
 
 def init_deque(maxlen=20):
@@ -18,10 +18,10 @@ def init_deque(maxlen=20):
     return d
 
 
-st.title("Accelerometer")
+st.title('Accelerometer')
 
 data_deque = init_deque()
-df["value"] = data_deque
+df['value'] = data_deque
 # st.session_state["d"] = df
 # st.write(st.session_state["d"])
 
@@ -31,9 +31,9 @@ async def accelerometer(uri=URI):
     async with connect(uri) as websocket:
         while True:
             data = await websocket.recv()
-            result = json.loads(data)["values"][0]
+            result = json.loads(data)['values'][0]
             data_deque.append(result)
-            df["value"] = data_deque
+            df['value'] = data_deque
             # st.session_state["d"] = df
             # st.write(data_deque)
             # st.write(df)

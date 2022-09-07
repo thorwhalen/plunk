@@ -9,7 +9,7 @@ from i2.tests.util import sig_to_inputs
 from i2.signatures import var_param_kinds
 
 
-kind_to_symbol = {PO: "PO", PK: "PK", VP: "VP", KO: "KO", VK: "VK"}
+kind_to_symbol = {PO: 'PO', PK: 'PK', VP: 'VP', KO: 'KO', VK: 'VK'}
 
 
 def transform_key(d, func):
@@ -161,7 +161,7 @@ def args_compatible_with_sig(sig, *args, **kwargs):
 def possible_named_args(sig):
     d = var_names_by_kind(sig)
     print(d)
-    return d.get("PK", []) + d.get("KO", [])
+    return d.get('PK', []) + d.get('KO', [])
 
 
 def named_args_are_valid(named_args1: List[str], vk2: int, named_args2: List[str]):
@@ -170,7 +170,7 @@ def named_args_are_valid(named_args1: List[str], vk2: int, named_args2: List[str
     excess = set(named_args1) - set(named_args2)
     if excess:
         ValueError(
-            f"The following named arguments cannot be accepted by the second function: {excess}"
+            f'The following named arguments cannot be accepted by the second function: {excess}'
         )
     else:
         return True
@@ -181,7 +181,7 @@ def is_compatible_func(f, g):
     sig2 = Sig(g)
     named_args1 = possible_named_args(sig1)
     named_args2 = possible_named_args(sig2)
-    vk2 = param_kind_counter(g).get("VK", 0)
+    vk2 = param_kind_counter(g).get('VK', 0)
 
     d1 = DefinitionSig(**param_kind_counter(sig1))
     d2 = DefinitionSig(**param_kind_counter(sig2))
@@ -230,8 +230,8 @@ def kind_to_symbol_func(k):
 
 def variadics_from_sig(sig):
     d = param_kind_counter(sig)
-    vp = "VP" in d
-    vk = "VK" in d
+    vp = 'VP' in d
+    vk = 'VK' in d
 
     return vp, vk
 

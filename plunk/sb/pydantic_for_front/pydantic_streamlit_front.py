@@ -19,7 +19,7 @@ class SimplePageFuncPydanticWrite(BasePageFunc):
         name = name_of_obj(self.func)
 
         # data = sp.pydantic_form(key=f"my_form_{name}", model=mymodel)
-        data = sp.pydantic_input(key=f"my_form_{name}", model=mymodel)
+        data = sp.pydantic_input(key=f'my_form_{name}', model=mymodel)
 
         if data:
             st.write(self.func(**data))
@@ -27,6 +27,6 @@ class SimplePageFuncPydanticWrite(BasePageFunc):
             # st.json(data.json())
 
 
-configs = {"page_factory": SimplePageFuncPydanticWrite}
+configs = {'page_factory': SimplePageFuncPydanticWrite}
 app = dispatch_funcs([foo], configs=configs)
 app()

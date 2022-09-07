@@ -24,8 +24,8 @@ def func(x: str) -> str:
     return result
 
 
-Input = func_to_pyd_input_model_cls(func, name="Input")
-print("issubclass", issubclass(Input, BaseModel))
+Input = func_to_pyd_input_model_cls(func, name='Input')
+print('issubclass', issubclass(Input, BaseModel))
 name = name_of_obj(func)
 
 

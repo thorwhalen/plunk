@@ -33,8 +33,8 @@ def pyd_func2(input: Input) -> Output:
 def create_api(opyrator: Opyrator, opyrator2: Opyrator) -> FastAPI:
 
     title = opyrator.name
-    if "opyrator" not in opyrator.name.lower():
-        title += " - Opyrator"
+    if 'opyrator' not in opyrator.name.lower():
+        title += ' - Opyrator'
 
     # TODO what about version?
     app = FastAPI(title=title, description=opyrator.description)
@@ -43,18 +43,18 @@ def create_api(opyrator: Opyrator, opyrator2: Opyrator) -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=['*'],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=['*'],
+        allow_headers=['*'],
     )
 
     @app.post(
-        "/call",
-        operation_id="call",
+        '/call',
+        operation_id='call',
         response_model=opyrator.output_type,
         # response_model_exclude_unset=True,
-        summary="Execute the opyrator.",
+        summary='Execute the opyrator.',
         status_code=status.HTTP_200_OK,
     )
     def call(input: opyrator.input_type) -> Any:  # type: ignore
@@ -62,11 +62,11 @@ def create_api(opyrator: Opyrator, opyrator2: Opyrator) -> FastAPI:
         return opyrator(input)
 
     @app.post(
-        "/call2",
-        operation_id="call2",
+        '/call2',
+        operation_id='call2',
         response_model=opyrator2.output_type,
         # response_model_exclude_unset=True,
-        summary="Execute the opyrator.",
+        summary='Execute the opyrator.',
         status_code=status.HTTP_200_OK,
     )
     def call(input: opyrator2.input_type) -> Any:  # type: ignore
@@ -74,11 +74,11 @@ def create_api(opyrator: Opyrator, opyrator2: Opyrator) -> FastAPI:
         return opyrator2(input)
 
     @app.get(
-        "/info",
-        operation_id="info",
+        '/info',
+        operation_id='info',
         response_model=Dict,
         # response_model_exclude_unset=True,
-        summary="Get info metadata.",
+        summary='Get info metadata.',
         status_code=status.HTTP_200_OK,
     )
     def info() -> Any:  # type: ignore
@@ -86,9 +86,9 @@ def create_api(opyrator: Opyrator, opyrator2: Opyrator) -> FastAPI:
         return {}
 
     # Redirect to docs
-    @app.get("/", include_in_schema=False)
+    @app.get('/', include_in_schema=False)
     def root() -> Any:
-        return RedirectResponse("./docs")
+        return RedirectResponse('./docs')
 
     return app
 

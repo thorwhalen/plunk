@@ -24,11 +24,11 @@ class AggTable(InputBase):
 
 class SimpleInput(IntInput):
     def render(self):
-        st.write(f"What has been entered={self.output}")
+        st.write(f'What has been entered={self.output}')
 
 
 # The App
-st.title("Wav Store explorer")
+st.title('Wav Store explorer')
 
 
 def simple_display(result):
@@ -36,13 +36,13 @@ def simple_display(result):
 
 
 config_ = {
-    APP_KEY: {"title": "Simple Real Audio ML"},
+    APP_KEY: {'title': 'Simple Real Audio ML'},
     # OBJ_KEY: {"trans": crudify},
     RENDERING_KEY: {
-        "simple_display": {
-            "execution": {
-                "inputs": {
-                    "result": {
+        'simple_display': {
+            'execution': {
+                'inputs': {
+                    'result': {
                         ELEMENT_KEY: IntInput,
                         # "options": mall["tag_sound_output"],
                     },
