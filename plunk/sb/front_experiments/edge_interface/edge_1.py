@@ -10,9 +10,9 @@ def foo(a: int = 1, b: int = 2, c=3):
     return (a * b) + c
 
 
-def bar(x, greeting="hello"):
+def bar(x, greeting='hello'):
     """bar greets its input"""
-    return f"{greeting} {x}"
+    return f'{greeting} {x}'
 
 
 def confuser(a: int, x: float = 3.14):
@@ -25,27 +25,23 @@ def proportion(x: int = 100, p: float = 0.5):
 
 class SimpleOutput(TextOutput):
     def render(self):
-        st.write(f"What has been entered={self.output}")
+        st.write(f'What has been entered={self.output}')
 
 
 class SimpleOutput2(OutputBase):
     def render(self):
-        st.write(f"What has been entered={self.output}")
+        st.write(f'What has been entered={self.output}')
 
 
 app = mk_app(
     [foo, proportion],
     config={
-        APP_KEY: {"title": "My app"},
+        APP_KEY: {'title': 'My app'},
         RENDERING_KEY: {
-            "proportion": {
-                "execution": {
-                    "inputs": {
-                        "p": {
-                            ELEMENT_KEY: FloatSliderInput,
-                        }
-                    },
-                    "output": {ELEMENT_KEY: SimpleOutput2},
+            'proportion': {
+                'execution': {
+                    'inputs': {'p': {ELEMENT_KEY: FloatSliderInput,}},
+                    'output': {ELEMENT_KEY: SimpleOutput2},
                 }
             },
         },

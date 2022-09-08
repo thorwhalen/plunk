@@ -5,7 +5,6 @@ from streamlit_folder_browser import st_folder_browser
 import streamlit as st
 
 
-
-st.title("Testing Streamlit custom components")
+st.title('Testing Streamlit custom components')
 v = st_folder_browser()
 st.write(v)

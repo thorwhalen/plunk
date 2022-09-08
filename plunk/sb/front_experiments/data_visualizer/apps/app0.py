@@ -12,9 +12,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-root_dir = "/Users/sylvain/Dropbox/_odata/sound/vacuum"
+root_dir = '/Users/sylvain/Dropbox/_odata/sound/vacuum'
 wf_store = WavLocalFileStore(root_dir)
-annots_path = "../data/annots_vacuum.csv"
+annots_path = '../data/annots_vacuum.csv'
 df = pd.read_csv(annots_path)
 
 
@@ -22,7 +22,7 @@ key_fvs = store_to_key_fvs(wf_store)
 tag_fv_iterator = key_fvs_to_tag_fvs(key_fvs, annots_df=df)
 X, y = mk_Xy(tag_fv_iterator)
 
-st.title("visualizer")
+st.title('visualizer')
 
 
 def plot_umap(X, y, show_legend=True):

@@ -10,8 +10,8 @@ from io import BytesIO
 DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 
 
-config_filename = "phone_digits_block.json"
-DFLT_LOCAL_SOURCE_DIR = myconfigs.get_config_value(config_filename, "local_source_dir")
+config_filename = 'phone_digits_block.json'
+DFLT_LOCAL_SOURCE_DIR = myconfigs.get_config_value(config_filename, 'local_source_dir')
 
 
 def mk_fvs(chk_tags, featurizer=DFLT_FEATURIZER):
@@ -55,7 +55,7 @@ class ClassifierTrainFlow(FlowSpec):
     def train_svm(self):  # B
         from sklearn import svm
 
-        self.model = svm.SVC(kernel="poly")  # D
+        self.model = svm.SVC(kernel='poly')  # D
         self.model.fit(self.train_data, self.train_labels)
         self.next(self.choose_model)
 
@@ -70,9 +70,9 @@ class ClassifierTrainFlow(FlowSpec):
 
     @step
     def end(self):  # C
-        print("Scores:")
-        print("\n".join("%s %f" % res for res in self.results))
+        print('Scores:')
+        print('\n'.join('%s %f' % res for res in self.results))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ClassifierTrainFlow()

@@ -199,8 +199,8 @@ def kwargs_from_args_and_kwargs(
     if no_var_kw and not allow_excess:  # don't ignore excess kwargs
         excess = kwargs.keys() - b.arguments
         if excess:
-            excess_str = ", ".join(excess)
-            raise TypeError(f"Got unexpected keyword arguments: {excess_str}")
+            excess_str = ', '.join(excess)
+            raise TypeError(f'Got unexpected keyword arguments: {excess_str}')
 
     if debug:
         var_kw_name = name_of_var_kw_argument(self)
@@ -373,7 +373,7 @@ def args_and_kwargs_from_kwargs(
     return args, kwargs
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     # def f(a, **kwargs):
     #    print(kwargs)
@@ -395,7 +395,7 @@ if __name__ == "__main__":
     from i2 import Sig
     from i2.signatures import VK
 
-    def foo(w, /, x: float, y="YY", *, z: str = "ZZ", **rest):
+    def foo(w, /, x: float, y='YY', *, z: str = 'ZZ', **rest):
         pass
 
     # sig = Sig(foo)
@@ -410,4 +410,4 @@ if __name__ == "__main__":
 
     foo_sig = Sig(foo)
     args, kwargs = foo_sig.args_and_kwargs_from_kwargs(dict(w=4, x=3, y=2, z=1, t=12))
-    print(f"args:{args}, kwargs: {kwargs}")
+    print(f'args:{args}, kwargs: {kwargs}')

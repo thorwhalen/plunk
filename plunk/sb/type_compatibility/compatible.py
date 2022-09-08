@@ -88,7 +88,7 @@ def has_compatible_type(typing_inst1, typing_inst2):
     return origin_comp and len_comp and args_comp
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     t1 = Union[int, float]
     t2 = Union[str, bool]
     t3 = Union[float, str]

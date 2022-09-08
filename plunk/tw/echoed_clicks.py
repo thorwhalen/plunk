@@ -83,11 +83,10 @@ def test_mk_pipe():
     ]
 
     p = mk_pipe(
-        chk_size=2,
-        slab_func=lambda x: any(map(sum, x)),
-        filt=lambda x: x[1] is True
+        chk_size=2, slab_func=lambda x: any(map(sum, x)), filt=lambda x: x[1] is True
     )
 
     assert list(p(stream_0, stream_1)) == [(2, True), (3, True)]
+
 
 # test_mk_pipe()

@@ -16,11 +16,11 @@ def wav_complex_display(uploaded_file):
     st.audio(bytes)
     arr = arr_from_bytes(bytes)
     arr_d = discretize(arr)
-    st.write(f"length = {len(arr)}")
+    st.write(f'length = {len(arr)}')
     st.bar_chart(arr_d)
 
 
-def arr_from_bytes(bytes, dtype="int16"):
+def arr_from_bytes(bytes, dtype='int16'):
     arr = sf.read(bytes, dtype=dtype)[0]
 
     return arr

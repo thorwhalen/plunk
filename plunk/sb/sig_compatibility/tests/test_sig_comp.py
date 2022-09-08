@@ -10,10 +10,10 @@ from plunk.sb.sig_compatibility.sig_comp import (
 
 
 def test_transform_key():
-    d = {"key1": 12, "key2": 23}
+    d = {'key1': 12, 'key2': 23}
     func = lambda x: x.upper()
     result = transform_key(d, func)
-    expected = {"KEY1": 12, "KEY2": 23}
+    expected = {'KEY1': 12, 'KEY2': 23}
     assert result == expected
 
 

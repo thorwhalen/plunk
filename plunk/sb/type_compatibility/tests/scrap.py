@@ -63,12 +63,12 @@ class D:
     bar = foo
 
     def g(self):
-        return "hello world"
+        return 'hello world'
 
     h = g
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = A(x=1)
     b = B(x=1)
     c = C(x=1)
@@ -88,7 +88,5 @@ if __name__ == "__main__":
     b2.bar(3)
     b2.bar2(3)
     # (variable) bar: MethodType
-    a.bar.func)
+    a.bar.func
     c.bar()
-
-

@@ -1,4 +1,5 @@
 from functools import partial
+
 # from typing import Callable
 from collections.abc import Callable
 from sklearn.preprocessing import StandardScaler
@@ -16,6 +17,7 @@ crudify = partial(Crudifier, mall=mall)
 
 def str_to_dict(string):
     import json
+
     return json.loads(string)
 
 
@@ -67,7 +69,7 @@ if __name__ == '__main__':
                     'inputs': {
                         'func': {
                             f.ELEMENT_KEY: sf.SelectBox,
-                            'options': list(mall['func'])
+                            'options': list(mall['func']),
                         },
                     },
                 }
@@ -81,18 +83,14 @@ if __name__ == '__main__':
     def kmeans(*args, **kwargs):
         return KMeans(*args, **kwargs)
 
-
     def change_types_to_callable(x):
         if isinstance(x, type):
             x = partial(x)
         return x
 
-
-    app = mk_app(
-        [factory, kmeans],
-        config=my_config,
-    )
+    app = mk_app([factory, kmeans], config=my_config,)
     app()
 
     import streamlit as st
+
     st.write(mall)

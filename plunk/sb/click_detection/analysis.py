@@ -7,7 +7,7 @@ from adtk.visualization import plot
 from adtk.detector import LevelShiftAD
 from adtk.detector import VolatilityShiftAD
 
-DFLT_DETECTOR = VolatilityShiftAD(c=20.0, side="positive", window=20)
+DFLT_DETECTOR = VolatilityShiftAD(c=20.0, side='positive', window=20)
 
 
 def arr_to_df(arr):
@@ -36,4 +36,4 @@ def detection_plot(arr, model=DFLT_DETECTOR):
     df = arr_to_df(arr)
     anomalies = event_detector(arr, model)
 
-    plot(df, anomaly=anomalies, anomaly_color="red", figsize=(15, 6))
+    plot(df, anomaly=anomalies, anomaly_color='red', figsize=(15, 6))

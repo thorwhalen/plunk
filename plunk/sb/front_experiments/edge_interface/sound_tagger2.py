@@ -15,17 +15,17 @@ from streamlitfront.elements import (
 )
 import streamlit as st
 
-param_to_mall_maps = dict(train_audio="train_audio", tag="tag_store")
+param_to_mall_maps = dict(train_audio='train_audio', tag='tag_store')
 
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
+if 'mall' not in st.session_state:
+    st.session_state['mall'] = dict(
         # train_audio={},
         # tag={},
         # unused_store={"to": "illustrate"},
         tag_sound_output={}
     )
 
-mall = st.session_state["mall"]
+mall = st.session_state['mall']
 # mall = dict(
 #     # train_audio={},
 #     # tag={},
@@ -55,13 +55,13 @@ class TaggedAudioPlayer(OutputBase):
 
 
 # @code_to_dag
-@prepare_for_crude_dispatch(mall=mall, output_store="tag_sound_output")
+@prepare_for_crude_dispatch(mall=mall, output_store='tag_sound_output')
 def tag_sound(train_audio: WaveForm, tag: str):
     # mall["tag_store"] = tag
     return (train_audio, tag)
 
 
-@prepare_for_crude_dispatch(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
+@prepare_for_crude_dispatch(mall=mall, param_to_mall_map={'result': 'tag_sound_output'})
 def display_tag_sound(result):
     return result
 
@@ -72,20 +72,17 @@ from i2 import Sig
 print(Sig(display_tag_sound))
 
 config_ = {
-    APP_KEY: {"title": "Simple Real Audio ML"},
+    APP_KEY: {'title': 'Simple Real Audio ML'},
     # OBJ_KEY: {"trans": crudify},
     RENDERING_KEY: {
-        "tag_sound": {
+        'tag_sound': {
             # "description": {"content": "A very simple learn model example."},
-            "execution": {
-                "inputs": {
-                    "train_audio": {
+            'execution': {
+                'inputs': {
+                    'train_audio': {
                         ELEMENT_KEY: MultiSourceInput,
-                        "From a file": {
-                            ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                        },
-                        "From the microphone": {ELEMENT_KEY: AudioRecorder},
+                        'From a file': {ELEMENT_KEY: FileUploader, 'type': 'wav',},
+                        'From the microphone': {ELEMENT_KEY: AudioRecorder},
                     },
                     # "tag": {
                     #     ELEMENT_KEY: TextInput,
@@ -93,32 +90,22 @@ config_ = {
                 },
             }
         },
-        "display_tag_sound": {
-            "execution": {
-                "inputs": {
-                    "result": {
+        'display_tag_sound': {
+            'execution': {
+                'inputs': {
+                    'result': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["tag_sound_output"],
+                        'options': mall['tag_sound_output'],
                     },
                 },
-                "output": {
-                    ELEMENT_KEY: TaggedAudioPlayer,
-                },
+                'output': {ELEMENT_KEY: TaggedAudioPlayer,},
             },
         },
-        DAG: {
-            "graph": {
-                ELEMENT_KEY: Graph,
-                NAME_KEY: "Flow",
-            },
-        },
+        DAG: {'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',},},
         Callable: {
-            "execution": {
-                "inputs": {
-                    "save_name": {
-                        ELEMENT_KEY: TextInput,
-                        NAME_KEY: "Save output as",
-                    },
+            'execution': {
+                'inputs': {
+                    'save_name': {ELEMENT_KEY: TextInput, NAME_KEY: 'Save output as',},
                 }
             },
         },

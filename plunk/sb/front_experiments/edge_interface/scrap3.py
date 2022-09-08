@@ -5,7 +5,7 @@ from streamlitfront import mk_app
 from streamlitfront.elements import SelectBox
 from streamlitfront import binder as b
 
-DFLT_INPUT = "my text"
+DFLT_INPUT = 'my text'
 
 
 def do_something(wf_src):
@@ -18,9 +18,7 @@ def do_something(wf_src):
 #     )
 
 if not b.mall():
-    b.mall = dict(
-        wfsource={"wfsrc": DFLT_INPUT},
-    )
+    b.mall = dict(wfsource={'wfsrc': DFLT_INPUT},)
 
 mall = b.mall()
 
@@ -34,28 +32,22 @@ def example(wf_src):
 
 
 example = prepare_for_crude_dispatch(
-    example, mall=mall, param_to_mall_map={"wf_src": "wfsource"}
+    example, mall=mall, param_to_mall_map={'wf_src': 'wfsource'}
 )
 
 config_ = {
-    APP_KEY: {"title": "Crudified learner"},
+    APP_KEY: {'title': 'Crudified learner'},
     RENDERING_KEY: {
-        "example": {
-            "execution": {
-                "inputs": {
-                    "wf_src": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": mall["wfsource"],
-                    },
+        'example': {
+            'execution': {
+                'inputs': {
+                    'wf_src': {ELEMENT_KEY: SelectBox, 'options': mall['wfsource'],},
                 },
             }
         },
     },
 }
 
-app = mk_app(
-    [example],
-    config=config_,
-)
+app = mk_app([example], config=config_,)
 app()
 # st.write(locals())

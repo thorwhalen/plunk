@@ -17,13 +17,13 @@ app = dash.Dash(__name__)
 app.layout = html.Div(
     [
         # contain a graph with a periodic call back thanks to interval
-        dcc.Graph(id="live-graph", animate=True),
-        dcc.Interval(id="graph-update", interval=1000, n_intervals=0),
+        dcc.Graph(id='live-graph', animate=True),
+        dcc.Interval(id='graph-update', interval=1000, n_intervals=0),
     ]
 )
 
 # the callback updates the graph
-@app.callback(Output("live-graph", "figure"), [Input("graph-update", "n_intervals")])
+@app.callback(Output('live-graph', 'figure'), [Input('graph-update', 'n_intervals')])
 
 # the function to update the graph
 def update_graph(n):
@@ -39,8 +39,8 @@ def update_graph(n):
         # always plot the last 10 values of x and y
         x=list(X[-10:]),
         y=list(Y[-10:]),
-        name="Scatter",
-        mode="lines+markers",
+        name='Scatter',
+        mode='lines+markers',
     )
 
     # recompute the x range based on the last 10 points
@@ -51,13 +51,10 @@ def update_graph(n):
 
     # return the plot dictionary
     return {
-        "data": [data],
-        "layout": go.Layout(
-            xaxis=dict(range=x_range),
-            yaxis=dict(range=y_range),
-        ),
+        'data': [data],
+        'layout': go.Layout(xaxis=dict(range=x_range), yaxis=dict(range=y_range),),
     }
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run_server()

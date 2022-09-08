@@ -6,9 +6,9 @@ from plunk.sb.front_experiments.data_visualizer.utils.tools import (
 )
 
 d_input = {
-    "store_to_key_fvs": store_to_key_fvs,
-    "key_fvs_to_tag_fvs": key_fvs_to_tag_fvs,
-    "mk_Xy": mk_Xy,
+    'store_to_key_fvs': store_to_key_fvs,
+    'key_fvs_to_tag_fvs': key_fvs_to_tag_fvs,
+    'mk_Xy': mk_Xy,
 }
 
 

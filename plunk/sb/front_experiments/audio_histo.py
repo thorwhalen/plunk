@@ -20,7 +20,7 @@ from streamlit_webrtc import (
 
 
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    {'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]}
 )
 
 
@@ -47,7 +47,7 @@ def process_audio(frame: av.AudioFrame) -> av.AudioFrame:
 
 
 webrtc_streamer(
-    key="audio-filter",
+    key='audio-filter',
     mode=WebRtcMode.SENDRECV,
     rtc_configuration=RTC_CONFIGURATION,
     audio_frame_callback=process_audio,

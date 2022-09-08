@@ -29,9 +29,9 @@ import streamlit.components.v1 as components
 
 parent_dir = os.path.dirname(os.path.abspath(__file__))
 # Custom REACT-based component for recording client audio in browser
-build_dir = os.path.join(parent_dir, "st_audiorec/frontend/build")
+build_dir = os.path.join(parent_dir, 'st_audiorec/frontend/build')
 # specify directory and initialize st_audiorec object functionality
-st_audiorec = components.declare_component("st_audiorec", path=build_dir)
+st_audiorec = components.declare_component('st_audiorec', path=build_dir)
 # base64data_audio = st_audiorec()
 
 # # APPROACH: DECODE BASE64 DATA FROM return value
@@ -57,8 +57,8 @@ st_audiorec = components.declare_component("st_audiorec", path=build_dir)
 
 val = st_audiorec()
 # web component returns arraybuffer from WAV-blob
-st.write("Audio data received in the Python backend will appear below this message ...")
-st.write(val["arr"])
+st.write('Audio data received in the Python backend will appear below this message ...')
+st.write(val['arr'])
 # if not isinstance(val, dict):  # retrieve audio data
 
 # # wav_bytes contains audio data in format to be further processed

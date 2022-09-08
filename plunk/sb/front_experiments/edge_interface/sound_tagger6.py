@@ -20,17 +20,17 @@ from io import BytesIO
 from front.crude import Crudifier
 
 
-param_to_mall_maps = dict(train_audio="train_audio", tag="tag_store")
+param_to_mall_maps = dict(train_audio='train_audio', tag='tag_store')
 
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
+if 'mall' not in st.session_state:
+    st.session_state['mall'] = dict(
         # train_audio={},
         # tag={},
         # unused_store={"to": "illustrate"},
         tag_sound_output={}
     )
 
-mall = st.session_state["mall"]
+mall = st.session_state['mall']
 # mall = dict(
 #     # train_audio={},
 #     # tag={},
@@ -59,9 +59,9 @@ class TaggedAudioVisualizer(OutputBase):
         if not isinstance(sound, str):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         fig, ax = plt.subplots(figsize=(15, 5))
-        ax.plot(arr, label=f"Tag={tag}")
+        ax.plot(arr, label=f'Tag={tag}')
         ax.legend()
         st.pyplot(fig)
         # st.write(arr[:10])
@@ -72,7 +72,7 @@ class DfVisualizer(OutputBase):
     def render(self):
         # m = self.output
 
-        st.dataframe(mall["tag_sound_output"])
+        st.dataframe(mall['tag_sound_output'])
 
 
 # crudify = Crudifier(mall=mall, output_store="tag_sound_output")
@@ -84,51 +84,48 @@ class DfVisualizer(OutputBase):
 # check "verbose"
 
 
-@Crudifier(mall=mall, output_store="tag_sound_output")
+@Crudifier(mall=mall, output_store='tag_sound_output')
 def tag_sound(train_audio: WaveForm, tag: str):
     # mall["tag_store"] = tag
     return (train_audio, tag)
 
 
-@Crudifier(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
+@Crudifier(mall=mall, param_to_mall_map={'result': 'tag_sound_output'})
 def display_tag_sound(result):
     return result
 
 
-@Crudifier(mall=mall, param_to_mall_map={"result": "tag_sound_output"})
+@Crudifier(mall=mall, param_to_mall_map={'result': 'tag_sound_output'})
 def visualize_tag_sound(result):
     return result
 
 
 def mall_to_df(mall):
-    names = list(mall["tag_sound_output"].keys())
+    names = list(mall['tag_sound_output'].keys())
     # pd.DataFrame
 
 
 def explore_dataset(result):
-    return mall["tag_sound_output"]
+    return mall['tag_sound_output']
 
 
 def set_train_test_proportion(train_proportion):
-    mall["train_test_proportion"] = train_proportion
+    mall['train_test_proportion'] = train_proportion
     return train_proportion
 
 
 config_ = {
-    APP_KEY: {"title": "Simple Real Audio ML"},
+    APP_KEY: {'title': 'Simple Real Audio ML'},
     # OBJ_KEY: {"trans": crudify},
     RENDERING_KEY: {
-        "tag_sound": {
+        'tag_sound': {
             # "description": {"content": "A very simple learn model example."},
-            "execution": {
-                "inputs": {
-                    "train_audio": {
+            'execution': {
+                'inputs': {
+                    'train_audio': {
                         ELEMENT_KEY: MultiSourceInput,
-                        "From a file": {
-                            ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                        },
-                        "From the microphone": {ELEMENT_KEY: AudioRecorder},
+                        'From a file': {ELEMENT_KEY: FileUploader, 'type': 'wav',},
+                        'From the microphone': {ELEMENT_KEY: AudioRecorder},
                     },
                     # "tag": {
                     #     ELEMENT_KEY: TextInput,
@@ -136,67 +133,44 @@ config_ = {
                 },
             }
         },
-        "display_tag_sound": {
-            "execution": {
-                "inputs": {
-                    "result": {
+        'display_tag_sound': {
+            'execution': {
+                'inputs': {
+                    'result': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["tag_sound_output"],
+                        'options': mall['tag_sound_output'],
                     },
                 },
-                "output": {
-                    ELEMENT_KEY: TaggedAudioPlayer,
-                },
+                'output': {ELEMENT_KEY: TaggedAudioPlayer,},
             },
         },
-        "visualize_tag_sound": {
-            "execution": {
-                "inputs": {
-                    "result": {
+        'visualize_tag_sound': {
+            'execution': {
+                'inputs': {
+                    'result': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["tag_sound_output"],
+                        'options': mall['tag_sound_output'],
                     },
                 },
-                "output": {
-                    ELEMENT_KEY: TaggedAudioVisualizer,
-                },
+                'output': {ELEMENT_KEY: TaggedAudioVisualizer,},
             },
         },
-        "explore_dataset": {
-            "execution": {
-                "inputs": {
-                    "result": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": "list",
-                    },
-                },
-                "output": {
-                    ELEMENT_KEY: DfVisualizer,
-                },
+        'explore_dataset': {
+            'execution': {
+                'inputs': {'result': {ELEMENT_KEY: SelectBox, 'options': 'list',},},
+                'output': {ELEMENT_KEY: DfVisualizer,},
             },
         },
-        "set_train_test_proportion": {
-            "execution": {
-                "inputs": {
-                    "train_proportion": {
-                        ELEMENT_KEY: FloatSliderInput,
-                    },
-                }
+        'set_train_test_proportion': {
+            'execution': {
+                'inputs': {'train_proportion': {ELEMENT_KEY: FloatSliderInput,},}
             },
         },
-        DAG: {
-            "graph": {
-                ELEMENT_KEY: Graph,
-                NAME_KEY: "Flow",
-            },
-        },
+        DAG: {'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',},},
         Callable: {
-            "execution": {
-                "inputs": {
-                    "save_name": {
-                        ELEMENT_KEY: TextInput,
-                        NAME_KEY: "Save output as",
-                    },
+            'execution': {
+                'inputs': {
+                    'save_name': {ELEMENT_KEY: TextInput, NAME_KEY: 'Save output as',},
                 }
             },
         },

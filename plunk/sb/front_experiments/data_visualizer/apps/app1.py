@@ -29,8 +29,8 @@ import umap.plot
 from hear import WavLocalFileStore
 
 
-root_dir = "/Users/sylvain/Dropbox/_odata/sound/vacuum"
-annots_path = "../data/annots_vacuum.csv"
+root_dir = '/Users/sylvain/Dropbox/_odata/sound/vacuum'
+annots_path = '../data/annots_vacuum.csv'
 
 
 # ============ BACKEND ============
@@ -63,12 +63,12 @@ if not b.mall():
     b.mall = dict(Xy={})
 mall = b.mall()
 
-load_dataset = Crudifier(output_store="Xy", mall=mall)(load_dataset)
+load_dataset = Crudifier(output_store='Xy', mall=mall)(load_dataset)
 
 
 # plot_umap = Crudifier(param_to_mall_map=dict(Xy="Xy"), mall=mall)(plot_umap)
 
-plot_umap = Crudifier(param_to_mall_map=["Xy"], mall=mall)(plot_umap)
+plot_umap = Crudifier(param_to_mall_map=['Xy'], mall=mall)(plot_umap)
 
 
 @dataclass
@@ -78,15 +78,15 @@ class UmapPlotter(OutputBase):
         X, y = self.output
         mapper = umap.UMAP().fit(X)
         fig, ax = plt.subplots()
-        show_legend = st.checkbox(label="Show legend")
+        show_legend = st.checkbox(label='Show legend')
         umap.plot.points(mapper, labels=np.array(y), show_legend=show_legend, ax=ax)
         st.pyplot(fig)
 
 
 config_ = {
-    APP_KEY: {"title": "Data Visualizer"},
+    APP_KEY: {'title': 'Data Visualizer'},
     RENDERING_KEY: {
-        "load_dataset": {
+        'load_dataset': {
             # NAME_KEY: "Get Data",
             # "description": {"content": get_data_description},
             # "execution": {
@@ -97,14 +97,12 @@ config_ = {
             #     }
             # },
         },
-        "plot_umap": {
+        'plot_umap': {
             # NAME_KEY: "Get Data",
             # "description": {"content": get_data_description},
-            "execution": {
-                "inputs": {
-                    "Xy": {ELEMENT_KEY: SelectBox, "options": mall["Xy"]},
-                },
-                "output": {ELEMENT_KEY: UmapPlotter},
+            'execution': {
+                'inputs': {'Xy': {ELEMENT_KEY: SelectBox, 'options': mall['Xy']},},
+                'output': {ELEMENT_KEY: UmapPlotter},
                 # "auto_submit": True,
             },
         },
@@ -112,7 +110,7 @@ config_ = {
 }
 # ============ END FRONTEND ============
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app([load_dataset, plot_umap], config=config_)
     app()
 st.write(mall)
