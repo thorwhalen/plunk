@@ -20,8 +20,8 @@ class names:
     def bool(x: Any, /) -> bool:
         ...
 
-    def breakpoint(*args, **kwargs):
-        ...
+    # def breakpoint(*args, **kwargs):
+    #    ...
 
     def bytearray(iterable_of_ints: Iterable[int]):  # no sig possible without wrapping
         ...
@@ -112,16 +112,16 @@ def test_bool():
     assert function_is_compatible_with_signature(bool, sig)
 
 
-def test_breakpoint():
-    name = "breakpoint"
-    names_dict = names
+# def test_breakpoint():
+#     name = "breakpoint"
+#     names_dict = names
 
-    sig = Sig(names_dict[name])
-    f = sig_to_func(sig)
+#     sig = Sig(names_dict[name])
+#     f = sig_to_func(sig)
 
-    assert not call_raises_signature_error(f, "12")
-    assert not call_raises_signature_error(f, 5)
-    assert function_is_compatible_with_signature(breakpoint, sig)
+#     assert not call_raises_signature_error(f, "12")
+#     assert not call_raises_signature_error(f, 5)
+#     assert function_is_compatible_with_signature(breakpoint, sig)
 
 
 def test_bytearray():
