@@ -1,12 +1,11 @@
+"""
+Simple example of streaming live accelerometer data from android phone
+Android app: see https://github.com/umer0586/SensorServer
+"""
+
+
 import websocket
 import json
-from streamz import Stream
-
-
-source = Stream()
-
-
-source.sink(print)
 
 
 def on_message(ws, message):
@@ -15,7 +14,7 @@ def on_message(ws, message):
     y = values[1]
     z = values[2]
 
-    source.emit(x)
+    # source.emit(x)
     print(x)
 
 
