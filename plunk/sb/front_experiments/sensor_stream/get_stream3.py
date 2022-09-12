@@ -10,7 +10,7 @@ source.sink(print)
 async def accelerometer(uri):
     async with connect(uri) as websocket:
         while True:
-            data = await websocket.recv()
+            data = await websocket.recv()  # push to the deque as the other example
             source.emit(data)
 
 
