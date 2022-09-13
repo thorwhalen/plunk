@@ -46,7 +46,7 @@ class AccelSource:
 
     def __init__(self, url, deque_size=DFLT_DEQUE_SIZE):
         self.url = url
-        self.data = deque(maxlen=DFLT_DEQUE_SIZE)
+        self.data = deque(maxlen=deque_size)
 
     def key(self, data) -> Any:
         ...
