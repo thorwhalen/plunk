@@ -10,16 +10,16 @@ import plotly.graph_objects as go
 
 source = Stream()
 
-df = pd.DataFrame({"x": []})
+df = pd.DataFrame({'x': []})
 sdf = DataFrame(source, example=df)
 
 
 def on_message(ws, message):
-    values = json.loads(message)["values"]
+    values = json.loads(message)['values']
     x = values[0]
     y = values[1]
     z = values[2]
-    source.emit(pd.DataFrame({"x": [float(x)]}, index=[pd.Timestamp.now()]))
+    source.emit(pd.DataFrame({'x': [float(x)]}, index=[pd.Timestamp.now()]))
     # source.emit(pd.DataFrame({"x": [x]},index=[datetime.datetime.now()]))
 
 
@@ -36,23 +36,23 @@ def on_message(ws, message):
 
 
 def on_error(ws, error):
-    print("error occurred")
+    print('error occurred')
     print(error)
 
 
 def on_close(ws, close_code, reason):
-    print("connection close")
-    print("close code : ", close_code)
-    print("reason : ", reason)
+    print('connection close')
+    print('close code : ', close_code)
+    print('reason : ', reason)
 
 
 def on_open(ws):
-    print("connection open")
+    print('connection open')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ws = websocket.WebSocketApp(
-        "ws://192.168.1.3:8080/sensor/connect?type=android.sensor.accelerometer",
+        'ws://192.168.1.3:8080/sensor/connect?type=android.sensor.accelerometer',
         on_open=on_open,
         on_message=on_message,
         on_error=on_error,

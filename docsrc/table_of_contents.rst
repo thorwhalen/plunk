@@ -9,6 +9,7 @@
    module_docs/plunk/sb/sig_compatibility/sig_builtins
    module_docs/plunk/sb/sig_compatibility/sig_code_to_dag
    module_docs/plunk/sb/sig_compatibility/sig_comp
+   module_docs/plunk/sb/slabsiter_experiments/dict_generators
    module_docs/plunk/sb/type_compatibility/compatible
    module_docs/plunk/tw/echoed_clicks
    module_docs/plunk/tw/empty_sentinel_options
