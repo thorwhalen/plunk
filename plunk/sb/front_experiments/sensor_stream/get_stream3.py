@@ -11,10 +11,10 @@ def on_message(self):
         ws, message
     ):  # add incoming data to a standard deque: standard attribute to the SourceReader, so the read would read from the deque and pop data
         result = json.loads(message)
-        values = result["values"]
-        bt = result["timestamp"]
+        values = result['values']
+        bt = result['timestamp']
         x = values[0]
-        d = {"bt": bt, "acc_x": x}
+        d = {'bt': bt, 'acc_x': x}
         self.data.append(d)
         # source.emit(x)
         # print(d)
@@ -23,21 +23,21 @@ def on_message(self):
 
 
 def on_error(ws, error):
-    print("error occurred")
+    print('error occurred')
     print(error)
 
 
 def on_close(ws, close_code, reason):
-    print("connection close")
-    print("close code : ", close_code)
-    print("reason : ", reason)
+    print('connection close')
+    print('close code : ', close_code)
+    print('reason : ', reason)
 
 
 def on_open(ws):
-    print("connection open")
+    print('connection open')
 
 
-DFLT_URL = "ws://192.168.1.3:8080/sensor/connect?type=android.sensor.accelerometer"
+DFLT_URL = 'ws://192.168.1.3:8080/sensor/connect?type=android.sensor.accelerometer'
 DFLT_DEQUE_SIZE = 5
 
 
@@ -61,7 +61,7 @@ class AccelSource:
 
     def read(self) -> Any:
         data = self.data.popleft()
-        print(f"data retrieved = {data}")
+        print(f'data retrieved = {data}')
         return data
 
     def open(self) -> None:
@@ -78,7 +78,7 @@ class AccelSource:
         self.ws.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     stream = AccelSource(url=DFLT_URL)
     stream.open()
     stream.read()
