@@ -9,6 +9,7 @@ from slink.sequences import (
 from know.base import SlabsIter
 from meshed import DAG
 from i2 import Sig
+import itertools
 
 
 class SimpleRepeater:
