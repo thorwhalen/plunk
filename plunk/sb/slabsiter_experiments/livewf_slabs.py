@@ -4,7 +4,7 @@ from taped import LiveWf, chunk_indices
 from know.audio_to_store import get_resource
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # print(f"starting")
     # live_source = LiveWf
 
@@ -33,12 +33,12 @@ if __name__ == "__main__":
         store=mk_session_block_wf_store(
             rootdir=None,  # will choose one for you
             # template examples: '{session}_{block}.wav' '{session}/d/{block}.pcm', '{session}/{block}', 'demo/s_{session}/blocks/{block}.wav'
-            template="{session}/d/{block}.pcm",  #
-            pattern=r"\d+",
+            template='{session}/d/{block}.pcm',  #
+            pattern=r'\d+',
             value_trans=int,
         ),
         chk_size=100_000,
         end_idx=300_000,
         logger=print,
     )
-    print(f"{len(wfs)=}")
+    print(f'{len(wfs)=}')
