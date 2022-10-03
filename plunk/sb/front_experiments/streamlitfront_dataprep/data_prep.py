@@ -26,9 +26,25 @@ from streamlitfront.elements import (
 )
 import streamlit as st
 
+import os
+import soundfile as sf
+import pandas as pd
+import zipfile
+from io import BytesIO
+from pathlib import Path
+
+from dol.appendable import add_append_functionality_to_store_cls
+from dol import Store
+from dol import FilesOfZip, wrap_kvs, filt_iter
+
+from py2store import FilesOfZip
+from hear import WavLocalFileStore
+from dol import FuncReader
+
 
 # ============ BACKEND ============
 WaveForm = Any
+DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
 
 
 from hear import WavLocalFileStore
@@ -104,10 +120,11 @@ def mk_store_item(key, tag, data):
 # tagged_wf_store = appendable(Files, item2kv=tagged_timestamped_kv)
 if not b.mall():
     b.mall = dict(
-        wf_factory_store={"wf_factory": wf_store_factory},
+        wfstore_factory={"wf_factory": wf_store_factory},
+        wf_store_path={"wf_path": DFLT_WF_PATH},
+        # wf_store_factory=dict(one=1, two=2),
         annot_store={"annot_factory": annot_store_factory},
         wf_store=dict(),
-        annot_store=dict(),
         dummy_store=dict(),
     )
 mall = b.mall()
@@ -118,10 +135,20 @@ def auto_namer(*, arguments):
     return "_".join(map(str, arguments.values()))
 
 
-@crudifier(output_store="wf_store", auto_namer=auto_namer)
-def mk_wf_store(wf_store: Any, tag: str):
-    return (wf_store, tag)
+# @crudifier(output_store="wf_store", auto_namer=auto_namer)
+@crudifier(
+    param_to_mall_map=dict(wfstore_factory="wfstore_factory", path="wf_store_path")
+)
+def mk_wf_store(wfstore_factory: Any, path: str):
+    return wfstore_factory(path)
 
+
+# foo = prepare_for_crude_dispatch(
+#     mk_wf_store,
+#     mall=mall,
+#     param_to_mall_map=dict(wf_store="wf_factory_store"),
+#     # output_store = f'{foo.__name__}_output'
+# )
 
 # @crudifier(
 #     param_to_mall_map=dict(x="tagged_wf")
@@ -156,11 +183,18 @@ config_ = {
             "description": {"content": get_wfstore_description},
             "execution": {
                 "inputs": {
-                    "wf_factory": {
+                    "wf_store": {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["wf_factory_store"],
-                        "display_label": False,
-                    }
+                        "options": mall["wf_store_factory"],
+                        # "options": dict(a="a_choice"),
+                        # "display_label": False,
+                    },
+                    "path": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": mall["wf_store_path"],
+                        # "options": dict(a="a_choice"),
+                        # "display_label": False,
+                    },
                 },
                 "output": {
                     ELEMENT_KEY: SuccessNotification,
