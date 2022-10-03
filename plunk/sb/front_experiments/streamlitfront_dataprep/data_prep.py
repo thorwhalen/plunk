@@ -44,7 +44,7 @@ from dol import FuncReader
 
 # ============ BACKEND ============
 WaveForm = Any
-DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
+DFLT_WF_PATH = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
 DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 
 
@@ -121,11 +121,11 @@ def mk_store_item(key, tag, data):
 # tagged_wf_store = appendable(Files, item2kv=tagged_timestamped_kv)
 if not b.mall():
     b.mall = dict(
-        wf_store_factory={"wf_factory": wf_store_factory},
-        wf_store_path={"wf_path": DFLT_WF_PATH},
-        annot_store_path={"annot_path": DFLT_ANNOT_PATH},
+        wf_store_factory={'wf_factory': wf_store_factory},
+        wf_store_path={'wf_path': DFLT_WF_PATH},
+        annot_store_path={'annot_path': DFLT_ANNOT_PATH},
         # wf_store_factory=dict(one=1, two=2),
-        annot_store_factory={"annot_factory": annot_store_factory},
+        annot_store_factory={'annot_factory': annot_store_factory},
         data_store=dict(),
         dummy_store=dict(),
     )
@@ -138,13 +138,19 @@ def auto_namer(*, arguments):
 
 
 # @crudifier(output_store="wf_store", auto_namer=auto_namer)
-@crudifier(param_to_mall_map=dict(factory="wf_store_factory", path="wf_store_path"), output_store = 'data_store')
+@crudifier(
+    param_to_mall_map=dict(factory='wf_store_factory', path='wf_store_path'),
+    output_store='data_store',
+)
 def mk_wf_store(factory: Any, path: str):
     result = factory(path)
     st.write(result)
     return factory(path)
 
-@crudifier(param_to_mall_map=dict(factory="annot_store_factory", path="annot_store_path"))
+
+@crudifier(
+    param_to_mall_map=dict(factory='annot_store_factory', path='annot_store_path')
+)
 def mk_annot_store(factory: Any, path: str):
     result = factory(path)
     st.write(result)
@@ -186,12 +192,12 @@ Make a store containing wav files.
 config_ = {
     APP_KEY: {'title': 'Data Prep App'},
     RENDERING_KEY: {
-        "mk_wf_store": {
-            NAME_KEY: "Make Wf Store",
-            "description": {"content": get_wfstore_description},
-            "execution": {
-                "inputs": {
-                    "factory": {
+        'mk_wf_store': {
+            NAME_KEY: 'Make Wf Store',
+            'description': {'content': get_wfstore_description},
+            'execution': {
+                'inputs': {
+                    'factory': {
                         ELEMENT_KEY: SelectBox,
                         'options': mall['wf_store_factory'],
                         # "options": dict(a="a_choice"),
@@ -210,36 +216,31 @@ config_ = {
                 },
             },
         },
-        "mk_annot_store": {
-            NAME_KEY: "Make annot Store",
-            #"description": {"content": get_wfstore_description},
-            "execution": {
-                "inputs": {
-                    "factory": {
+        'mk_annot_store': {
+            NAME_KEY: 'Make annot Store',
+            # "description": {"content": get_wfstore_description},
+            'execution': {
+                'inputs': {
+                    'factory': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["annot_store_factory"],
+                        'options': mall['annot_store_factory'],
                         # "options": dict(a="a_choice"),
                         # "display_label": False,
                     },
-                    "path": {
+                    'path': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["annot_store_path"],
+                        'options': mall['annot_store_path'],
                         # "options": dict(a="a_choice"),
                         # "display_label": False,
                     },
                 },
-                "output": {
+                'output': {
                     ELEMENT_KEY: SuccessNotification,
-                    "message": "The wave store has been made successfully.",
+                    'message': 'The wave store has been made successfully.',
                 },
             },
         },
-        DAG: {
-            "graph": {
-                ELEMENT_KEY: Graph,
-                NAME_KEY: "Flow",
-            }
-        },
+        DAG: {'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',}},
         Callable: {
             'execution': {
                 'inputs': {
@@ -251,7 +252,6 @@ config_ = {
 }
 # ============ END FRONTEND ============
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app([mk_wf_store, mk_annot_store], config=config_)
     app()
-    
