@@ -45,6 +45,7 @@ from dol import FuncReader
 # ============ BACKEND ============
 WaveForm = Any
 DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
+DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 
 
 from hear import WavLocalFileStore
@@ -122,9 +123,10 @@ if not b.mall():
     b.mall = dict(
         wf_store_factory={"wf_factory": wf_store_factory},
         wf_store_path={"wf_path": DFLT_WF_PATH},
+        annot_store_path={"annot_path": DFLT_ANNOT_PATH},
         # wf_store_factory=dict(one=1, two=2),
-        annot_store={"annot_factory": annot_store_factory},
-        wf_store=dict(),
+        annot_store_factory={"annot_factory": annot_store_factory},
+        data_store=dict(),
         dummy_store=dict(),
     )
 mall = b.mall()
@@ -136,11 +138,17 @@ def auto_namer(*, arguments):
 
 
 # @crudifier(output_store="wf_store", auto_namer=auto_namer)
-@crudifier(
-    param_to_mall_map=dict(wfstore_factory="wf_store_factory", path="wf_store_path")
-)
-def mk_wf_store(wfstore_factory: Any, path: str):
-    return wfstore_factory(path)
+@crudifier(param_to_mall_map=dict(factory="wf_store_factory", path="wf_store_path"), output_store = 'data_store')
+def mk_wf_store(factory: Any, path: str):
+    result = factory(path)
+    st.write(result)
+    return factory(path)
+
+@crudifier(param_to_mall_map=dict(factory="annot_store_factory", path="annot_store_path"))
+def mk_annot_store(factory: Any, path: str):
+    result = factory(path)
+    st.write(result)
+    return factory(path)
 
 
 # foo = prepare_for_crude_dispatch(
@@ -183,7 +191,7 @@ config_ = {
             "description": {"content": get_wfstore_description},
             "execution": {
                 "inputs": {
-                    "wf_store": {
+                    "factory": {
                         ELEMENT_KEY: SelectBox,
                         "options": mall["wf_store_factory"],
                         # "options": dict(a="a_choice"),
@@ -192,6 +200,30 @@ config_ = {
                     "path": {
                         ELEMENT_KEY: SelectBox,
                         "options": mall["wf_store_path"],
+                        # "options": dict(a="a_choice"),
+                        # "display_label": False,
+                    },
+                },
+                "output": {
+                    ELEMENT_KEY: SuccessNotification,
+                    "message": "The wave store has been made successfully.",
+                },
+            },
+        },
+        "mk_annot_store": {
+            NAME_KEY: "Make annot Store",
+            #"description": {"content": get_wfstore_description},
+            "execution": {
+                "inputs": {
+                    "factory": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": mall["annot_store_factory"],
+                        # "options": dict(a="a_choice"),
+                        # "display_label": False,
+                    },
+                    "path": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": mall["annot_store_path"],
                         # "options": dict(a="a_choice"),
                         # "display_label": False,
                     },
@@ -223,5 +255,6 @@ config_ = {
 # ============ END FRONTEND ============
 
 if __name__ == "__main__":
-    app = mk_app([mk_wf_store], config=config_)
+    app = mk_app([mk_wf_store, mk_annot_store], config=config_)
     app()
+    
