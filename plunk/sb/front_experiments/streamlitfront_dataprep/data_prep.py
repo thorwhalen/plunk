@@ -53,11 +53,11 @@ from dol import FuncReader
 
 
 def my_obj_of_data(b):
-    return sf.read(BytesIO(b), dtype="float32")[0]
+    return sf.read(BytesIO(b), dtype='float32')[0]
 
 
 @wrap_kvs(obj_of_data=my_obj_of_data)
-@filt_iter(filt=lambda x: not x.startswith("__MACOSX") and x.endswith(".wav"))
+@filt_iter(filt=lambda x: not x.startswith('__MACOSX') and x.endswith('.wav'))
 class WfZipStore(FilesOfZip):
     """Waveform access. Keys are .wav filenames and values are numpy arrays of int16 waveform."""
 
@@ -66,17 +66,17 @@ class WfZipStore(FilesOfZip):
 
 def key_to_ext(k):
     _, ext = os.path.splitext(k)
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
     return ext
 
 
 def processor_from_ext(ext):
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
-    if ext in {"zip"}:
+    if ext in {'zip'}:
         pass
-    elif ext in {"wav"}:
+    elif ext in {'wav'}:
         pass
 
 
@@ -89,12 +89,12 @@ def is_dir(filepath):
 
 
 def key_maker(name, prefix):
-    return f"{prefix}_{name}"
+    return f'{prefix}_{name}'
 
 
 def wf_store_factory(filepath):
-    key = key_maker(name=filepath, prefix="wf_store")
-    tag = "wf_store"
+    key = key_maker(name=filepath, prefix='wf_store')
+    tag = 'wf_store'
 
     if is_dir(filepath):
         data = WavLocalFileStore(filepath)
@@ -106,8 +106,8 @@ def wf_store_factory(filepath):
 
 
 def annot_store_factory(filepath):
-    key = key_maker(name=filepath, prefix="annot_store")
-    tag = "annot_store"
+    key = key_maker(name=filepath, prefix='annot_store')
+    tag = 'annot_store'
 
     data = pd.read_csv(filepath)
 
@@ -134,7 +134,7 @@ crudifier = partial(Crudifier, mall=mall)
 
 
 def auto_namer(*, arguments):
-    return "_".join(map(str, arguments.values()))
+    return '_'.join(map(str, arguments.values()))
 
 
 # @crudifier(output_store="wf_store", auto_namer=auto_namer)
@@ -173,18 +173,18 @@ def mk_annot_store(factory: Any, path: str):
 
 @dataclass
 class SuccessNotification(OutputBase):
-    message: str = "Success!"
+    message: str = 'Success!'
 
     def render(self):
         return st.success(self.message)
 
 
-get_wfstore_description = """
+get_wfstore_description = '''
 Make a store containing wav files.
-"""
+'''
 
 config_ = {
-    APP_KEY: {"title": "Data Prep App"},
+    APP_KEY: {'title': 'Data Prep App'},
     RENDERING_KEY: {
         "mk_wf_store": {
             NAME_KEY: "Make Wf Store",
@@ -193,20 +193,20 @@ config_ = {
                 "inputs": {
                     "factory": {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["wf_store_factory"],
+                        'options': mall['wf_store_factory'],
                         # "options": dict(a="a_choice"),
                         # "display_label": False,
                     },
-                    "path": {
+                    'path': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["wf_store_path"],
+                        'options': mall['wf_store_path'],
                         # "options": dict(a="a_choice"),
                         # "display_label": False,
                     },
                 },
-                "output": {
+                'output': {
                     ELEMENT_KEY: SuccessNotification,
-                    "message": "The wave store has been made successfully.",
+                    'message': 'The wave store has been made successfully.',
                 },
             },
         },
@@ -241,12 +241,9 @@ config_ = {
             }
         },
         Callable: {
-            "execution": {
-                "inputs": {
-                    "save_name": {
-                        ELEMENT_KEY: TextInput,
-                        NAME_KEY: "Save output as",
-                    }
+            'execution': {
+                'inputs': {
+                    'save_name': {ELEMENT_KEY: TextInput, NAME_KEY: 'Save output as',}
                 }
             }
         },
