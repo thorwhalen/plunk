@@ -137,7 +137,6 @@ def auto_namer(*, arguments):
     return '_'.join(map(str, arguments.values()))
 
 
-# @crudifier(output_store="wf_store", auto_namer=auto_namer)
 @crudifier(param_to_mall_map=dict(factory="wf_store_factory", path="wf_store_path"), output_store = 'data_store')
 def mk_wf_store(factory: Any, path: str):
     result = factory(path)
@@ -151,18 +150,7 @@ def mk_annot_store(factory: Any, path: str):
     return factory(path)
 
 
-# foo = prepare_for_crude_dispatch(
-#     mk_wf_store,
-#     mall=mall,
-#     param_to_mall_map=dict(wf_store="wf_factory_store"),
-#     # output_store = f'{foo.__name__}_output'
-# )
 
-# @crudifier(
-#     param_to_mall_map=dict(x="tagged_wf")
-# )
-# def get_tagged_wf(x: Any):
-#     return x
 
 
 # ============ END BACKEND ============
