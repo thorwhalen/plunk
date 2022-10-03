@@ -120,7 +120,7 @@ def mk_store_item(key, tag, data):
 # tagged_wf_store = appendable(Files, item2kv=tagged_timestamped_kv)
 if not b.mall():
     b.mall = dict(
-        wfstore_factory={"wf_factory": wf_store_factory},
+        wf_store_factory={"wf_factory": wf_store_factory},
         wf_store_path={"wf_path": DFLT_WF_PATH},
         # wf_store_factory=dict(one=1, two=2),
         annot_store={"annot_factory": annot_store_factory},
@@ -137,7 +137,7 @@ def auto_namer(*, arguments):
 
 # @crudifier(output_store="wf_store", auto_namer=auto_namer)
 @crudifier(
-    param_to_mall_map=dict(wfstore_factory="wfstore_factory", path="wf_store_path")
+    param_to_mall_map=dict(wfstore_factory="wf_store_factory", path="wf_store_path")
 )
 def mk_wf_store(wfstore_factory: Any, path: str):
     return wfstore_factory(path)
