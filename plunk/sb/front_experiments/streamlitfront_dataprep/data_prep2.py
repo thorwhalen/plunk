@@ -44,8 +44,8 @@ from dol import FuncReader
 
 # ============ BACKEND ============
 WaveForm = Any
-DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
-DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
+DFLT_WF_PATH = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
+DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 
 
 from hear import WavLocalFileStore
@@ -53,11 +53,11 @@ from dol import FuncReader
 
 
 def my_obj_of_data(b):
-    return sf.read(BytesIO(b), dtype="float32")[0]
+    return sf.read(BytesIO(b), dtype='float32')[0]
 
 
 @wrap_kvs(obj_of_data=my_obj_of_data)
-@filt_iter(filt=lambda x: not x.startswith("__MACOSX") and x.endswith(".wav"))
+@filt_iter(filt=lambda x: not x.startswith('__MACOSX') and x.endswith('.wav'))
 class WfZipStore(FilesOfZip):
     """Waveform access. Keys are .wav filenames and values are numpy arrays of int16 waveform."""
 
@@ -66,17 +66,17 @@ class WfZipStore(FilesOfZip):
 
 def key_to_ext(k):
     _, ext = os.path.splitext(k)
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
     return ext
 
 
 def processor_from_ext(ext):
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
-    if ext in {"zip"}:
+    if ext in {'zip'}:
         pass
-    elif ext in {"wav"}:
+    elif ext in {'wav'}:
         pass
 
 
@@ -89,12 +89,12 @@ def is_dir(filepath):
 
 
 def key_maker(name, prefix):
-    return f"{prefix}_{name}"
+    return f'{prefix}_{name}'
 
 
 def wf_store_factory(filepath):
-    key = key_maker(name=filepath, prefix="wf_store")
-    tag = "wf_store"
+    key = key_maker(name=filepath, prefix='wf_store')
+    tag = 'wf_store'
 
     if is_dir(filepath):
         data = WavLocalFileStore(filepath)
@@ -106,8 +106,8 @@ def wf_store_factory(filepath):
 
 
 def annot_store_factory(filepath):
-    key = key_maker(name=filepath, prefix="annot_store")
-    tag = "annot_store"
+    key = key_maker(name=filepath, prefix='annot_store')
+    tag = 'annot_store'
 
     data = pd.read_csv(filepath)
 
@@ -118,5 +118,5 @@ def mk_store_item(key, tag, data):
     return dict(key=key, tag=tag, data=data)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
