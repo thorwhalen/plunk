@@ -32,16 +32,16 @@ from dol import FilesOfZip, wrap_kvs, filt_iter
 from hear import WavLocalFileStore
 
 
-DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
-DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
+DFLT_WF_PATH = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
+DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 
 
 def my_obj_of_data(b):
-    return sf.read(BytesIO(b), dtype="float32")[0]
+    return sf.read(BytesIO(b), dtype='float32')[0]
 
 
 @wrap_kvs(obj_of_data=my_obj_of_data)
-@filt_iter(filt=lambda x: not x.startswith("__MACOSX") and x.endswith(".wav"))
+@filt_iter(filt=lambda x: not x.startswith('__MACOSX') and x.endswith('.wav'))
 class WfZipStore(FilesOfZip):
     """Waveform access. Keys are .wav filenames and values are numpy arrays of int16 waveform."""
 
@@ -50,17 +50,17 @@ class WfZipStore(FilesOfZip):
 
 def key_to_ext(k):
     _, ext = os.path.splitext(k)
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
     return ext
 
 
 def processor_from_ext(ext):
-    if ext.startswith("."):
+    if ext.startswith('.'):
         ext = ext[1:]
-    if ext in {"zip"}:
+    if ext in {'zip'}:
         pass
-    elif ext in {"wav"}:
+    elif ext in {'wav'}:
         pass
 
 
@@ -73,15 +73,15 @@ def is_dir(filepath):
 
 
 def key_maker(name, prefix):
-    return f"{prefix}_{name}"
+    return f'{prefix}_{name}'
 
 
 def wf_store_factory(filepath):
-    return store_factory(filepath, data_reader=data_from_wav_folder, prefix="wf_store")
+    return store_factory(filepath, data_reader=data_from_wav_folder, prefix='wf_store')
 
 
 def annot_store_factory(filepath):
-    return store_factory(filepath, data_reader=data_from_csv, prefix="annot_store")
+    return store_factory(filepath, data_reader=data_from_csv, prefix='annot_store')
 
 
 def data_from_wav_folder(filepath):
@@ -92,7 +92,7 @@ def data_from_wav_folder(filepath):
         data = WfZipStore(filepath)
 
     else:
-        raise ("Data not supported")
+        raise ('Data not supported')
     return data
 
 
@@ -101,11 +101,11 @@ def data_from_csv(filepath):
 
 
 def annot_store_factory(filepath):
-    key = key_maker(name=filepath, prefix="annot_store")
-    tag = "annot_store"
+    key = key_maker(name=filepath, prefix='annot_store')
+    tag = 'annot_store'
 
 
-def store_factory(filepath, data_reader=data_from_csv, prefix="annot_store"):
+def store_factory(filepath, data_reader=data_from_csv, prefix='annot_store'):
     key = key_maker(name=filepath, prefix=prefix)
     tag = prefix
 
@@ -133,7 +133,7 @@ def key_fvs_to_tag_fvs(key_fvs, annots_df):
 
 
 def key_to_tag_from_annots(key, annots_df):
-    tag = annots_df["tag"][annots_df["key"] == key].values[0]
+    tag = annots_df['tag'][annots_df['key'] == key].values[0]
     return tag
 
 
@@ -142,5 +142,5 @@ def mk_Xy(tag_fv_iterator):
     return np.array(X), y
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
