@@ -1,9 +1,16 @@
 import numpy as np
 from creek.tools import apply_func_to_index, fanout_and_flatten
-import umap
-import umap.plot
 from functools import partial
 from hear import WavLocalFileStore
+from odat.mdat.vacuum import (
+    DFLT_ANNOTS_COLS,
+    DFLT_CHUNKER,
+    DFLT_FEATURIZER,
+)
+import re
+import umap
+import umap.plot
+import pandas as pd
 
 
 chunker = DFLT_CHUNKER
