@@ -100,6 +100,11 @@ def data_from_csv(filepath):
     return pd.read_csv(filepath)
 
 
+def annot_store_factory(filepath):
+    key = key_maker(name=filepath, prefix="annot_store")
+    tag = "annot_store"
+
+
 def store_factory(filepath, data_reader=data_from_csv, prefix="annot_store"):
     key = key_maker(name=filepath, prefix=prefix)
     tag = prefix
