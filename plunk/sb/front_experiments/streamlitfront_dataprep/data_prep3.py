@@ -34,43 +34,43 @@ def dag_maker(funcnames_list):
 
 
 metadata = {
-    "FixedSizeChunker": {"func": FixedSizeChunker, "out": "chks"},
-    "FixedSizeChunker100": {"out": "chks"},
-    "ThresholdChunker": {"out": "chks"},
-    "FixedSizeChunkerMaker": {"func": DFLT_CHUNKER_MAKER, "out": "chunker"},
-    "FeaturizerMaker": {"func": DFLT_FEATURIZER_MAKER, "out": "featurizer"},
-    "key_fvs_to_tag_fvs": {"func": key_fvs_to_tag_fvs},
-    "Featurizer": {"func": DFLT_FEATURIZER, "out": "fvs"},
-    "store_to_key_fvs": {"func": store_to_key_fvs, "out": "key_fvs"},
-    "key_fvs_to_tag_fvs": {"func": key_fvs_to_tag_fvs, "out": "tag_fv_iterator"},
-    "WfStoreMaker": {
-        "func": data_from_wav_folder,
-        "out": "wf_store",
-        "bind": {"filepath": "wf_filepath"},
+    'FixedSizeChunker': {'func': FixedSizeChunker, 'out': 'chks'},
+    'FixedSizeChunker100': {'out': 'chks'},
+    'ThresholdChunker': {'out': 'chks'},
+    'FixedSizeChunkerMaker': {'func': DFLT_CHUNKER_MAKER, 'out': 'chunker'},
+    'FeaturizerMaker': {'func': DFLT_FEATURIZER_MAKER, 'out': 'featurizer'},
+    'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs},
+    'Featurizer': {'func': DFLT_FEATURIZER, 'out': 'fvs'},
+    'store_to_key_fvs': {'func': store_to_key_fvs, 'out': 'key_fvs'},
+    'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs, 'out': 'tag_fv_iterator'},
+    'WfStoreMaker': {
+        'func': data_from_wav_folder,
+        'out': 'wf_store',
+        'bind': {'filepath': 'wf_filepath'},
     },
-    "AnnotsStoreMaker": {"func": data_from_csv, "out": "annots_df"},
-    "mk_Xy": {"func": mk_Xy},
+    'AnnotsStoreMaker': {'func': data_from_csv, 'out': 'annots_df'},
+    'mk_Xy': {'func': mk_Xy},
 }
 
 # Make a dag from only typing info
 # my_chunker: Chunker    -->
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # example
     # pyckup
-    wf_filepath = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
-    annots_filepath = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
+    wf_filepath = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
+    annots_filepath = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 
     funcnames_list = [
-        "FixedSizeChunkerMaker",
-        "FeaturizerMaker",
-        "WfStoreMaker",
-        "AnnotsStoreMaker",
-        "key_fvs_to_tag_fvs",
-        "store_to_key_fvs",
-        "key_fvs_to_tag_fvs",
-        "mk_Xy",
+        'FixedSizeChunkerMaker',
+        'FeaturizerMaker',
+        'WfStoreMaker',
+        'AnnotsStoreMaker',
+        'key_fvs_to_tag_fvs',
+        'store_to_key_fvs',
+        'key_fvs_to_tag_fvs',
+        'mk_Xy',
     ]
     # do a multiselect to do the selection
     # validation, errors to be checked
@@ -78,15 +78,8 @@ if __name__ == "__main__":
     print(dag.synopsis_string())
 
     config_ = {
-        APP_KEY: {"title": "Simple Load and Display"},
-        RENDERING_KEY: {
-            DAG: {
-                "graph": {
-                    ELEMENT_KEY: Graph,
-                    NAME_KEY: "Flow",
-                },
-            },
-        },
+        APP_KEY: {'title': 'Simple Load and Display'},
+        RENDERING_KEY: {DAG: {'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',},},},
     }
 
     app = mk_app([dag], config=config_)
