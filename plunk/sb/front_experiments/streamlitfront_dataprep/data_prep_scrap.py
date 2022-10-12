@@ -9,9 +9,10 @@ import streamlit as st
 from front.elements import InputBase
 from i2 import Sig
 from dataclasses import dataclass
-from streamlitfront.elements import TextInput, SelectBox
+from streamlitfront.elements import TextInput, SelectBox, ExecSection, TextOutput
 from functools import partial
 from front.crude import Crudifier
+from streamlitfront.data_binding import BoundData
 
 
 # # ============ MALL ===============
@@ -21,8 +22,8 @@ from front.crude import Crudifier
 # mall = b.mall()
 
 
-def foo(x: str, y: int):
-    return str(x) * int(y)
+def foo(x: str, y: str):
+    return x + y
 
 
 def bar(msg: str):
@@ -35,8 +36,9 @@ metadata = {"foo": foo, "bar": bar}
 
 # @Crudifier(output_store="func_store", mall=mall)
 def my_map(func, kwargs):
-    # return partial(func, **kwargs)
-    return kwargs
+    f = metadata[func]
+    return partial(f, **kwargs)
+    # return f, kwargs
 
 
 def expand_names(names):
@@ -46,8 +48,47 @@ def expand_names(names):
 def populate_kwargs():
     value = b.selected_func()
     list_names = list(Sig(metadata[value]).names)
-    b.names_for_kwargs.set(expand_names(list_names))
+    b.names_for_kwargs = expand_names(list_names)
     st.write(b.names_for_kwargs())
+
+
+if not b.selected_func():
+    b.selected_func = "foo"
+
+
+def get_kwargs(**kwargs):
+    return kwargs
+
+
+@dataclass
+class KwargsInput(InputBase):
+    func_sig: Sig = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.get_kwargs = self.func_sig(get_kwargs)
+        self.inputs = self._build_inputs_from_sig()
+
+    def render(self):
+        exec_section = ExecSection(
+            obj=self.get_kwargs,
+            inputs=self.inputs,
+            output={ELEMENT_KEY: TextOutput},
+            auto_submit=True,
+            on_submit=self._return_kwargs,
+            use_expander=False,
+        )
+        exec_section()
+        return self.value()
+
+    def _build_inputs_from_sig(self):
+        return {
+            name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
+            for name in self.func_sig
+        }
+
+    def _return_kwargs(self, output):
+        self.value.set(output)
 
 
 if __name__ == "__main__":
@@ -66,9 +107,8 @@ if __name__ == "__main__":
                                 "on_value_change": populate_kwargs,
                             },
                             "kwargs": {
-                                ELEMENT_KEY: MultiSourceInput,
-                                # "a": {ELEMENT_KEY: TextInput},
-                                **b.names_for_kwargs(),
+                                ELEMENT_KEY: KwargsInput,
+                                "func_sig": Sig(metadata[b.selected_func()]),
                             },
                         }
                     }
