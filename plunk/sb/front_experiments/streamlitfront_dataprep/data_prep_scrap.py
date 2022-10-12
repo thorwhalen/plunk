@@ -29,8 +29,8 @@ def bar(msg: str):
     return msg
 
 
-data = ["foo", "bar"]
-metadata = {"foo": foo, "bar": bar}
+data = ['foo', 'bar']
+metadata = {'foo': foo, 'bar': bar}
 
 
 # @Crudifier(output_store="func_store", mall=mall)
@@ -50,22 +50,22 @@ def populate_kwargs():
     st.write(b.names_for_kwargs())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(
         [my_map],
         config={
-            APP_KEY: {"title": "Rendering map"},
+            APP_KEY: {'title': 'Rendering map'},
             RENDERING_KEY: {
-                "my_map": {
-                    "execution": {
-                        "inputs": {
-                            "func": {
+                'my_map': {
+                    'execution': {
+                        'inputs': {
+                            'func': {
                                 ELEMENT_KEY: SelectBox,
-                                "options": data,
-                                "value": b.selected_func,
-                                "on_value_change": populate_kwargs,
+                                'options': data,
+                                'value': b.selected_func,
+                                'on_value_change': populate_kwargs,
                             },
-                            "kwargs": {
+                            'kwargs': {
                                 ELEMENT_KEY: MultiSourceInput,
                                 # "a": {ELEMENT_KEY: TextInput},
                                 **b.names_for_kwargs(),
