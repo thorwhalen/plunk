@@ -24,15 +24,15 @@ if not b.mall():
 mall = b.mall()
 
 
-mall["factory_store"] = [
-    "FixedSizeChunkerMaker",
-    "FeaturizerMaker",
+mall['factory_store'] = [
+    'FixedSizeChunkerMaker',
+    'FeaturizerMaker',
 ]
 
 
 metadata = {
-    "FixedSizeChunkerMaker": {"func": DFLT_CHUNKER_MAKER, "out": "chunker"},
-    "FeaturizerMaker": {"func": DFLT_FEATURIZER_MAKER, "out": "featurizer"},
+    'FixedSizeChunkerMaker': {'func': DFLT_CHUNKER_MAKER, 'out': 'chunker'},
+    'FeaturizerMaker': {'func': DFLT_FEATURIZER_MAKER, 'out': 'featurizer'},
 }
 
 # ============ DFLT FACTORIES =====
@@ -40,7 +40,7 @@ metadata = {
 # select_factories = Crudifier(output_store="factories", mall=mall)(select_factories)
 
 
-@Crudifier(output_store="factory_objects_store", mall=mall)
+@Crudifier(output_store='factory_objects_store', mall=mall)
 def select_factory(factory):
     return metadata[factory]
 
@@ -57,16 +57,16 @@ def make_functions():
 
 
 config_ = {
-    APP_KEY: {"title": "Data Prepper"},
+    APP_KEY: {'title': 'Data Prepper'},
     RENDERING_KEY: {
-        "select_factory": {
-            NAME_KEY: "Select factories",
+        'select_factory': {
+            NAME_KEY: 'Select factories',
             # "description": {"content": get_data_description},
-            "execution": {
-                "inputs": {
-                    "factory": {
+            'execution': {
+                'inputs': {
+                    'factory': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["factory_store"],
+                        'options': mall['factory_store'],
                     },
                 },
             },
@@ -75,7 +75,7 @@ config_ = {
 }
 # ============ END FRONTEND ============
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app([select_factory], config=config_)
     app()
     st.write(mall)

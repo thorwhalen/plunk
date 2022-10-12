@@ -24,16 +24,16 @@ DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
 FixedSizeChunker = DFLT_CHUNKER
 Featurizer = DFLT_FEATURIZER
 
-if "mall" not in st.session_state:
-    st.session_state["mall"] = dict(
+if 'mall' not in st.session_state:
+    st.session_state['mall'] = dict(
         # train_audio={},
         # tag={},
         # unused_store={"to": "illustrate"},
         global_input={}
     )
 
-mall = st.session_state["mall"]
-mall["global_input"] = ["a name", 3]
+mall = st.session_state['mall']
+mall['global_input'] = ['a name', 3]
 
 
 def funcnode_maker(name):
@@ -47,7 +47,7 @@ def dag_maker(funcnames_list):
 
 
 def f(msg):
-    return msg + "bob"
+    return msg + 'bob'
 
 
 def g(x):
@@ -59,44 +59,39 @@ def mul(msg_out, multiplier):
 
 
 metadata = {
-    "f": {"func": f, "out": "msg_out"},
-    "g": {"func": g, "out": "multiplier"},
-    "mul": {"func": mul, "out": "result"},
+    'f': {'func': f, 'out': 'msg_out'},
+    'g': {'func': g, 'out': 'multiplier'},
+    'mul': {'func': mul, 'out': 'result'},
 }
 
 # Make a dag from only typing info
 # my_chunker: Chunker    -->
-funcnames_list = ["f", "g", "mul"]
+funcnames_list = ['f', 'g', 'mul']
 
 
 def delegate_input(input_nodes):
     dflt_val = {
         ELEMENT_KEY: SelectBox,
-        "options": mall["global_input"],
+        'options': mall['global_input'],
     }
 
     return {k: dflt_val for k in input_nodes}
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     dag = dag_maker(funcnames_list)
     var_nodes = dag.var_nodes
     print(var_nodes)
-    nodes_list = ["x", "msg"]
+    nodes_list = ['x', 'msg']
     print(dag.synopsis_string())
 
     config_ = {
-        APP_KEY: {"title": "Simple Load and Display"},
+        APP_KEY: {'title': 'Simple Load and Display'},
         RENDERING_KEY: {
             DAG: {
-                "graph": {
-                    ELEMENT_KEY: Graph,
-                    NAME_KEY: "Flow",
-                },
-                "execution": {
-                    "inputs": delegate_input(nodes_list),
-                },
+                'graph': {ELEMENT_KEY: Graph, NAME_KEY: 'Flow',},
+                'execution': {'inputs': delegate_input(nodes_list),},
             },
         },
     }
