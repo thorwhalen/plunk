@@ -30,8 +30,8 @@ def bar(msg: str):
     return msg
 
 
-data = ["foo", "bar"]
-metadata = {"foo": foo, "bar": bar}
+data = ['foo', 'bar']
+metadata = {'foo': foo, 'bar': bar}
 
 
 # @Crudifier(output_store="func_store", mall=mall)
@@ -53,7 +53,7 @@ def populate_kwargs():
 
 
 if not b.selected_func():
-    b.selected_func = "foo"
+    b.selected_func = 'foo'
 
 
 def get_kwargs(**kwargs):
@@ -83,7 +83,7 @@ class KwargsInput(InputBase):
 
     def _build_inputs_from_sig(self):
         return {
-            name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
+            name: {ELEMENT_KEY: TextInput, 'bound_data_factory': BoundData}
             for name in self.func_sig
         }
 
@@ -91,24 +91,24 @@ class KwargsInput(InputBase):
         self.value.set(output)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(
         [my_map],
         config={
-            APP_KEY: {"title": "Rendering map"},
+            APP_KEY: {'title': 'Rendering map'},
             RENDERING_KEY: {
-                "my_map": {
-                    "execution": {
-                        "inputs": {
-                            "func": {
+                'my_map': {
+                    'execution': {
+                        'inputs': {
+                            'func': {
                                 ELEMENT_KEY: SelectBox,
-                                "options": data,
-                                "value": b.selected_func,
-                                "on_value_change": populate_kwargs,
+                                'options': data,
+                                'value': b.selected_func,
+                                'on_value_change': populate_kwargs,
                             },
-                            "kwargs": {
+                            'kwargs': {
                                 ELEMENT_KEY: KwargsInput,
-                                "func_sig": Sig(metadata[b.selected_func()]),
+                                'func_sig': Sig(metadata[b.selected_func()]),
                             },
                         }
                     }
