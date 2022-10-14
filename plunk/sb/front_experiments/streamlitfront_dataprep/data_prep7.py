@@ -68,26 +68,86 @@ metadata = {
     "AnnotsStoreMaker": {"func": data_from_csv, "out": "annots_df"},
     "mk_Xy": {"func": mk_Xy},
 }
-data = list(metadata.keys())
+
+from meshed import DAG
+from sklearn.preprocessing import MinMaxScaler
+
+DFLT_CHK_SIZE = 4
+DFLT_NDIGITS = None
 
 
-crudifier_output = Crudifier(output_store="func_store", mall=mall)
+def chunker(wf, chk_size=DFLT_CHK_SIZE):
+    """An iterable of fixed size chunks of wf"""
+    yield from zip(*[iter(wf)] * chk_size)
 
 
-def my_map(func_name):
-    f = metadata[func_name]["func"]
-    return f
+def featurizer(chk, ndigits=DFLT_NDIGITS):
+    """Compute a feature vector from a waveform chunk"""
+    from statistics import stdev
+
+    # note: surrounding single number with [...] because a vector is expected
+    return [round(stdev(map(float, chk)), ndigits)]
 
 
-def expand_names(names):
-    return {name: {ELEMENT_KEY: TextInput} for name in names}
+def wfs(data_src=10):
+    """Get an iterable of waveforms from the data source"""
+    seed = [1, 2, 3, 5, 4, 2, 1, 4, 3]
+    yield seed
+    yield [x + 10 for x in seed] + [1, 2, 3, 7]
+    # and finally, an outlier (the difference, is that we have high variance)
+    yield [x * data_src for x in seed]
 
 
-def populate_pages():
-    value = b.selected_name()
-    func = metadata[value]["func"]
-    func = crudifier_output(func)
-    b.list_funcs().append(func)
+def chk_gen(chunker, wfs):
+    return (chunker(wf) for wf in wfs)
+
+
+def fv_gen(chunker_gen, featurizer):
+    """apply _featurizer to an iterable"""
+    return (featurizer(chk) for chk in chunker_gen)
+
+
+# featurizer = partial(map, _featurizer)
+
+from sklearn.preprocessing import MinMaxScaler
+
+
+def learn(fv_gen, learner=MinMaxScaler()):
+    """"""
+    return learner.fit(list(fv_gen))
+
+
+data = ["foo", "bar"]
+
+
+def foo(x: str, y: str):
+    return x + y
+
+
+def bar(msg: str):
+    return msg
+
+
+data = ["foo", "bar"]
+metadata = {"foo": foo, "bar": bar}
+
+
+# crudifier_output = Crudifier(output_store="func_store", mall=mall)
+
+
+def my_map(func, kwargs):
+    f = metadata[func]
+    return partial(f, **kwargs)
+    # return f, kwargs
+
+
+# def expand_names(names):
+#     return {name: {ELEMENT_KEY: TextInput} for name in names}
+
+
+def populate_list_funcs():
+    value = b.selected_func()
+    b.list_funcs().append(metadata[value])
 
 
 if not b.selected_func():
@@ -96,27 +156,29 @@ if not b.selected_func():
 if not b.list_funcs():
     b.list_funcs = [my_map]
 
-
-def get_kwargs(**kwargs):
-    return kwargs
+data = ["chunker", "featurizer"]
+metadata = {"chunker": chunker, "featurizer": featurizer}
 
 
 if __name__ == "__main__":
     app = mk_app(
         b.list_funcs(),
-        # [my_map, FuncFactory(foo)],
         config={
             APP_KEY: {"title": "Rendering map"},
             RENDERING_KEY: {
                 "my_map": {
                     "execution": {
                         "inputs": {
-                            "func_name": {
+                            "func": {
                                 ELEMENT_KEY: SelectBox,
                                 "options": data,
-                                "value": b.selected_name,
-                                "on_value_change": populate_pages,
+                                "value": b.selected_func,
+                                "on_value_change": populate_list_funcs,
                             },
+                            # "kwargs": {
+                            #     ELEMENT_KEY: KwargsInput,
+                            #     "func_sig": Sig(metadata[b.selected_func()]),
+                            # },
                         }
                     }
                 },
