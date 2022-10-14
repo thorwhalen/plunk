@@ -48,34 +48,34 @@ def bar(msg: str):
 
 DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
 DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
-DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
-DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
+DFLT_WF_PATH = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
+DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
 metadata = {
-    "FixedSizeChunker": {"func": DFLT_CHUNKER, "out": "chks"},
+    'FixedSizeChunker': {'func': DFLT_CHUNKER, 'out': 'chks'},
     # 'FixedSizeChunker100': {'out': 'chks'},
     # 'ThresholdChunker': {'out': 'chks'},
-    "FixedSizeChunkerMaker": {"func": DFLT_CHUNKER_MAKER, "out": "chunker"},
-    "FeaturizerMaker": {"func": DFLT_FEATURIZER_MAKER, "out": "featurizer"},
+    'FixedSizeChunkerMaker': {'func': DFLT_CHUNKER_MAKER, 'out': 'chunker'},
+    'FeaturizerMaker': {'func': DFLT_FEATURIZER_MAKER, 'out': 'featurizer'},
     # 'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs},
     # 'Featurizer': {'func': DFLT_FEATURIZER, 'out': 'fvs'},
-    "store_to_key_fvs": {"func": store_to_key_fvs, "out": "key_fvs"},
-    "key_fvs_to_tag_fvs": {"func": key_fvs_to_tag_fvs, "out": "tag_fv_iterator"},
-    "WfStoreMaker": {
-        "func": data_from_wav_folder,
-        "out": "wf_store",
-        "bind": {"filepath": "wf_filepath"},
+    'store_to_key_fvs': {'func': store_to_key_fvs, 'out': 'key_fvs'},
+    'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs, 'out': 'tag_fv_iterator'},
+    'WfStoreMaker': {
+        'func': data_from_wav_folder,
+        'out': 'wf_store',
+        'bind': {'filepath': 'wf_filepath'},
     },
-    "AnnotsStoreMaker": {"func": data_from_csv, "out": "annots_df"},
-    "mk_Xy": {"func": mk_Xy},
+    'AnnotsStoreMaker': {'func': data_from_csv, 'out': 'annots_df'},
+    'mk_Xy': {'func': mk_Xy},
 }
 data = list(metadata.keys())
 
 
-crudifier_output = Crudifier(output_store="func_store", mall=mall)
+crudifier_output = Crudifier(output_store='func_store', mall=mall)
 
 
 def my_map(func_name):
-    f = metadata[func_name]["func"]
+    f = metadata[func_name]['func']
     return f
 
 
@@ -85,13 +85,13 @@ def expand_names(names):
 
 def populate_pages():
     value = b.selected_name()
-    func = metadata[value]["func"]
+    func = metadata[value]['func']
     func = crudifier_output(func)
     b.list_funcs().append(func)
 
 
 if not b.selected_func():
-    b.selected_func = "foo"
+    b.selected_func = 'foo'
 
 if not b.list_funcs():
     b.list_funcs = [my_map]
@@ -101,21 +101,21 @@ def get_kwargs(**kwargs):
     return kwargs
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(
         b.list_funcs(),
         # [my_map, FuncFactory(foo)],
         config={
-            APP_KEY: {"title": "Rendering map"},
+            APP_KEY: {'title': 'Rendering map'},
             RENDERING_KEY: {
-                "my_map": {
-                    "execution": {
-                        "inputs": {
-                            "func_name": {
+                'my_map': {
+                    'execution': {
+                        'inputs': {
+                            'func_name': {
                                 ELEMENT_KEY: SelectBox,
-                                "options": data,
-                                "value": b.selected_name,
-                                "on_value_change": populate_pages,
+                                'options': data,
+                                'value': b.selected_name,
+                                'on_value_change': populate_pages,
                             },
                         }
                     }
