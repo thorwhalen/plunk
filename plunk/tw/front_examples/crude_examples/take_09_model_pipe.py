@@ -23,7 +23,7 @@ rootdir = get_a_root_directory_for_module_and_mk_tmp_dir_for_it(__file__)
 # a dill mall (persisted) for model_results
 # ram_stores = mall_contents
 persisting_stores = mk_mall_of_dill_stores(
-    ["model_results", "learner_store", "chunkers"], rootdir=rootdir
+    ['model_results', 'learner_store', 'chunkers'], rootdir=rootdir
 )
 mall = dict(mall_contents, **persisting_stores)
 
@@ -50,14 +50,14 @@ from typing import Optional
 annotator = partial(
     annotate_func_arguments,
     annot_for_argname={
-        "n_components": Optional[int],  # TODO: Default should be None
-        "feature_range": confloat(),
-        "iterated_power": int,  # really Union[int, 'auto']
-        "random_state": Optional[int],  # TODO: Default should be None
+        'n_components': Optional[int],  # TODO: Default should be None
+        'feature_range': confloat(),
+        'iterated_power': int,  # really Union[int, 'auto']
+        'random_state': Optional[int],  # TODO: Default should be None
         # TODO: Had iterable_to_enum(["auto", "full", "arpack", "randomized"], "SvdSolverChoices"),
         #  in the following, but led to `Can't pickle <enum 'SvdSolverChoices'>: it's not found as front.util.SvdSolverChoices`
         #  problem. need to use inject_enum_annotations tech somehow
-        "svd_solver": str,
+        'svd_solver': str,
         'chk_size': int,
         'chk_step': Optional[int],
     },
@@ -69,11 +69,9 @@ annotator = partial(
 # TODO: Enhanced Enum; Give more info to user to be able to choose
 
 # TODO: Better dispatching of mall explorer (needs conditional Enums)
-@inject_enum_annotations(action=["list", "get"], store_name=mall)
+@inject_enum_annotations(action=['list', 'get'], store_name=mall)
 def explore_mall(
-    store_name: StoreName,
-    key: KT,
-    action: str,
+    store_name: StoreName, key: KT, action: str,
 ):
     return simple_mall_dispatch_core_func(key, action, store_name, mall=mall)
 
@@ -97,19 +95,16 @@ def make_chunker(chk_size: int, chk_step: Optional[int] = None):
     return partial(fixed_step_chunker, chk_size=chk_size, chk_step=chk_step)
 
 
-chunker = prepare_for_dispatch(
-    make_chunker,
-    output_store=mall["chunkers"],
-)
+chunker = prepare_for_dispatch(make_chunker, output_store=mall['chunkers'],)
 
 
 # learners ----------------------------------------------------------------------
 
 MinMaxScaler, StandardScaler, PCA = map(
     Pipe(
-        rm_params(params_to_remove=["copy"]),
+        rm_params(params_to_remove=['copy']),
         annotator,
-        partial(prepare_for_dispatch, output_store=mall["learner_store"]),
+        partial(prepare_for_dispatch, output_store=mall['learner_store']),
     ),
     [MinMaxScaler, StandardScaler, PCA],
 )
@@ -123,34 +118,28 @@ MinMaxScaler, StandardScaler, PCA = map(
 # TODO: Automatic defaults from Enum (do the defaults even interact well with Enums?)
 dispatchable_learn_model = prepare_for_dispatch(
     learn_model,
-    param_to_mall_map={"learner": "learner_store", "fvs": "fvs"},
+    param_to_mall_map={'learner': 'learner_store', 'fvs': 'fvs'},
     mall=mall,
-    output_store="fitted_model",
-    defaults=dict(
-        learner="StandardScaler",
-        fvs="train_fvs_1",
-    ),
+    output_store='fitted_model',
+    defaults=dict(learner='StandardScaler', fvs='train_fvs_1',),
 )
 
 # apply model ----------------------------------------------------------------------
 
 dispatchable_apply_model = prepare_for_dispatch(
     apply_model,
-    param_to_mall_map=["fvs", "fitted_model"],
+    param_to_mall_map=['fvs', 'fitted_model'],
     mall=mall,
-    output_store="model_results",
-    defaults=dict(
-        fitted_model="fitted_model_1",
-        fvs="test_fvs",
-    ),
+    output_store='model_results',
+    defaults=dict(fitted_model='fitted_model_1', fvs='test_fvs',),
 )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     from streamlitfront.page_funcs import SimplePageFuncPydanticWrite
 
-    configs = {"page_factory": SimplePageFuncPydanticWrite}
+    configs = {'page_factory': SimplePageFuncPydanticWrite}
 
     from streamlitfront.base import dispatch_funcs
 

@@ -14,7 +14,7 @@ SalaryKey = str  # or some type that will resolve in store-fed key selector
 SalaryMapping = Mapping[SalaryKey, ComplexType]
 
 salary_store: SalaryMapping
-salary_store = {"sylvain": 10000, "christian": 2000, "thor": 50000}
+salary_store = {'sylvain': 10000, 'christian': 2000, 'thor': 50000}
 
 
 def ingress_salary(salary_str: SalaryKey, n_months: int):
@@ -24,10 +24,10 @@ def ingress_salary(salary_str: SalaryKey, n_months: int):
 store_wrapped_func = wrap(func, ingress=ingress_salary)
 
 
-assert store_wrapped_func("sylvain", 6) == 60000
+assert store_wrapped_func('sylvain', 6) == 60000
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from crude.util import ignore_import_problems
 
     with ignore_import_problems:

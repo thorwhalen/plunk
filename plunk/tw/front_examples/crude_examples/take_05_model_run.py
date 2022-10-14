@@ -10,7 +10,7 @@ from front.crude import prepare_for_crude_dispatch
 
 f = prepare_for_crude_dispatch(apply_model, param_to_mall_map=mall)
 assert all(
-    f("fitted_model_1", "test_fvs") == np.array([[0.0], [1.0], [0.5], [2.25], [-1.5]])
+    f('fitted_model_1', 'test_fvs') == np.array([[0.0], [1.0], [0.5], [2.25], [-1.5]])
 )
 
 
@@ -23,10 +23,10 @@ def simple_mall_dispatch_core_func(
     else:  # if not, get the store
         store = mall[store_name]
 
-    if action == "list":
+    if action == 'list':
         key = key.strip()  # to handle some invisible whitespace that would screw things
         return list(filter(lambda k: key in k, store))
-    elif action == "get":
+    elif action == 'get':
         return store[key]
 
 
@@ -48,7 +48,7 @@ def explore_mall(key: KT, action: str, store_name: StoreName):
 # )
 # mall_exploration_func.__name__ = "explore_mall"
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from crude.util import ignore_import_problems
 
     with ignore_import_problems:
@@ -56,13 +56,11 @@ if __name__ == "__main__":
         from functools import partial
 
         dispatchable_apply_model = prepare_for_crude_dispatch(
-            apply_model, output_store="model_results"
+            apply_model, output_store='model_results'
         )
         # extra, to get some defaults in:
         dispatchable_apply_model = partial(
-            dispatchable_apply_model,
-            fitted_model="fitted_model_1",
-            fvs="test_fvs",
+            dispatchable_apply_model, fitted_model='fitted_model_1', fvs='test_fvs',
         )
         app = dispatch_funcs([dispatchable_apply_model, explore_mall])
         app()

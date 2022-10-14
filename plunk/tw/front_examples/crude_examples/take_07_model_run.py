@@ -34,14 +34,14 @@ this_filename, *_ = os.path.splitext(__file__)
 this_filename = os.path.basename(this_filename)
 print(this_filename)
 rootdir = mk_tmp_dol_dir(this_filename)
-print(f"\n****************************************************")
-print(f"The data will be saved here: {rootdir}")
-print(f"****************************************************")
+print(f'\n****************************************************')
+print(f'The data will be saved here: {rootdir}')
+print(f'****************************************************')
 
 # Here we want to use the RAM mall_contents for fvs and fitted_models, but
 # a dill mall (persisted) for model_results
 # ram_stores = mall_contents
-persisting_stores = mk_mall_of_dill_stores("model_results", rootdir=rootdir)
+persisting_stores = mk_mall_of_dill_stores('model_results', rootdir=rootdir)
 mall = dict(mall_contents, **persisting_stores)
 
 # ---------------------------------------------------------------------------------------
@@ -50,21 +50,21 @@ from front.crude import prepare_for_crude_dispatch
 
 w_apply_model = prepare_for_crude_dispatch(
     apply_model,
-    param_to_mall_map=["fvs", "fitted_model"],
+    param_to_mall_map=['fvs', 'fitted_model'],
     mall=mall,
     include_stores_attribute=True,
 )
 assert (
-    w_apply_model("fitted_model_1", "test_fvs")
+    w_apply_model('fitted_model_1', 'test_fvs')
     == [[0.0], [1.0], [0.5], [2.25], [-1.5]]
     == apply_model(
-        fitted_model=w_apply_model.store_for_param["fitted_model"]["fitted_model_1"],
-        fvs=w_apply_model.store_for_param["fvs"]["test_fvs"],
+        fitted_model=w_apply_model.store_for_param['fitted_model']['fitted_model_1'],
+        fvs=w_apply_model.store_for_param['fvs']['test_fvs'],
     )
 )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     from functools import partial
     from streamlitfront.base import dispatch_funcs
@@ -83,27 +83,25 @@ if __name__ == "__main__":
 
     dispatchable_apply_model = prepare_for_crude_dispatch(
         apply_model,
-        param_to_mall_map=["fvs", "fitted_model"],
+        param_to_mall_map=['fvs', 'fitted_model'],
         mall=mall,
-        output_store="model_results",
+        output_store='model_results',
     )
     # extra, to get some defaults in:
     dispatchable_apply_model = partial(
-        dispatchable_apply_model,
-        fitted_model="fitted_model_1",
-        fvs="test_fvs",
+        dispatchable_apply_model, fitted_model='fitted_model_1', fvs='test_fvs',
     )
 
     dispatchable_learn_model = prepare_for_crude_dispatch(
         learn_model,
-        param_to_mall_map={"learner": "learner_store", "fvs": "fvs"},
+        param_to_mall_map={'learner': 'learner_store', 'fvs': 'fvs'},
         mall=mall,
-        output_store="fitted_model",
+        output_store='fitted_model',
     )
 
     # inject an Enum (fed by mall['learners']) in learners arg
     dispatchable_learn_model = inject_enum_annotations(
-        dispatchable_learn_model, learner=list(mall["learner_store"])
+        dispatchable_learn_model, learner=list(mall['learner_store'])
     )
 
     # # extra, to get some defaults in:
@@ -115,7 +113,7 @@ if __name__ == "__main__":
 
     from streamlitfront.page_funcs import SimplePageFuncPydanticWrite
 
-    configs = {"page_factory": SimplePageFuncPydanticWrite}
+    configs = {'page_factory': SimplePageFuncPydanticWrite}
     app = dispatch_funcs(
         [dispatchable_apply_model, explore_mall, dispatchable_learn_model],
         configs=configs,

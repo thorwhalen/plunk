@@ -20,11 +20,12 @@ def get_a_root_directory_for_module_and_mk_tmp_dir_for_it(module_path, verbose=T
     this_filename = os.path.basename(this_filename)
     rootdir = mk_tmp_dol_dir(this_filename)
     if verbose:
-        print(f"\n****************************************************")
-        print(f"A temp directory was made for {this_filename}")
-        print(f"The data will be saved here: {rootdir}")
-        print(f"****************************************************")
+        print(f'\n****************************************************')
+        print(f'A temp directory was made for {this_filename}')
+        print(f'The data will be saved here: {rootdir}')
+        print(f'****************************************************')
     return rootdir
+
 
 # ---------------------------------------------------------------------------------------
 # The function(ality) we want to dispatch:
@@ -35,18 +36,16 @@ def get_a_root_directory_for_module_and_mk_tmp_dir_for_it(module_path, verbose=T
 #  Could make them from i2.wrapper tools. Should is a different question though.
 
 
-def learn_model(learner: Learner, fvs: FVs, method="fit"):
+def learn_model(learner: Learner, fvs: FVs, method='fit'):
     method_func = getattr(learner, method)
     return method_func(list(fvs))
 
 
-def apply_model(fitted_model: FittedModel, fvs: FVs, method="transform"):
+def apply_model(fitted_model: FittedModel, fvs: FVs, method='transform'):
     method_func = getattr(fitted_model, method)
     # TODO: Should remove .tolist() (and possibly the list of list(fvs)).
     #  Not concern here.
     return method_func(list(fvs)).tolist()
-
-
 
 
 # TODO: Make a sklearn-free and numpy-free version?
@@ -90,26 +89,26 @@ mall_with_learners = dict(
     mall,
     **dict(
         learner_store=dict(
-            MinMaxScaler=MinMaxScaler(),
-            StandardScaler=StandardScaler(),
-            PCA=PCA(),
+            MinMaxScaler=MinMaxScaler(), StandardScaler=StandardScaler(), PCA=PCA(),
         )
-    )
+    ),
 )
 
 
 def test_dispatch(dispatcher):
     w_apply_model = dispatcher(
         apply_model,
-        param_to_mall_map=["fvs", "fitted_model"],
+        param_to_mall_map=['fvs', 'fitted_model'],
         mall=mall,
         include_stores_attribute=True,
     )
     assert (
-        w_apply_model("fitted_model_1", "test_fvs")
+        w_apply_model('fitted_model_1', 'test_fvs')
         == [[0.0], [1.0], [0.5], [2.25], [-1.5]]
         == apply_model(
-            fitted_model=w_apply_model.store_for_param["fitted_model"]["fitted_model_1"],
-            fvs=w_apply_model.store_for_param["fvs"]["test_fvs"],
+            fitted_model=w_apply_model.store_for_param['fitted_model'][
+                'fitted_model_1'
+            ],
+            fvs=w_apply_model.store_for_param['fvs']['test_fvs'],
         )
     )

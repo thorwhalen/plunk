@@ -14,7 +14,7 @@ FittedModel = Any
 
 # ---------------------------------------------------------------------------------------
 # The function(ality) we want to dispatch:
-def apply_model(fitted_model: FittedModel, fvs: FVs, method="transform"):
+def apply_model(fitted_model: FittedModel, fvs: FVs, method='transform'):
     method_func = getattr(fitted_model, method)
     return method_func(list(fvs)).tolist()
 
@@ -54,43 +54,43 @@ def prepare_for_dispatch(func):
     """
     # apply_model_using_stores will be made automatically by wrapping apply_model
     # Here we're just pretending that this wrapping happens automatically
-    if func.__name__ == "apply_model":
+    if func.__name__ == 'apply_model':
 
         def apply_model_using_stores(
             fitted_model: str,
             fvs: str,
-            method: str = "transform",
+            method: str = 'transform',
             # TODO: Have streamlit populate automatically with auto_key:
-            save_name: str = "",
+            save_name: str = '',
         ):
             # make a name if not given explicitly
             save_name = save_name or auto_key(fitted_model=fitted_model, fvs=fvs)
             # get the inputs
-            fitted_model = mall["fitted_model"][fitted_model]
-            fvs = mall["fvs"][fvs]
+            fitted_model = mall['fitted_model'][fitted_model]
+            fvs = mall['fvs'][fvs]
             # compute the function
             result = apply_model(fitted_model, fvs, method=method)
             # store the outputs
-            mall["model_results"][save_name] = result
+            mall['model_results'][save_name] = result
 
             return result  # or not
 
         # sanity check: test apply_model_using_stores
-        assert list(mall["model_results"]) == []
-        t = apply_model_using_stores(fitted_model="fitted_model_1", fvs="test_fvs")
-        print(list(mall["model_results"]))
-        assert list(mall["model_results"]) == [
-            "fitted_model=fitted_model_1,fvs=test_fvs"
+        assert list(mall['model_results']) == []
+        t = apply_model_using_stores(fitted_model='fitted_model_1', fvs='test_fvs')
+        print(list(mall['model_results']))
+        assert list(mall['model_results']) == [
+            'fitted_model=fitted_model_1,fvs=test_fvs'
         ]
         assert all(t == np.array([[0.0], [1.0], [0.5], [2.25], [-1.5]]))
-        mall["model_results"].clear()
+        mall['model_results'].clear()
 
         return apply_model_using_stores
     else:
         raise ValueError(f"Can't dispatch {func}")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from crude.util import ignore_import_problems
 
     with ignore_import_problems:

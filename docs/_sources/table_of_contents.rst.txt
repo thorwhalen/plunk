@@ -14,6 +14,19 @@
    module_docs/plunk/sb/type_compatibility/compatible
    module_docs/plunk/tw/echoed_clicks
    module_docs/plunk/tw/empty_sentinel_options
+   module_docs/plunk/tw/front_examples/crude_examples
+   module_docs/plunk/tw/front_examples/crude_examples/extrude_crude_util
+   module_docs/plunk/tw/front_examples/crude_examples/pydantic_examples
+   module_docs/plunk/tw/front_examples/crude_examples/scrap_streamlit
+   module_docs/plunk/tw/front_examples/crude_examples/take_01_salary
+   module_docs/plunk/tw/front_examples/crude_examples/take_02_salary
+   module_docs/plunk/tw/front_examples/crude_examples/take_03_salary
+   module_docs/plunk/tw/front_examples/crude_examples/take_04_model_run
+   module_docs/plunk/tw/front_examples/crude_examples/take_05_model_run
+   module_docs/plunk/tw/front_examples/crude_examples/take_06_model_run
+   module_docs/plunk/tw/front_examples/crude_examples/take_07_model_run
+   module_docs/plunk/tw/front_examples/crude_examples/take_08_model_pipe
+   module_docs/plunk/tw/front_examples/crude_examples/take_09_model_pipe
    module_docs/plunk/tw/front_examples/data_binding_1
    module_docs/plunk/tw/front_examples/make_pipelines
    module_docs/plunk/tw/ipython_magic
