@@ -24,125 +24,110 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     mk_Xy,
 )
 from odat.mdat.vacuum import DFLT_CHUNKER, DFLT_FEATURIZER
+from typing import Optional
+from slang.chunkers import fixed_step_chunker
+from front.base import prepare_for_dispatch
+from front.crude import simple_mall_dispatch_core_func
+from front.util import inject_enum_annotations
+from front.base import prepare_for_dispatch
+from front.crude import KT, StoreName
 
 
 # # ============ MALL ===============
+def make_chunker(chk_size: int, chk_step: Optional[int] = None):
+    return partial(fixed_step_chunker, chk_size=chk_size, chk_step=chk_step)
+
+
 if not b.mall():
-    b.mall = dict(func_store={})
+    b.mall = {
+        "func_store": {},
+        "featurizer": {},
+        "featurizer_cls": {},
+        "chunker": {},
+        "chunker_cls": {"chunker": make_chunker},
+        "wf_store": {},
+        "wf_store_cls": {"data_from_wav_folder": data_from_wav_folder},
+        "annots_loader": {},
+        "annots_loader_cls": {"data_from_csv": data_from_csv},
+    }
 
 mall = b.mall()
-
-
-def foo(x: str, y: str):
-    return x + y
-
-
-def bar(msg: str):
-    return msg
-
-
-# def factory(func):
-#     result = FuncFactory(func)
-#     return result
+chunker = prepare_for_dispatch(
+    make_chunker,
+    output_store=mall["chunker"],
+)
 
 
 DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
 DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
-DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
-DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
-metadata = {
-    "FixedSizeChunker": {"func": DFLT_CHUNKER, "out": "chks"},
-    # 'FixedSizeChunker100': {'out': 'chks'},
-    # 'ThresholdChunker': {'out': 'chks'},
-    "FixedSizeChunkerMaker": {"func": DFLT_CHUNKER_MAKER, "out": "chunker"},
-    "FeaturizerMaker": {"func": DFLT_FEATURIZER_MAKER, "out": "featurizer"},
-    # 'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs},
-    # 'Featurizer': {'func': DFLT_FEATURIZER, 'out': 'fvs'},
-    "store_to_key_fvs": {"func": store_to_key_fvs, "out": "key_fvs"},
-    "key_fvs_to_tag_fvs": {"func": key_fvs_to_tag_fvs, "out": "tag_fv_iterator"},
-    "WfStoreMaker": {
-        "func": data_from_wav_folder,
-        "out": "wf_store",
-        "bind": {"filepath": "wf_filepath"},
-    },
-    "AnnotsStoreMaker": {"func": data_from_csv, "out": "annots_df"},
-    "mk_Xy": {"func": mk_Xy},
-}
+
+
+FixedSizeChunker = DFLT_CHUNKER
+featurizer = DFLT_FEATURIZER
+
+# DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
+# DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
+# DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
+# DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
+
+# metadata = {
+#     "FixedSizeChunker": {"func": DFLT_CHUNKER, "out": "chks"},
+#     # 'FixedSizeChunker100': {'out': 'chks'},
+#     # 'ThresholdChunker': {'out': 'chks'},
+#     "FixedSizeChunkerMaker": {"func": DFLT_CHUNKER_MAKER, "out": "chunker"},
+#     "FeaturizerMaker": {"func": DFLT_FEATURIZER_MAKER, "out": "featurizer"},
+#     # 'key_fvs_to_tag_fvs': {'func': key_fvs_to_tag_fvs},
+#     # 'Featurizer': {'func': DFLT_FEATURIZER, 'out': 'fvs'},
+#     "store_to_key_fvs": {"func": store_to_key_fvs, "out": "key_fvs"},
+#     "key_fvs_to_tag_fvs": {"func": key_fvs_to_tag_fvs, "out": "tag_fv_iterator"},
+#     "WfStoreMaker": {
+#         "func": data_from_wav_folder,
+#         "out": "wf_store",
+#         "bind": {"filepath": "wf_filepath"},
+#     },
+#     "AnnotsStoreMaker": {"func": data_from_csv, "out": "annots_df"},
+#     "mk_Xy": {"func": mk_Xy},
+# }
 
 from meshed import DAG
 from sklearn.preprocessing import MinMaxScaler
 
-DFLT_CHK_SIZE = 4
-DFLT_NDIGITS = None
 
+from streamlitfront.elements import SelectBox
 
-def chunker(wf, chk_size=DFLT_CHK_SIZE):
-    """An iterable of fixed size chunks of wf"""
-    yield from zip(*[iter(wf)] * chk_size)
+from streamlitfront.examples.util import Graph
 
-
-def featurizer(chk, ndigits=DFLT_NDIGITS):
-    """Compute a feature vector from a waveform chunk"""
-    from statistics import stdev
-
-    # note: surrounding single number with [...] because a vector is expected
-    return [round(stdev(map(float, chk)), ndigits)]
-
-
-def wfs(data_src=10):
-    """Get an iterable of waveforms from the data source"""
-    seed = [1, 2, 3, 5, 4, 2, 1, 4, 3]
-    yield seed
-    yield [x + 10 for x in seed] + [1, 2, 3, 7]
-    # and finally, an outlier (the difference, is that we have high variance)
-    yield [x * data_src for x in seed]
-
-
-def chk_gen(chunker, wfs):
-    return (chunker(wf) for wf in wfs)
-
-
-def fv_gen(chunker_gen, featurizer):
-    """apply _featurizer to an iterable"""
-    return (featurizer(chk) for chk in chunker_gen)
-
-
-# featurizer = partial(map, _featurizer)
-
-from sklearn.preprocessing import MinMaxScaler
-
-
-def learn(fv_gen, learner=MinMaxScaler()):
-    """"""
-    return learner.fit(list(fv_gen))
-
-
-data = ["foo", "bar"]
-
-
-def foo(x: str, y: str):
-    return x + y
-
-
-def bar(msg: str):
-    return msg
-
-
-data = ["foo", "bar"]
-metadata = {"foo": foo, "bar": bar}
+from front.spec_maker_base import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+from streamlitfront.base import mk_app
 
 
 # crudifier_output = Crudifier(output_store='func_store', mall=mall)
 
+# @Crudifier(output_store='func_store', mall = mall)
 
-def my_map(func, kwargs):
+
+def my_map(func, store_name, kwargs):
     f = metadata[func]
-    return partial(f, **kwargs)
-    # return f, kwargs
+    result_func = partial(f, **kwargs)
+    mall[store_name][func] = result_func
+    return result_func
 
 
 # def expand_names(names):
 #     return {name: {ELEMENT_KEY: TextInput} for name in names}
+
+
+@inject_enum_annotations(action=["list", "get"], store_name=mall)
+def explore_mall(
+    store_name: StoreName,
+    key: KT,
+    action: str,
+):
+    return simple_mall_dispatch_core_func(key, action, store_name, mall=mall)
+
+
+def get_kwargs(**kwargs):
+    return kwargs
 
 
 def populate_list_funcs():
@@ -151,7 +136,7 @@ def populate_list_funcs():
 
 
 if not b.selected_func():
-    b.selected_func = "foo"
+    b.selected_func = "chunker"
 
 if not b.list_funcs():
     b.list_funcs = [my_map]
@@ -160,9 +145,44 @@ data = ["chunker", "featurizer"]
 metadata = {"chunker": chunker, "featurizer": featurizer}
 
 
+@dataclass
+class KwargsInput(InputBase):
+    func_sig: Sig = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.get_kwargs = self.func_sig(get_kwargs)
+        self.inputs = self._build_inputs_from_sig()
+
+    def render(self):
+        exec_section = ExecSection(
+            obj=self.get_kwargs,
+            inputs=self.inputs,
+            output={ELEMENT_KEY: TextOutput},
+            auto_submit=True,
+            on_submit=self._return_kwargs,
+            use_expander=False,
+        )
+        exec_section()
+        return self.value()
+
+    def _build_inputs_from_sig(self):
+        return {
+            name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
+            for name in self.func_sig
+        }
+
+    def _return_kwargs(self, output):
+        self.value.set(output)
+
+
+def send_message(output):
+    b.update_store()
+
+
 if __name__ == "__main__":
     app = mk_app(
-        b.list_funcs(),
+        [my_map],
         config={
             APP_KEY: {"title": "Rendering map"},
             RENDERING_KEY: {
@@ -173,16 +193,18 @@ if __name__ == "__main__":
                                 ELEMENT_KEY: SelectBox,
                                 "options": data,
                                 "value": b.selected_func,
-                                "on_value_change": populate_list_funcs,
+                                # "on_value_change": populate_list_funcs,
                             },
-                            # "kwargs": {
-                            #     ELEMENT_KEY: KwargsInput,
-                            #     "func_sig": Sig(metadata[b.selected_func()]),
-                            # },
-                        }
+                            "kwargs": {
+                                ELEMENT_KEY: KwargsInput,
+                                "func_sig": Sig(metadata[b.selected_func()]),
+                            },
+                        },
+                        "on_submit": send_message,
                     }
                 },
             },
         },
     )
     app()
+    st.write(mall)
