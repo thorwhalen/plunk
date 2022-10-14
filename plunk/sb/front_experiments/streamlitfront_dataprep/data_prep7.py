@@ -132,7 +132,7 @@ data = ["foo", "bar"]
 metadata = {"foo": foo, "bar": bar}
 
 
-# crudifier_output = Crudifier(output_store="func_store", mall=mall)
+# crudifier_output = Crudifier(output_store='func_store', mall=mall)
 
 
 def my_map(func, kwargs):
