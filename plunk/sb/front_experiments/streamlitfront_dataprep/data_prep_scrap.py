@@ -29,12 +29,14 @@ def foo(x: str, y: str, z: int):
 def bar(msg: str):
     return msg
 
+
 # Choice #1: Simple ####################
 # data = ['foo', 'bar']
 # metadata = {'foo': foo, 'bar': bar}
 
 # Choice #2: Involving a local file store ####################
 from dol import Files
+
 data = Files('~', max_levels=0)
 metadata = {k: [foo, bar][len(k) % 2] for k in data}
 
