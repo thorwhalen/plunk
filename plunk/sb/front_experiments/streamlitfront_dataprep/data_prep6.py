@@ -29,7 +29,6 @@ mall['factory_store'] = [
     'FeaturizerMaker',
 ]
 
-
 metadata = {
     'FixedSizeChunkerMaker': {'func': DFLT_CHUNKER_MAKER, 'out': 'chunker'},
     'FeaturizerMaker': {'func': DFLT_FEATURIZER_MAKER, 'out': 'featurizer'},
