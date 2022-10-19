@@ -15,7 +15,7 @@ def add_nums(nums_to_add: Iterable[float] = 12):
 
 if not b.mall():
     b.mall = {
-        "result": {},
+        'result': {},
     }
 
 mall = b.mall()
@@ -40,11 +40,11 @@ class ArgsInput(InputBase):
             use_expander=False,
         )
         exec_section()
-        st.write(f"inputs={self.inputs}, args={self.output}")
+        st.write(f'inputs={self.inputs}, args={self.output}')
         return self.value()
 
     def populate_input(self, output):
-        st.write(f"inputs={self.inputs}, args={self.output}")
+        st.write(f'inputs={self.inputs}, args={self.output}')
         self.value.set(output)
         # self.inputs.append(item)
 
@@ -58,19 +58,19 @@ def populate_list():
     b.list_args().append(value)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(
         [add_nums],
         config={
-            APP_KEY: {"title": "Rendering map"},
+            APP_KEY: {'title': 'Rendering map'},
             RENDERING_KEY: {
-                "add_nums": {
-                    "execution": {
-                        "inputs": {
-                            "nums_to_add": {
+                'add_nums': {
+                    'execution': {
+                        'inputs': {
+                            'nums_to_add': {
                                 ELEMENT_KEY: TextInput,
-                                "value": b.result,
-                                "on_value_change": populate_list
+                                'value': b.result,
+                                'on_value_change': populate_list
                                 # "func_sig": Sig(add_nums),
                             },
                         },
