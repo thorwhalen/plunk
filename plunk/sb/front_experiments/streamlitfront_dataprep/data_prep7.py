@@ -95,7 +95,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from streamlitfront.elements import SelectBox
 
-from streamlitfront.examples.util import Graph
+data = ["foo", "bar"]
 
 from front.spec_maker_base import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from streamlitfront.base import mk_app
