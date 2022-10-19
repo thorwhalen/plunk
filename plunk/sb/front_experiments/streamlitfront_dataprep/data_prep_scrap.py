@@ -22,17 +22,25 @@ from streamlitfront.data_binding import BoundData
 # mall = b.mall()
 
 
-def foo(x: str, y: str):
-    return x + y
+def foo(x: str, y: str, z: int):
+    return x + y * z
 
 
 def bar(msg: str):
     return msg
 
 
-data = ['foo', 'bar']
-metadata = {'foo': foo, 'bar': bar}
+# Choice #1: Simple ####################
+# data = ['foo', 'bar']
+# metadata = {'foo': foo, 'bar': bar}
 
+# Choice #2: Involving a local file store ####################
+from dol import Files
+
+data = Files('~', max_levels=0)
+metadata = {k: [foo, bar][len(k) % 2] for k in data}
+
+# print(metadata)
 
 # @Crudifier(output_store="func_store", mall=mall)
 def my_map(func, kwargs):
@@ -53,7 +61,7 @@ def populate_kwargs():
 
 
 if not b.selected_func():
-    b.selected_func = 'foo'
+    b.selected_func = next(iter(data))
 
 
 def get_kwargs(**kwargs):
