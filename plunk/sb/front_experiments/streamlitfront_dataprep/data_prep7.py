@@ -44,7 +44,7 @@ if not b.mall():
         "featurizer": {},
         "featurizer_cls": {},
         "chunker": {},
-        "chunker_cls": {"chunker": make_chunker},
+        "factories": {"chunker": make_chunker},
         "wf_store": {},
         "wf_store_cls": {"data_from_wav_folder": data_from_wav_folder},
         "annots_loader": {},
@@ -60,10 +60,15 @@ chunker = prepare_for_dispatch(
 
 DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
 DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
+DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
+DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
 
 
 FixedSizeChunker = DFLT_CHUNKER
 featurizer = DFLT_FEATURIZER
+
+# def data_loader(**kwargs):
+#     return data_from_wav_folder(filepath)
 
 # DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
 # DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
@@ -95,7 +100,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 from streamlitfront.elements import SelectBox
 
-data = ["foo", "bar"]
 
 from front.spec_maker_base import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from streamlitfront.base import mk_app
@@ -106,24 +110,22 @@ from streamlitfront.base import mk_app
 # @Crudifier(output_store='func_store', mall = mall)
 
 
-def my_map(func, store_name, kwargs):
+def dag_from_mall():
+    pass
+
+
+def select_func(func, store_name, kwargs):
     f = metadata[func]
     result_func = partial(f, **kwargs)
     mall[store_name][func] = result_func
+    sig = Sig(result_func)
+    st.write(f"added function with sig={sig}")
     return result_func
 
 
-# def expand_names(names):
-#     return {name: {ELEMENT_KEY: TextInput} for name in names}
-
-
-@inject_enum_annotations(action=["list", "get"], store_name=mall)
-def explore_mall(
-    store_name: StoreName,
-    key: KT,
-    action: str,
-):
-    return simple_mall_dispatch_core_func(key, action, store_name, mall=mall)
+# @inject_enum_annotations(action=["list", "get"], store_name=mall)
+def explore_mall(store_name: StoreName, key: KT, action: str, mall=mall):
+    return simple_mall_dispatch_core_func(key, action, store_name=mall, mall=mall)
 
 
 def get_kwargs(**kwargs):
@@ -139,10 +141,15 @@ if not b.selected_func():
     b.selected_func = "chunker"
 
 if not b.list_funcs():
-    b.list_funcs = [my_map]
+    b.list_funcs = [select_func]
 
-data = ["chunker", "featurizer"]
-metadata = {"chunker": chunker, "featurizer": featurizer}
+data = ["chunker", "featurizer", "data_loader"]
+metadata = {
+    "chunker": chunker,
+    "featurizer": featurizer,
+    "data_loader": data_from_wav_folder,
+    "csv_loader": data_from_csv,
+}
 
 
 @dataclass
@@ -180,19 +187,32 @@ def send_message(output):
     b.update_store()
 
 
+from typing import Tuple
+
+
+def dummy(t: Tuple[int, int]):
+    return t
+
+
 if __name__ == "__main__":
     app = mk_app(
-        [my_map],
+        [select_func],
         config={
             APP_KEY: {"title": "Rendering map"},
             RENDERING_KEY: {
-                "my_map": {
+                "select_func": {
                     "execution": {
                         "inputs": {
                             "func": {
                                 ELEMENT_KEY: SelectBox,
                                 "options": data,
                                 "value": b.selected_func,
+                                # "on_value_change": populate_list_funcs,
+                            },
+                            "store_name": {
+                                ELEMENT_KEY: SelectBox,
+                                "options": ["func_store"],
+                                # "value": b.selected_func,
                                 # "on_value_change": populate_list_funcs,
                             },
                             "kwargs": {
