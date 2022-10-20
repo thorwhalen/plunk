@@ -14,6 +14,7 @@
    module_docs/plunk/sb/type_compatibility/compatible
    module_docs/plunk/tw/echoed_clicks
    module_docs/plunk/tw/empty_sentinel_options
+   module_docs/plunk/tw/front_examples/audio_ml/take01_simple_pipeline
    module_docs/plunk/tw/front_examples/crude_examples
    module_docs/plunk/tw/front_examples/crude_examples/extrude_crude_util
    module_docs/plunk/tw/front_examples/crude_examples/pydantic_examples

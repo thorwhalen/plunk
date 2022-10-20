@@ -29,8 +29,8 @@ def three_element_pipe(
     first: Callable = identity,
     middle: Callable = identity,
     last: Callable = identity,
-    __name__: str = "",
-    __doc__: str = "",
+    __name__: str = '',
+    __doc__: str = '',
 ):
     """
     The only purpose for this function is to enable Pipe instances to be
@@ -66,7 +66,7 @@ def bar(msg: str):
 # Choice #2: Involving a local file store ####################
 from dol import Files
 
-data = Files("~", max_levels=0)
+data = Files('~', max_levels=0)
 metadata = {k: [foo, bar][len(k) % 2] for k in data}
 
 # print(metadata)
@@ -120,7 +120,7 @@ class KwargsInput(InputBase):
 
     def _build_inputs_from_sig(self):
         return {
-            name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
+            name: {ELEMENT_KEY: TextInput, 'bound_data_factory': BoundData}
             for name in self.func_sig
         }
 
@@ -128,24 +128,24 @@ class KwargsInput(InputBase):
         self.value.set(output)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(
         [my_map],
         config={
-            APP_KEY: {"title": "Rendering map"},
+            APP_KEY: {'title': 'Rendering map'},
             RENDERING_KEY: {
-                "my_map": {
-                    "execution": {
-                        "inputs": {
-                            "func": {
+                'my_map': {
+                    'execution': {
+                        'inputs': {
+                            'func': {
                                 ELEMENT_KEY: SelectBox,
-                                "options": data,
-                                "value": b.selected_func,
-                                "on_value_change": populate_kwargs,
+                                'options': data,
+                                'value': b.selected_func,
+                                'on_value_change': populate_kwargs,
                             },
-                            "kwargs": {
+                            'kwargs': {
                                 ELEMENT_KEY: KwargsInput,
-                                "func_sig": Sig(metadata[b.selected_func()]),
+                                'func_sig': Sig(metadata[b.selected_func()]),
                             },
                         }
                     }
