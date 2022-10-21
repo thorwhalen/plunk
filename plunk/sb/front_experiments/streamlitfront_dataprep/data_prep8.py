@@ -69,13 +69,13 @@ def mk_pipeline_maker_app_with_mall(
         output_store=pipelines_store
     )
     def mk_pipeline(steps: Iterable[Callable]):
-        print(f"{steps}")
+        print(f'{steps}')
         return Pipe(*steps)
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(pipeline=pipelines_store),
-        output_store="exec_outputs",
+        output_store='exec_outputs',
     )
     def exec_pipeline(pipeline: Callable, kwargs):
         print(type(pipeline), Sig(pipeline))
