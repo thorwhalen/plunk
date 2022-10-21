@@ -130,9 +130,7 @@ def convert(arg):
 
 # @inject_enum_annotations(action=["list", "get"], store_name=mall)
 def explore_mall(
-    store_name: StoreName,
-    key: KT,
-    action: str,
+    store_name: StoreName, key: KT, action: str,
 ):
     args = [key, action, store_name]
     [key, action, store_name] = list(map(convert, args))
