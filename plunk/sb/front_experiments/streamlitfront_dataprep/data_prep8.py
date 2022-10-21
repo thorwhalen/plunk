@@ -31,10 +31,10 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = "step_factories",
-    steps: str = "steps",
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
     steps_store=None,
-    pipelines: str = "pipelines",
+    pipelines: str = 'pipelines',
     pipelines_store=None,
 ):
     # TODO: Like to not have this binder logic involving streamlit state here! Contain it!
@@ -43,7 +43,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "data_loader"
+        b.selected_step_factory = 'data_loader'
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -92,58 +92,58 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall[step_factories],
-                            "value": b.selected_step_factory,
+                            'options': mall[step_factories],
+                            'value': b.selected_step_factory,
                         },
-                        "kwargs": {
+                        'kwargs': {
                             ELEMENT_KEY: KwargsInput,
-                            "func_sig": Sig(
+                            'func_sig': Sig(
                                 mall[step_factories][b.selected_step_factory()]
                             ),
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
-                            "serializer": get_step_name,
+                            'items': list(mall[steps].values()),
+                            'serializer': get_step_name,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        'message': 'The pipeline has been created successfully.',
                     },
                 },
             },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
+            'exec_pipeline': {
+                NAME_KEY: 'Pipeline Executor',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall[pipelines],
-                            "value": b.selected_pipeline,
+                            'options': mall[pipelines],
+                            'value': b.selected_pipeline,
                         },
-                        "kwargs": {
+                        'kwargs': {
                             ELEMENT_KEY: KwargsInput,
-                            "func_sig": get_selected_pipeline_sig(),
+                            'func_sig': get_selected_pipeline_sig(),
                         },
                     }
                 },
@@ -157,7 +157,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # TODO: Try with know.malls.mk_mall:
     mall = dict(
         step_factories=dict(
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     )
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
     )
 
     app()
