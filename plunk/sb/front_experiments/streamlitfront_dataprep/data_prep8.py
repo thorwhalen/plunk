@@ -17,6 +17,8 @@ from streamlitfront.elements import (
     KwargsInput,
     PipelineMaker,
 )
+from slang import fixed_step_chunker, mk_chk_fft
+
 from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     # DFLT_WF_PATH,
     # DFLT_ANNOT_PATH,
@@ -26,6 +28,10 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     key_fvs_to_tag_fvs,
     mk_Xy,
 )
+
+
+def chunker(it, chk_size):
+    return fixed_step_chunker(it=it, chk_size=chk_size, chk_step=chk_size)
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -63,16 +69,16 @@ def mk_pipeline_maker_app_with_mall(
         output_store=pipelines_store
     )
     def mk_pipeline(steps: Iterable[Callable]):
-        # print(f"{type(Pipe(*steps))}")
+        print(f"{steps}")
         return Pipe(*steps)
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(pipeline=pipelines_store),
-        # output_store='exec_outputs'
+        output_store="exec_outputs",
     )
     def exec_pipeline(pipeline: Callable, kwargs):
-        print(type(pipeline), callable(pipeline))
+        print(type(pipeline), Sig(pipeline))
         return pipeline(**kwargs)
 
     # NOTE: Just ideas. call_func not used:
@@ -163,12 +169,13 @@ if __name__ == "__main__":
         step_factories=dict(
             # Source Readers
             data_loader=FuncFactory(data_from_wav_folder),
+            # data_loader=FuncFactory(foo),
             # Chunkers
-            chunker=FuncFactory(fixed_step_chunker),
+            chunker=FuncFactory(chunker),
         ),
         steps=dict(),
         pipelines=dict(),
-        # exec_outputs=dict(),
+        exec_outputs=dict(),
     )
 
     app = mk_pipeline_maker_app_with_mall(
