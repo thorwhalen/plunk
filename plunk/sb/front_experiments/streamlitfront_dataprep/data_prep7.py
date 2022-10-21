@@ -1,5 +1,6 @@
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from collections.abc import Callable
+from front.crude import Crudifier
 
 from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import SelectBox
@@ -124,8 +125,22 @@ def select_func(func, store_name, kwargs):
 
 
 # @inject_enum_annotations(action=["list", "get"], store_name=mall)
-def explore_mall(store_name: StoreName, key: KT, action: str, mall=mall):
-    return simple_mall_dispatch_core_func(key, action, store_name=mall, mall=mall)
+
+
+def convert(arg):
+    return None
+
+
+# @inject_enum_annotations(action=["list", "get"], store_name=mall)
+def explore_mall(
+    store_name: StoreName,
+    key: KT,
+    action: str,
+):
+    args = [key, action, store_name]
+    [key, action, store_name] = list(map(convert, args))
+
+    return simple_mall_dispatch_core_func(key, action, store_name, mall=mall)
 
 
 def get_kwargs(**kwargs):
@@ -196,7 +211,7 @@ def dummy(t: Tuple[int, int]):
 
 if __name__ == "__main__":
     app = mk_app(
-        [select_func],
+        [select_func, explore_mall],
         config={
             APP_KEY: {"title": "Rendering map"},
             RENDERING_KEY: {
