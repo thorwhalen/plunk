@@ -2,6 +2,7 @@
    :maxdepth: 2
    :caption: Contents:
 
+   module_docs/plunk/ap/audio_stream/audiostream_webservice
    module_docs/plunk/sb/click_detection/analysis
    module_docs/plunk/sb/click_detection/clickified
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
