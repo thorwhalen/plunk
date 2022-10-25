@@ -92,7 +92,6 @@ class FuncRenderer(OutputBase):
     def __post_init__(self):
         super().__post_init__()
 
-    #     # self.func = func
     def _return_kwargs(self, output):
         st.write(f"output = {output}")
 
