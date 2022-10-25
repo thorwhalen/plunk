@@ -64,16 +64,16 @@ def bar(msg: str):
 
 if not b.mall():
     # TODO: Maybe it's here that we need to use know.malls.mk_mall?
-    b.mall = {"func_choices": {"foo": foo, "bar": bar}, "selected_func_store": {}}
+    b.mall = {'func_choices': {'foo': foo, 'bar': bar}, 'selected_func_store': {}}
 mall = b.mall()
 
 if not b.selected_func():
-    b.selected_func = "foo"
+    b.selected_func = 'foo'
 
 crudifier = partial(Crudifier, mall=mall)
 
 
-@crudifier(param_to_mall_map=dict(func="func_choices"))
+@crudifier(param_to_mall_map=dict(func='func_choices'))
 def identity(func: Callable):
     return func
 
@@ -81,7 +81,7 @@ def identity(func: Callable):
 @dataclass
 class OutRenderer(InputBase):
     def render(self):
-        st.write(f"{self=}")
+        st.write(f'{self=}')
         # st.write(f"{self.output=}")
 
 
@@ -93,7 +93,7 @@ class FuncRenderer(OutputBase):
         super().__post_init__()
 
     def _return_kwargs(self, output):
-        st.write(f"output = {output}")
+        st.write(f'output = {output}')
 
     def render(self):
         sig = Sig(self.output)
@@ -102,7 +102,7 @@ class FuncRenderer(OutputBase):
         exec_section = ExecSection(
             obj=self.output,
             inputs={
-                name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
+                name: {ELEMENT_KEY: TextInput, 'bound_data_factory': BoundData}
                 for name in sig
             },
             output={ELEMENT_KEY: TextOutput},
@@ -119,19 +119,19 @@ class SimpleOutputFunc(ExecContainerBase):
 
 
 config = {
-    APP_KEY: {"title": "Funcs"},
+    APP_KEY: {'title': 'Funcs'},
     RENDERING_KEY: {
-        "identity": {
-            NAME_KEY: "Identity Rendering",
-            "execution": {
-                "inputs": {
-                    "func": {
+        'identity': {
+            NAME_KEY: 'Identity Rendering',
+            'execution': {
+                'inputs': {
+                    'func': {
                         ELEMENT_KEY: SelectBox,
-                        "options": mall["func_choices"],
-                        "value": b.selected_func,
+                        'options': mall['func_choices'],
+                        'value': b.selected_func,
                     },
                 },
-                "output": {ELEMENT_KEY: FuncRenderer},
+                'output': {ELEMENT_KEY: FuncRenderer},
             },
         }
     },
@@ -145,7 +145,7 @@ app = mk_app(funcs, config=config)
 app()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from streamlitfront.base import get_func_args_specs
 
     print(get_func_args_specs(identity))
