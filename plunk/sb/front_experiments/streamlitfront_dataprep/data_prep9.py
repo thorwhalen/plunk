@@ -55,7 +55,7 @@ def identity(func: Callable):
 
 
 def foo(x: int):
-    return x + 1
+    return x
 
 
 def bar(msg: str):
@@ -76,45 +76,6 @@ crudifier = partial(Crudifier, mall=mall)
 @crudifier(param_to_mall_map=dict(func="func_choices"))
 def identity(func: Callable):
     return func
-
-
-# @dataclass
-# class FuncRenderer(InputBase):
-#     func_sig: Sig = None
-
-#     def __post_init__(self):
-#         super().__post_init__()
-
-#         @self.func_sig
-#         def get_kwargs(**kwargs):
-#             return kwargs
-
-#         self.get_kwargs = get_kwargs
-#         self.inputs = self._build_inputs_from_sig()
-
-#     def render(self):
-#         exec_section = ExecSection(
-#             obj=self.get_kwargs,
-#             inputs=self.inputs,
-#             output={ELEMENT_KEY: HiddenOutput},
-#             auto_submit=True,
-#             on_submit=self._return_kwargs,
-#             use_expander=False,
-#         )
-#         exec_section()
-#         return self.value()
-
-#     def _build_inputs_from_sig(self):
-#         return {
-#             name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
-#             for name in self.func_sig
-#         }
-
-#     def _get_kwargs(self, **kwargs):
-#         return kwargs
-
-#     def _return_kwargs(self, output):
-#         self.value.set(output)
 
 
 @dataclass
@@ -138,8 +99,7 @@ class FuncRenderer(OutputBase):
     def render(self):
         sig = Sig(self.output)
         st.write(sig)
-        # k = KwargsInput(func_sig=sig)
-        # k.render()
+
         exec_section = ExecSection(
             obj=self.output,
             inputs={
@@ -147,14 +107,11 @@ class FuncRenderer(OutputBase):
                 for name in sig
             },
             output={ELEMENT_KEY: TextOutput},
-            # output={ELEMENT_KEY: TextOutput},
             auto_submit=True,
             on_submit=self._return_kwargs,
             use_expander=False,
         )
         exec_section()
-        # return self.value()
-        # st.write(k)
 
 
 class SimpleOutputFunc(ExecContainerBase):
@@ -175,12 +132,6 @@ config = {
                         "value": b.selected_func,
                     },
                 },
-                # "output": {
-                #     ELEMENT_KEY: View,
-                #     # "func": b.selected_func,
-                #     # "message": "The step has been created successfully.",
-                #     # ELEMENT_KEY: SelectBox
-                # },
                 "output": {ELEMENT_KEY: FuncRenderer},
             },
         }
