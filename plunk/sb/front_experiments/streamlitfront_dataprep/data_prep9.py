@@ -99,6 +99,7 @@ def if_none_default(value, default):
 def dflt_element_key_factory(func, name, kind, default, annotation):
     return None
 
+
 def example_element_key_factory_01(name):
     if name in {'y', 'a'}:
         return IntInput
@@ -111,9 +112,9 @@ from i2.signatures import _call_forgivingly
 def call_forgivingly(func, /, *args, **kwargs):
     return _call_forgivingly(func, args, kwargs)
 
+
 def param_to_dict(parameter: Parameter):
     return {k: getattr(parameter, k) for k in ('name', 'kind', 'default', 'annotation')}
-
 
 
 # def mk_element_key_factory_based_on_mapping(mapping):
@@ -121,11 +122,13 @@ def param_to_dict(parameter: Parameter):
 #         return mapping.get(name)
 #     return element_key_factory
 
+
 def mk_element_key_factory_based_on_mapping(mapping, argname='name'):
     # return Sig(argname)(mapping.get)  # if mapping.get had a signature
     @Sig(argname)
     def element_key_factory(x):
         return mapping.get(x)
+
     return element_key_factory
 
 
@@ -189,7 +192,9 @@ config = {
                         'value': b.selected_func,
                     },
                 },
-                'output': {ELEMENT_KEY: partial(FuncRenderer, mk_element_key=mk_element_key)},
+                'output': {
+                    ELEMENT_KEY: partial(FuncRenderer, mk_element_key=mk_element_key)
+                },
             },
         }
     },
