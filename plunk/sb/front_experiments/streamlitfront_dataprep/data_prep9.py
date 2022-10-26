@@ -114,7 +114,6 @@ def call_forgivingly(func, /, *args, **kwargs):
 def param_to_dict(parameter: Parameter):
     return {k: getattr(parameter, k) for k in ('name', 'kind', 'default', 'annotation')}
 
-def mk_adf(annotation_rules, name_rules)
 
 
 # def mk_element_key_factory_based_on_mapping(mapping):
