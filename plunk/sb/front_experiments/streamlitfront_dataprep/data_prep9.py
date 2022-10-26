@@ -54,11 +54,11 @@ def identity(func: Callable):
     return func
 
 
-def foo(x: int):
-    return x
+def foo(x: int, y: float, z: str, a=10):
+    return int(x + y * a) * z
 
 
-def bar(msg: str):
+def bar(msg: str, x: str, y=20):
     return msg * 2
 
 
@@ -85,9 +85,56 @@ class OutRenderer(InputBase):
         # st.write(f"{self.output=}")
 
 
+from streamlitfront.elements import IntInput
+from operator import attrgetter
+
+
+def if_none_default(value, default):
+    if value is None:
+        return default
+    else:
+        return value
+
+
+def dflt_element_key_factory(func, name, kind, default, annotation):
+    return None
+
+def example_element_key_factory_01(name):
+    if name in {'y', 'a'}:
+        return IntInput
+
+
+from inspect import Parameter
+from i2.signatures import _call_forgivingly
+
+
+def call_forgivingly(func, /, *args, **kwargs):
+    return _call_forgivingly(func, args, kwargs)
+
+def param_to_dict(parameter: Parameter):
+    return {k: getattr(parameter, k) for k in ('name', 'kind', 'default', 'annotation')}
+
+def mk_adf(annotation_rules, name_rules)
+
+
+# def mk_element_key_factory_based_on_mapping(mapping):
+#     def element_key_factory(name):
+#         return mapping.get(name)
+#     return element_key_factory
+
+def mk_element_key_factory_based_on_mapping(mapping, argname='name'):
+    # return Sig(argname)(mapping.get)  # if mapping.get had a signature
+    @Sig(argname)
+    def element_key_factory(x):
+        return mapping.get(x)
+    return element_key_factory
+
+
 @dataclass
 class FuncRenderer(OutputBase):
     value: Any = None
+    dflt_element_key: Any = TextInput
+    mk_element_key: Callable = dflt_element_key_factory
 
     def __post_init__(self):
         super().__post_init__()
@@ -96,14 +143,23 @@ class FuncRenderer(OutputBase):
         st.write(f'output = {output}')
 
     def render(self):
+        func = self.output
         sig = Sig(self.output)
         st.write(sig)
 
         exec_section = ExecSection(
             obj=self.output,
             inputs={
-                name: {ELEMENT_KEY: TextInput, 'bound_data_factory': BoundData}
-                for name in sig
+                param.name: {
+                    ELEMENT_KEY: if_none_default(
+                        call_forgivingly(
+                            self.mk_element_key, func=func, **param_to_dict(param)
+                        ),
+                        self.dflt_element_key,
+                    ),
+                    'bound_data_factory': BoundData,
+                }
+                for param in sig.values()
             },
             output={ELEMENT_KEY: TextOutput},
             auto_submit=True,
@@ -118,6 +174,9 @@ class SimpleOutputFunc(ExecContainerBase):
         st.write(self.obj)
 
 
+# mk_element_key = dflt_mk_element_key
+mk_element_key = example_element_key_factory_01
+
 config = {
     APP_KEY: {'title': 'Funcs'},
     RENDERING_KEY: {
@@ -131,7 +190,7 @@ config = {
                         'value': b.selected_func,
                     },
                 },
-                'output': {ELEMENT_KEY: FuncRenderer},
+                'output': {ELEMENT_KEY: partial(FuncRenderer, mk_element_key=mk_element_key)},
             },
         }
     },
