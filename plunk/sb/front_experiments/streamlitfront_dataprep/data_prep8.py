@@ -62,6 +62,9 @@ def mk_pipeline_maker_app_with_mall(
     def mk_step(step_factory: Callable, kwargs: dict):
         return partial(step_factory, **kwargs)
 
+        # def mk_step(func): crudified to be sourced from funcfactory store
+        mk_app(choice)
+
     #
     @crudifier(
         # TODO: Want to be able to do this and this only to have the effect
