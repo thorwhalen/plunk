@@ -48,10 +48,10 @@ class GraphOutput(OutputBase):
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = "step_factories",
-    steps: str = "steps",
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
     steps_store=None,
-    pipelines: str = "pipelines",
+    pipelines: str = 'pipelines',
     pipelines_store=None,
 ):
     # TODO: Like to not have this binder logic involving streamlit state here! Contain it!
@@ -60,7 +60,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "data_loader"  # TODO make this dynamic
+        b.selected_step_factory = 'data_loader'  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -109,69 +109,61 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {
-                            "func_sig": Sig(
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {'value': b.selected_step_factory,},
+                        'kwargs': {
+                            'func_sig': Sig(
                                 mall[step_factories][b.selected_step_factory()]
                             ),
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
-                            "serializer": get_step_name,
+                            'items': list(mall[steps].values()),
+                            'serializer': get_step_name,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        'message': 'The pipeline has been created successfully.',
                     },
                 },
             },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                        "kwargs": {
+            'exec_pipeline': {
+                NAME_KEY: 'Pipeline Executor',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {'value': b.selected_pipeline,},
+                        'kwargs': {
                             ELEMENT_KEY: KwargsInput,
-                            "func_sig": get_selected_pipeline_sig(),
+                            'func_sig': get_selected_pipeline_sig(),
                         },
                     }
                 },
             },
-            "visualize_pipeline": {
-                NAME_KEY: "Pipeline Visualization",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                    },
-                    "output": {
+            'visualize_pipeline': {
+                NAME_KEY: 'Pipeline Visualization',
+                'execution': {
+                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
+                    'output': {
                         ELEMENT_KEY: GraphOutput,
-                        NAME_KEY: "Flow",
-                        "use_container_width": True,
+                        NAME_KEY: 'Flow',
+                        'use_container_width': True,
                     },
                 },
             },
@@ -184,7 +176,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # TODO: Try with know.malls.mk_mall: #TODO
 
     mall = dict(
@@ -206,10 +198,10 @@ if __name__ == "__main__":
         chunker=FuncFactory(chunker),
     )
 
-    mall["step_factories"] = step_factories
+    mall['step_factories'] = step_factories
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
     )
 
     app()
