@@ -17,6 +17,11 @@ from streamlitfront.elements import (
     KwargsInput,
     PipelineMaker,
 )
+from streamlitfront.elements import (
+    AudioRecorder,
+    FileUploader,
+    MultiSourceInput,
+)
 from streamlitfront.examples.util import Graph
 import streamlit as st
 from dataclasses import dataclass
@@ -26,6 +31,30 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     # DFLT_ANNOT_PATH,
     data_from_wav_folder,
 )
+import soundfile as sf
+from io import BytesIO
+import matplotlib.pyplot as plt
+
+WaveForm = Iterable[int]
+
+
+@dataclass
+class AudioDisplay(OutputBase):
+    def render(self):
+        sound, tag = self.output
+        if not isinstance(sound, str):
+            sound = sound.getvalue()
+
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        with tab1:
+            st.audio(sound)
+        with tab2:
+            fig, ax = plt.subplots(figsize=(15, 5))
+            ax.plot(arr, label=f"Tag={tag}")
+            ax.legend()
+            st.pyplot(fig)
+            # st.write(arr[:10])
 
 
 def chunker(it, chk_size: int):
@@ -54,6 +83,7 @@ def mk_pipeline_maker_app_with_mall(
     pipelines: str = "pipelines",
     pipelines_store=None,
     data: str = "data",
+    data_output=None,
     data_store=None,
 ):
     # TODO: Like to not have this binder logic involving streamlit state here! Contain it!
@@ -87,12 +117,20 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(pipeline=pipelines_store),
-        # output_store='exec_outputs'
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
+        output_store="exec_outputs",
     )
-    def exec_pipeline(pipeline: Callable, kwargs):
-        pipe = pipeline(**kwargs)
-        return pipe
+    def exec_pipeline(pipeline: Callable, tagged_data):
+        sound, tag = tagged_data
+        if not isinstance(sound, str):
+            sound = sound.getvalue()
+
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        result = list(
+            pipeline(arr)()
+        )  # TODO: because we use FuncFactories we need that hack
+        st.write(result)
+        return result
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
@@ -103,6 +141,15 @@ def mk_pipeline_maker_app_with_mall(
 
         return pipeline
 
+    @crudifier(output_store="sound_output")
+    def upload_sound(train_audio: WaveForm, tag: str):
+        # mall["tag_store"] = tag
+        return (train_audio, tag)
+
+    @crudifier(param_to_mall_map={"result": "sound_output"})
+    def display_tag_sound(result):
+        return result
+
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(step_factory=step_factories),
@@ -111,7 +158,9 @@ def mk_pipeline_maker_app_with_mall(
     )
     def load_data(step_factory: Callable, kwargs: dict):
         st.write(mall)
-        return partial(step_factory, **kwargs)
+        # result = partial(step_factory, **kwargs)
+        result = step_factory(**kwargs)
+        return result
 
     def get_step_name(step):
         return [k for k, v in mall[steps].items() if v == step][0]
@@ -124,6 +173,42 @@ def mk_pipeline_maker_app_with_mall(
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
+            "upload_sound": {
+                # NAME_KEY: "Data Loader",
+                # "description": {"content": "A very simple learn model example."},
+                "execution": {
+                    "inputs": {
+                        "train_audio": {
+                            ELEMENT_KEY: MultiSourceInput,
+                            "From a file": {
+                                ELEMENT_KEY: FileUploader,
+                                "type": "wav",
+                            },
+                            "From the microphone": {ELEMENT_KEY: AudioRecorder},
+                        },
+                        # "tag": {
+                        #     ELEMENT_KEY: TextInput,
+                        # },
+                    },
+                    "output": {
+                        ELEMENT_KEY: SuccessNotification,
+                        "message": "Wav loaded successfully.",
+                    },
+                },
+            },
+            "display_tag_sound": {
+                "execution": {
+                    "inputs": {
+                        "result": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["sound_output"],
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: AudioDisplay,
+                    },
+                },
+            },
             "load_data": {
                 NAME_KEY: "Data Loader",
                 "execution": {
@@ -185,9 +270,9 @@ def mk_pipeline_maker_app_with_mall(
                         "pipeline": {
                             "value": b.selected_pipeline,
                         },
-                        "kwargs": {
-                            ELEMENT_KEY: KwargsInput,
-                            "func_sig": get_selected_pipeline_sig(),
+                        "data": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["sound_output"],
                         },
                     }
                 },
@@ -210,17 +295,25 @@ def mk_pipeline_maker_app_with_mall(
         },
     }
 
-    funcs = [load_data, mk_step, mk_pipeline, exec_pipeline, visualize_pipeline]
+    funcs = [
+        upload_sound,
+        display_tag_sound,
+        load_data,
+        mk_step,
+        mk_pipeline,
+        exec_pipeline,
+        visualize_pipeline,
+    ]
     app = mk_app(funcs, config=config)
 
     return app
 
 
 if __name__ == "__main__":
-    # TODO: Try with know.malls.mk_mall: #TODO
 
     mall = dict(
         # Factory Input Stores
+        sound_output=dict(),
         step_factories=dict(),
         # Output Store
         data=dict(),
@@ -233,8 +326,8 @@ if __name__ == "__main__":
 
     step_factories = dict(
         # Source Readers
-        data_loader=FuncFactory(data_from_wav_folder),
-        # data_loader=FuncFactory(foo),
+        data_loader_factory=FuncFactory(data_from_wav_folder),
+        data_loader=data_from_wav_folder,
         # Chunkers
         chunker=FuncFactory(chunker),
     )
