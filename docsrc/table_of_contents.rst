@@ -3,6 +3,8 @@
    :caption: Contents:
 
    module_docs/plunk/ap/audio_stream/audiostream_webservice
+   module_docs/plunk/ap/live_graph/live_graph_data_buffer
+   module_docs/plunk/ap/live_graph/live_graph_streamlitfront
    module_docs/plunk/sb/click_detection/analysis
    module_docs/plunk/sb/click_detection/clickified
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
