@@ -1,7 +1,10 @@
 """Render a stream"""
+import datetime
 import time
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
+from typing import List
 
 from audiostream2py import PyAudioSourceReader
 
@@ -9,7 +12,7 @@ import streamlit as st
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, Crudifier, NAME_KEY
 from front.elements import OutputBase
 import matplotlib.pyplot as plt
-from stream2py import StreamBuffer
+from stream2py import StreamBuffer, BufferReader
 
 from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import SelectBox
@@ -30,34 +33,53 @@ mall = b.mall()
 crudifier = partial(Crudifier, mall=mall)
 
 
+def time_string(timestamp):
+    st.markdown(f'## time: {str(datetime.datetime.fromtimestamp(timestamp / 1e6))}')
+
+
+def line_plot(graph_data: List[int | float], title: str, figsize=(15, 5)):
+    fig, ax = plt.subplots(figsize=figsize)
+    st.markdown(f'## {title}')
+    ax.plot(graph_data)
+    st.pyplot(fig)
+    plt.close(fig)
+
+
+PLOT_TYPES = {'line': line_plot}
+
+
 @dataclass
 class DataGraph(OutputBase):
     output: StreamBuffer = None
 
+    def format(self, data_reader: BufferReader):
+        maxlen = data_reader._buffer._sorted_deque.maxlen
+        data_list = data_reader.range(0, time.time() * 1e6, peek=True)
+        plots_data_padding = [0] * (maxlen - len(data_list))
+        plots_data = defaultdict(plots_data_padding.copy)
+        for d in data_list:
+            for k, v in d.items():
+                if k in GRAPH_TYPES and v is not None:
+                    plots_data[k].append(v)
+        timestamp = data_list[-1]['timestamp']
+        return timestamp, plots_data
+
+    def plot(self, graph_type: str, graph_data: List[int | float]):
+        plot_type = GRAPH_TYPES[graph_type]['plot']
+        PLOT_TYPES[plot_type](graph_data, title=graph_type)
+
     def render(self):
         if self.output:
-            maxlen = self.output._maxlen
             box = st.empty()
             i = 0
             data_reader = self.output.mk_reader()
             while self.output.is_running:
                 if data_reader.read(ignore_no_item_found=True) is not None:
-                    data_list = data_reader.range(0, time.time() * 1e6, peek=True)
-                    # print(f'{len(data_list)=}')
-
-                    graph_data = [0] * (maxlen - len(data_list))
-                    graph_data.extend(
-                        [
-                            next(v for k, v in d.items() if k != 'timestamp')
-                            for d in data_list
-                        ]
-                    )
+                    timestamp, plots_data = self.format(data_reader)
                     with box.container():
-                        fig, ax = plt.subplots(figsize=(15, 5))
-                        st.markdown(f'## Graph')
-                        ax.plot(graph_data, label='Graph')
-                        st.pyplot(fig)
-                        plt.close(fig)
+                        for graph_type, graph_data in plots_data.items():
+                            self.plot(graph_type, graph_data)
+                        time_string(timestamp)
                     print(f'rendering...({i})')
                     i += 1
                 else:
@@ -114,7 +136,7 @@ if __name__ == '__main__':
                                 ELEMENT_KEY: SelectBox,
                                 'options': mall['input_device'],
                             },
-                            'graph_types': {
+                            'graph_types': {  # TODO option to select more than one graph type
                                 ELEMENT_KEY: SelectBox,
                                 'options': mall['graph_types'],
                             },
