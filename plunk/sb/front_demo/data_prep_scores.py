@@ -9,6 +9,7 @@ from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from i2 import Pipe, Sig
 from front.crude import Crudifier, prepare_for_crude_dispatch
 from lined import LineParametrized
+import numpy as np
 
 from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import (
@@ -34,6 +35,24 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
 import soundfile as sf
 from io import BytesIO
 import matplotlib.pyplot as plt
+
+
+from omodel.gen_utils.chunker import fixed_step_chunker
+
+from functools import partial
+from omodel.outliers.pystroll import OutlierModel as Stroll
+
+DFLT_CHK_SIZE = 2048
+DFLT_CHK_STEP = 2048
+DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
+
+
+def chunker(it, chk_size: int = DFLT_CHK_SIZE):
+    return fixed_step_chunker(it=it, chk_size=chk_size, chk_step=chk_size)
+
+
+featurizer = DFLT_FEATURIZER
+
 
 WaveForm = Iterable[int]
 
@@ -72,6 +91,18 @@ class GraphOutput(OutputBase):
             figure_or_dot=dag.dot_digraph(),
             use_container_width=self.use_container_width,
         )
+
+
+@dataclass
+class ArrayPlotter(OutputBase):
+    def render(self):
+        # st.write(f"output = {self.output}")
+        X = self.output
+        fig, ax = plt.subplots(figsize=(15, 5))
+        ax.plot(X)
+        # ax.vlines(range(len(X)), ymin=np.min(X), ymax=X)
+        ax.legend()
+        st.pyplot(fig)
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -129,8 +160,28 @@ def mk_pipeline_maker_app_with_mall(
         result = list(
             pipeline(arr)()
         )  # TODO: because we use FuncFactories we need that hack
-        st.write(result)
         return result
+
+    @crudifier(
+        # TODO: Does this work if pipelines_store is a mapping instead of a string?
+        param_to_mall_map=dict(tagged_data="sound_output"),
+        # output_store='exec_outputs'
+    )
+    def simple_model(tagged_data):
+        sound, tag = tagged_data
+        if not isinstance(sound, str):
+            sound = sound.getvalue()
+
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+
+        wfs = np.array(arr)
+        st.write(f"wfs = {wfs[:200]}")
+        chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
+        fvs = np.array(list(map(featurizer, chks)))
+        model = Stroll(n_centroids=50)
+        model.fit(X=fvs)
+        scores = model.score_samples(X=fvs)
+        return scores
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
@@ -144,22 +195,16 @@ def mk_pipeline_maker_app_with_mall(
     @crudifier(output_store="sound_output")
     def upload_sound(train_audio: WaveForm, tag: str):
         # mall["tag_store"] = tag
-        return (train_audio, tag)
+        # sound, tag = train_audio, tag
+        # if not isinstance(sound, str):
+        #     sound = sound.getvalue()
+
+        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        st.write(mall)
+        return train_audio, tag
 
     @crudifier(param_to_mall_map={"result": "sound_output"})
     def display_tag_sound(result):
-        return result
-
-    @crudifier(
-        # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(step_factory=step_factories),
-        output_store=data_store
-        # output_store='exec_outputs'
-    )
-    def load_data(step_factory: Callable, kwargs: dict):
-        st.write(mall)
-        # result = partial(step_factory, **kwargs)
-        result = step_factory(**kwargs)
         return result
 
     def get_step_name(step):
@@ -206,25 +251,6 @@ def mk_pipeline_maker_app_with_mall(
                     },
                     "output": {
                         ELEMENT_KEY: AudioDisplay,
-                    },
-                },
-            },
-            "load_data": {
-                NAME_KEY: "Data Loader",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {
-                            "func_sig": Sig(
-                                mall[step_factories][b.selected_step_factory()]
-                            ),
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
                     },
                 },
             },
@@ -292,12 +318,27 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            "simple_model": {
+                NAME_KEY: "Visualize outputs",
+                "execution": {
+                    "inputs": {
+                        "tagged_data": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["sound_output"],
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
         },
     }
 
     funcs = [
         upload_sound,
         display_tag_sound,
+        simple_model,
         # load_data,
         mk_step,
         mk_pipeline,
