@@ -36,8 +36,8 @@ def zero_crossing_ratio(wf):
 
 
 GRAPH_TYPES = {
-    'volume': volume,
-    'zero_crossing_ratio': zero_crossing_ratio,
+    'volume': {'function': volume, 'plot': 'line'},
+    'zero_crossing_ratio': {'function': zero_crossing_ratio, 'plot': 'line'},
 }
 
 
@@ -55,7 +55,7 @@ def audio_it(
     channels=1,
     frames_per_buffer=44100,  # same as sample rate for 1 second intervals
     seconds_to_keep_in_stream_buffer=60,
-    graph_types=('volume', 'zero_crossing_ratio'),
+    graph_types=(*GRAPH_TYPES,),
 ):
     input_device_index = get_input_device_index(input_device=input_device)
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
@@ -87,7 +87,7 @@ def audio_it(
         wf=audio_to_wf,
         audio_reader_instance=lambda: audio_buffer,
         _audio_stop=stop_if_audio_not_running,
-        **{k: v for k, v in GRAPH_TYPES.items() if k in graph_types},
+        **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
 
 
@@ -117,7 +117,10 @@ class SlabsSourceReader(SourceReader):
         return data
 
 
-DATA_KEYS = ('timestamp', 'volume', 'zero_crossing_ratio')
+DATA_KEYS = (
+    'timestamp',
+    *GRAPH_TYPES,
+)
 
 
 @if_not_none
@@ -135,7 +138,7 @@ def mk_live_graph_data_buffer(
     channels=1,
     frames_per_buffer=44100,
     seconds_to_keep_in_stream_buffer=60,
-    graph_types=('volume', 'zero_crossing_ratio'),
+    graph_types=(*GRAPH_TYPES,),
 ) -> StreamBuffer:
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
         buffer_size_seconds=seconds_to_keep_in_stream_buffer,
@@ -157,14 +160,18 @@ def mk_live_graph_data_buffer(
     ).stream_buffer(maxlen)
 
 
-def _test_live_graph_data_buffer(input_device='NexiGo N930AF FHD Webcam Audio'):
+def _test_live_graph_data_buffer(
+    input_device='NexiGo N930AF FHD Webcam Audio', graph_types=(*GRAPH_TYPES,)
+):
     recording_devices = PyAudioSourceReader.list_recording_devices()
     recording_devices.append(None)
     print(recording_devices)
     assert input_device in recording_devices, 'Selected input device not found.'
 
     start = time() * 1e6
-    with mk_live_graph_data_buffer(input_device=input_device) as slab_buffer:
+    with mk_live_graph_data_buffer(
+        input_device=input_device, graph_types=graph_types
+    ) as slab_buffer:
         i = 0
         slab_reader = slab_buffer.mk_reader()
         while slab_buffer.is_running:
@@ -184,4 +191,4 @@ def _test_live_graph_data_buffer(input_device='NexiGo N930AF FHD Webcam Audio'):
 
 
 if __name__ == '__main__':
-    _test_live_graph_data_buffer()
+    _test_live_graph_data_buffer(graph_types='volume')
