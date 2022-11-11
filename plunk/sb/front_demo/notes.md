@@ -2,6 +2,7 @@
 
 ## 1) Visualize a store of tagged sounds
 * load the dataset by pointing to a folder
+* visualize the result
 * apply a simple pipeline (chunker -> featurizer -> projector to plane) and visualize the result
 
 ## 2) Record/load and play sounds
