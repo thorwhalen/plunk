@@ -175,7 +175,7 @@ def _test_live_graph_data_buffer(
         i = 0
         slab_reader = slab_buffer.mk_reader()
         while slab_buffer.is_running:
-            if (slab := slab_reader.next(ignore_no_item_found=True)) is not None:
+            if (slab := slab_reader.read(ignore_no_item_found=True)) is not None:
                 print('slab', i, slab)
                 assert all(k in slab for k in DATA_KEYS)
                 i += 1

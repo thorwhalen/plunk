@@ -1,10 +1,10 @@
 """Render a stream"""
 import datetime
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from functools import partial
-from typing import List
+from typing import List, DefaultDict, Iterable
 
 from audiostream2py import PyAudioSourceReader
 
@@ -12,6 +12,7 @@ import streamlit as st
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, Crudifier, NAME_KEY
 from front.elements import OutputBase
 import matplotlib.pyplot as plt
+from plunk.ap.snippets import prefill_deque_with_value
 from stream2py import StreamBuffer, BufferReader
 
 from streamlitfront import mk_app, binder as b
@@ -37,7 +38,7 @@ def time_string(timestamp):
     st.markdown(f'## time: {str(datetime.datetime.fromtimestamp(timestamp / 1e6))}')
 
 
-def line_plot(graph_data: List[int | float], title: str, figsize=(15, 5)):
+def line_plot(graph_data: Iterable[int | float], title: str, figsize=(15, 5)):
     fig, ax = plt.subplots(figsize=figsize)
     st.markdown(f'## {title}')
     ax.plot(graph_data)
@@ -48,37 +49,73 @@ def line_plot(graph_data: List[int | float], title: str, figsize=(15, 5)):
 PLOT_TYPES = {'line': line_plot}
 
 
+def plot(graph_type: str, graph_data: Iterable[int | float]):
+    """Checks for plot type and draws plot
+
+    :param graph_type:
+    :param graph_data:
+    :return:
+    """
+    plot_type = GRAPH_TYPES[graph_type]['plot']
+    PLOT_TYPES[plot_type](graph_data, title=graph_type)
+
+
 @dataclass
 class DataGraph(OutputBase):
     output: StreamBuffer = None
+    plots_data: DefaultDict[str, deque] = None
 
-    def format(self, data_reader: BufferReader):
-        maxlen = data_reader._buffer._sorted_deque.maxlen
-        data_list = data_reader.range(0, time.time() * 1e6, peek=True)
-        plots_data_padding = [0] * (maxlen - len(data_list))
-        plots_data = defaultdict(plots_data_padding.copy)
-        for d in data_list:
-            for k, v in d.items():
-                if k in GRAPH_TYPES and v is not None:
-                    plots_data[k].append(v)
-        timestamp = data_list[-1]['timestamp']
-        return timestamp, plots_data
+    def prefill_plots_data(self, data_reader: BufferReader, fill_value=0):
+        """Prefill data upto the expected plot data window size
 
-    def plot(self, graph_type: str, graph_data: List[int | float]):
-        plot_type = GRAPH_TYPES[graph_type]['plot']
-        PLOT_TYPES[plot_type](graph_data, title=graph_type)
+        :param data_reader:
+        :param fill_value:
+        :return:
+        """
+        pd = prefill_deque_with_value(
+            value=0, maxlen=data_reader._buffer._sorted_deque.maxlen
+        )
+        self.plots_data = defaultdict(pd.copy)
+        data_list = data_reader.range(
+            fill_value, time.time() * 1e6, peek=True, ignore_no_item_found=True
+        )
+        if data_list is not None:
+            for d in data_list:
+                self.append_plots_data(d)
+
+    def append_plots_data(self, data: dict):
+        """Parse by graph type and add data point to plots_data
+
+        :param data: dict(timestamp=1, volume=2, zero_crossing_ratio=3)
+        :return:
+        """
+        for k, v in data.items():
+            if k in GRAPH_TYPES and v is not None:
+                self.plots_data[k].append(v)
+
+    def timestamp(self, data_reader: BufferReader, data: dict):
+        """Get timestamp using SourceReader key function
+
+        :param data_reader:
+        :param data: dict(timestamp=1, volume=2, zero_crossing_ratio=3)
+        :return:
+        """
+        key = data_reader._buffer.key
+        return key(data)
 
     def render(self):
         if self.output:
             box = st.empty()
             i = 0
             data_reader = self.output.mk_reader()
+            self.prefill_plots_data(data_reader)
             while self.output.is_running:
-                if data_reader.read(ignore_no_item_found=True) is not None:
-                    timestamp, plots_data = self.format(data_reader)
+                if (data := data_reader.read(ignore_no_item_found=True)) is not None:
+                    timestamp = self.timestamp(data_reader, data)
+                    self.append_plots_data(data)
                     with box.container():
-                        for graph_type, graph_data in plots_data.items():
-                            self.plot(graph_type, graph_data)
+                        for graph_type, graph_data in self.plots_data.items():
+                            plot(graph_type, graph_data)
                         time_string(timestamp)
                     print(f'rendering...({i})')
                     i += 1
