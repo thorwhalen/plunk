@@ -107,18 +107,22 @@ class DataGraph(OutputBase):
         if self.output:
             box = st.empty()
             i = 0
-            data_reader = self.output.mk_reader()
+            data_reader = self.output.mk_reader(
+                read_size=self.output._maxlen, ignore_no_item_found=True
+            )
             self.prefill_plots_data(data_reader)
             while self.output.is_running:
-                if (data := data_reader.read(ignore_no_item_found=True)) is not None:
+                if (data_list := data_reader.read()) is not None:
+                    # print(f'{len(data_list)=}')
+                    for data in data_list:
+                        self.append_plots_data(data)
+                        i += 1
                     timestamp = self.timestamp(data_reader, data)
-                    self.append_plots_data(data)
+                    print(f'rendering...({i})')
                     with box.container():
                         for graph_type, graph_data in self.plots_data.items():
                             plot(graph_type, graph_data)
                         time_string(timestamp)
-                    print(f'rendering...({i})')
-                    i += 1
                 else:
                     time.sleep(0.1)
                     # print(f'sleeping...')
