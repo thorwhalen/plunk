@@ -24,3 +24,28 @@ class AudioArrayDisplay(OutputBase):
             ax.legend()
             st.pyplot(fig)
             # st.write(arr[:10])
+
+
+@dataclass
+class GraphOutput(OutputBase):
+    use_container_width: bool = False
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        dag = self.output
+        st.graphviz_chart(
+            figure_or_dot=dag.dot_digraph(),
+            use_container_width=self.use_container_width,
+        )
+
+
+@dataclass
+class ArrayPlotter(OutputBase):
+    def render(self):
+        # st.write(f"output = {self.output}")
+        X = self.output
+        fig, ax = plt.subplots(figsize=(15, 5))
+        ax.plot(X)
+        # ax.vlines(range(len(X)), ymin=np.min(X), ymax=X)
+        ax.legend()
+        st.pyplot(fig)

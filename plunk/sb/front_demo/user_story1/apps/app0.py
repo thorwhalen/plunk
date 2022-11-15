@@ -1,5 +1,6 @@
 """
-An app to take care of the initial 'sourcing' part of the data prep of audio ML
+An app that loads either a wav file from local folder or records a sound
+and visualizes the resulting numpy array 
 """
 from typing import Mapping
 from know.boxes import *
@@ -23,10 +24,7 @@ from streamlitfront.elements import (
     FileUploader,
     MultiSourceInput,
 )
-from streamlitfront.examples.util import Graph
 import streamlit as st
-from dataclasses import dataclass
-from front.elements import OutputBase
 from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     # DFLT_WF_PATH,
     # DFLT_ANNOT_PATH,
@@ -35,8 +33,10 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
 import soundfile as sf
 from io import BytesIO
 import matplotlib.pyplot as plt
-from plunk.sb.front_experiments.front_demo.user_story1.components.components import (
+from plunk.sb.front_demo.user_story1.components.components import (
     AudioArrayDisplay,
+    GraphOutput,
+    ArrayPlotter,
 )
 
 from omodel.gen_utils.chunker import fixed_step_chunker
@@ -57,79 +57,6 @@ featurizer = DFLT_FEATURIZER
 
 
 WaveForm = Iterable[int]
-
-
-@dataclass
-class AudioDisplay(OutputBase):
-    def render(self):
-        sound, tag = self.output
-        # if not isinstance(sound, str):
-        if not isinstance(sound, bytes):
-
-            sound = sound.getvalue()
-
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        st.write(type(arr))
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
-        with tab1:
-            st.audio(sound)
-        with tab2:
-            fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(arr, label=f"Tag={tag}")
-            ax.legend()
-            st.pyplot(fig)
-            # st.write(arr[:10])
-
-
-@dataclass
-class AudioArrayDisplay(OutputBase):
-    def render(self):
-        sound, tag = self.output
-        # if not isinstance(sound, str):
-        # if not isinstance(sound, bytes):
-
-        #     sound = sound.getvalue()
-
-        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        # st.write(type(arr))
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
-        with tab1:
-            st.audio(sound)
-        with tab2:
-            fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(sound, label=f"Tag={tag}")
-            ax.legend()
-            st.pyplot(fig)
-            # st.write(arr[:10])
-
-
-def chunker(it, chk_size: int):
-    return fixed_step_chunker(it=it, chk_size=chk_size, chk_step=chk_size)
-
-
-@dataclass
-class GraphOutput(OutputBase):
-    use_container_width: bool = False
-
-    def render(self):
-        # with st.expander(self.name, True): #cannot nest expanders
-        dag = self.output
-        st.graphviz_chart(
-            figure_or_dot=dag.dot_digraph(),
-            use_container_width=self.use_container_width,
-        )
-
-
-@dataclass
-class ArrayPlotter(OutputBase):
-    def render(self):
-        # st.write(f"output = {self.output}")
-        X = self.output
-        fig, ax = plt.subplots(figsize=(15, 5))
-        ax.plot(X)
-        # ax.vlines(range(len(X)), ymin=np.min(X), ymax=X)
-        ax.legend()
-        st.pyplot(fig)
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -228,7 +155,6 @@ def mk_pipeline_maker_app_with_mall(
             sound = sound.getvalue()
 
         arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        # st.write(mall)
         return arr, tag
 
     @crudifier(param_to_mall_map={"result": "sound_output"})
@@ -366,7 +292,7 @@ def mk_pipeline_maker_app_with_mall(
     funcs = [
         upload_sound,
         display_tag_sound,
-        simple_model,
+        # simple_model,
         # load_data,
         # mk_step,
         # mk_pipeline,
