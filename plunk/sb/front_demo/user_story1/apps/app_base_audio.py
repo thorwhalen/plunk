@@ -41,6 +41,7 @@ from plunk.sb.front_demo.user_story1.components.components import (
 from plunk.sb.front_demo.user_story1.utils.tools import (
     DFLT_CHUNKER,
     DFLT_FEATURIZER,
+    DFLT_CHK_SIZE,
     chunker,
     featurizer,
     WaveForm,
@@ -56,7 +57,7 @@ def simple_chunker(wfs):
 
 
 def simple_featurizer(chks):
-    fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
+    fvs = np.array(list(map(np.std, chks)))
     return fvs
 
 
@@ -128,46 +129,12 @@ def mk_pipeline_maker_app_with_mall(
     )
     def simple_model(tagged_data):
         sound, tag = tagged_data
-        if not isinstance(sound, str):
-            sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        wfs = sound
+        chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
+        fvs = simple_featurizer(chks)
 
-        wfs = np.array(arr)
-        st.write(f"wfs = {wfs[:200]}")
-        # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
-        # fvs = np.array(list(map(featurizer, chks)))
-        # model = Stroll(n_centroids=50)
-        # model.fit(X=fvs)
-        # scores = model.score_samples(X=fvs)
-        # return scores
-        return wfs
-
-    @crudifier(
-        # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(
-            tagged_data="sound_output", preprocess_pipeline="pipelines"
-        ),
-        output_store="learned_models",
-    )
-    def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=50):
-        sound, tag = tagged_data
-        # if not isinstance(sound, str):
-        #     sound = sound.getvalue()
-
-        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-
-        wfs = np.array(sound)
-        st.write(Sig(preprocess_pipeline))
-        fvs = preprocess_pipeline(wfs)()
-        # st.write(f"wfs = {wfs[:200]}")
-        # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
-        # fvs = np.array(list(map(featurizer, chks)))
-        model = Stroll(n_centroids=50)
-        model.fit(X=fvs)
-        # scores = model.score_samples(X=fvs)
-        # return scores
-        return model
+        return fvs
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
@@ -203,7 +170,7 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {"title": "Base Audio"},
         RENDERING_KEY: {
             "upload_sound": {
                 # NAME_KEY: "Data Loader",
@@ -241,70 +208,6 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {
-                            "func_sig": Sig(
-                                mall[step_factories][b.selected_step_factory()]
-                            ),
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
-                    },
-                },
-            },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
-                        steps: {
-                            ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
-                            "serializer": get_step_name,
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
-                    },
-                },
-            },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                        "data": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
-                        },
-                    }
-                },
-            },
-            "visualize_pipeline": {
-                NAME_KEY: "Pipeline Visualization",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: GraphOutput,
-                        NAME_KEY: "Flow",
-                        "use_container_width": True,
-                    },
-                },
-            },
             "simple_model": {
                 NAME_KEY: "Visualize outputs",
                 "execution": {
@@ -319,37 +222,13 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "simple_model": {
-                NAME_KEY: "Learn model",
-                "execution": {
-                    "inputs": {
-                        "tagged_data": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
-                        },
-                        "preprocess_pipeline": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["pipelines"],
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
-            },
         },
     }
 
     funcs = [
         upload_sound,
         display_tag_sound,
-        # simple_model,
-        # load_data,
-        mk_step,
-        mk_pipeline,
-        learn_outlier_model,
-        exec_pipeline,
-        visualize_pipeline,
+        simple_model,
     ]
     app = mk_app(funcs, config=config)
 
