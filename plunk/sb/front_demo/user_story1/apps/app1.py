@@ -38,25 +38,21 @@ from plunk.sb.front_demo.user_story1.components.components import (
     GraphOutput,
     ArrayPlotter,
 )
+from plunk.sb.front_demo.user_story1.utils.tools import (
+    DFLT_CHUNKER,
+    DFLT_FEATURIZER,
+    chunker,
+    featurizer,
+    WaveForm,
+    Stroll,
+)
 
-from omodel.gen_utils.chunker import fixed_step_chunker
-
-from functools import partial
-from omodel.outliers.pystroll import OutlierModel as Stroll
-
-DFLT_CHK_SIZE = 2048
-DFLT_CHK_STEP = 2048
-DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
-
-
-def chunker(it, chk_size: int = DFLT_CHK_SIZE):
-    return fixed_step_chunker(it=it, chk_size=chk_size, chk_step=chk_size)
+# DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 
 
-featurizer = DFLT_FEATURIZER
-
-
-WaveForm = Iterable[int]
+def simple_featurizer(chks):
+    fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
+    return fvs
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -77,7 +73,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "data_loader"  # TODO make this dynamic
+        b.selected_step_factory = "chunker"  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -89,15 +85,19 @@ def mk_pipeline_maker_app_with_mall(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
     )
     def mk_step(step_factory: Callable, kwargs: dict):
-        return partial(step_factory, **kwargs)
+        step = partial(step_factory, **kwargs)()  # TODO check this
+        sig = Sig(step)
+        st.write(f"Signature of step made: {sig}")
+        return step
 
     #
     @crudifier(
         # TODO: Want to be able to do this and this only to have the effect
         # param_to_mall_map=dict(steps=steps),
-        output_store=pipelines_store
+        output_store=pipelines_store,
     )
     def mk_pipeline(steps: Iterable[Callable]):
+        # func_steps = (step() for step in steps)
         return LineParametrized(*steps)
 
     @crudifier(
@@ -107,12 +107,12 @@ def mk_pipeline_maker_app_with_mall(
     )
     def exec_pipeline(pipeline: Callable, tagged_data):
         sound, tag = tagged_data
-        if not isinstance(sound, str):
-            sound = sound.getvalue()
+        # if not isinstance(sound, str):
+        #     sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
         result = list(
-            pipeline(arr)()
+            pipeline(sound)()
         )  # TODO: because we use FuncFactories we need that hack
         return result
 
@@ -140,10 +140,38 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
+        param_to_mall_map=dict(
+            tagged_data="sound_output", preprocess_pipeline="pipelines"
+        ),
+        output_store="learned_models",
+    )
+    def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=50):
+        sound, tag = tagged_data
+        # if not isinstance(sound, str):
+        #     sound = sound.getvalue()
+
+        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
+
+        wfs = np.array(sound)
+        st.write(Sig(preprocess_pipeline))
+        fvs = preprocess_pipeline(it=wfs)()
+        # st.write(f"wfs = {wfs[:200]}")
+        # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
+        # fvs = np.array(list(map(featurizer, chks)))
+        model = Stroll(n_centroids=50)
+        model.fit(X=fvs)
+        # scores = model.score_samples(X=fvs)
+        # return scores
+        return model
+
+    @crudifier(
+        # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(pipeline=pipelines_store),
         # output_store='exec_outputs'
     )
     def visualize_pipeline(pipeline: LineParametrized):
+        sig = Sig(pipeline)
+        st.write(f"Signature of selected pipeline = {sig}")
 
         return pipeline
 
@@ -286,6 +314,24 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            "simple_model": {
+                NAME_KEY: "Learn model",
+                "execution": {
+                    "inputs": {
+                        "tagged_data": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["sound_output"],
+                        },
+                        "preprocess_pipeline": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["pipelines"],
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
         },
     }
 
@@ -296,6 +342,7 @@ def mk_pipeline_maker_app_with_mall(
         # load_data,
         mk_step,
         mk_pipeline,
+        learn_outlier_model,
         exec_pipeline,
         visualize_pipeline,
     ]
@@ -315,16 +362,18 @@ if __name__ == "__main__":
         steps=dict(),
         pipelines=dict(),
         exec_outputs=dict(),
+        learned_models=dict(),
     )
 
     crudifier = partial(prepare_for_crude_dispatch, mall=mall)
 
     step_factories = dict(
         # Source Readers
-        data_loader_factory=FuncFactory(data_from_wav_folder),
-        data_loader=data_from_wav_folder,
+        # data_loader_factory=FuncFactory(data_from_wav_folder),
+        # data_loader=data_from_wav_folder,
         # Chunkers
         chunker=FuncFactory(chunker),
+        featurizer=FuncFactory(simple_featurizer),
     )
 
     mall["step_factories"] = step_factories

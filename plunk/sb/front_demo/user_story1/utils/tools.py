@@ -1,7 +1,7 @@
 import numpy as np
 
 from functools import partial
-
+from typing import Iterable
 
 from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
     # DFLT_WF_PATH,
@@ -29,6 +29,8 @@ DFLT_CHUNKER = simple_chunker
 DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 
 featurizer = DFLT_FEATURIZER
+chunker = simple_chunker
+WaveForm = Iterable[int]
 
 
 def store_to_key_fvs(wf_store, chunker=DFLT_CHUNKER, featurizer=DFLT_FEATURIZER):

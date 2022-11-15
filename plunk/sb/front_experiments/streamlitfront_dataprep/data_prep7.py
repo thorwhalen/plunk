@@ -41,25 +41,28 @@ def make_chunker(chk_size: int, chk_step: Optional[int] = None):
 
 if not b.mall():
     b.mall = {
-        'func_store': {},
-        'featurizer': {},
-        'featurizer_cls': {},
-        'chunker': {},
-        'factories': {'chunker': make_chunker},
-        'wf_store': {},
-        'wf_store_cls': {'data_from_wav_folder': data_from_wav_folder},
-        'annots_loader': {},
-        'annots_loader_cls': {'data_from_csv': data_from_csv},
+        "func_store": {},
+        "featurizer": {},
+        "featurizer_cls": {},
+        "chunker": {},
+        "factories": {"chunker": make_chunker},
+        "wf_store": {},
+        "wf_store_cls": {"data_from_wav_folder": data_from_wav_folder},
+        "annots_loader": {},
+        "annots_loader_cls": {"data_from_csv": data_from_csv},
     }
 
 mall = b.mall()
-chunker = prepare_for_dispatch(make_chunker, output_store=mall['chunker'],)
+chunker = prepare_for_dispatch(
+    make_chunker,
+    output_store=mall["chunker"],
+)
 
 
 DFLT_CHUNKER_MAKER = lambda: DFLT_CHUNKER
 DFLT_FEATURIZER_MAKER = lambda: DFLT_FEATURIZER
-DFLT_WF_PATH = '/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/'
-DFLT_ANNOT_PATH = '/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv'
+DFLT_WF_PATH = "/Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/"
+DFLT_ANNOT_PATH = "/Users/sylvain/Dropbox/sipyb/Testing/data/annots_vacuum.csv"
 
 
 FixedSizeChunker = DFLT_CHUNKER
@@ -117,7 +120,7 @@ def select_func(func, store_name, kwargs):
     result_func = partial(f, **kwargs)
     mall[store_name][func] = result_func
     sig = Sig(result_func)
-    st.write(f'added function with sig={sig}')
+    st.write(f"added function with sig={sig}")
     return result_func
 
 
@@ -130,7 +133,9 @@ def convert(arg):
 
 # @inject_enum_annotations(action=["list", "get"], store_name=mall)
 def explore_mall(
-    store_name: StoreName, key: KT, action: str,
+    store_name: StoreName,
+    key: KT,
+    action: str,
 ):
     args = [key, action, store_name]
     [key, action, store_name] = list(map(convert, args))
@@ -148,17 +153,17 @@ def populate_list_funcs():
 
 
 if not b.selected_func():
-    b.selected_func = 'chunker'
+    b.selected_func = "chunker"
 
 if not b.list_funcs():
     b.list_funcs = [select_func]
 
-data = ['chunker', 'featurizer', 'data_loader']
+data = ["chunker", "featurizer", "data_loader"]
 metadata = {
-    'chunker': chunker,
-    'featurizer': featurizer,
-    'data_loader': data_from_wav_folder,
-    'csv_loader': data_from_csv,
+    "chunker": chunker,
+    "featurizer": featurizer,
+    "data_loader": data_from_wav_folder,
+    "csv_loader": data_from_csv,
 }
 
 
@@ -185,7 +190,7 @@ class KwargsInput(InputBase):
 
     def _build_inputs_from_sig(self):
         return {
-            name: {ELEMENT_KEY: TextInput, 'bound_data_factory': BoundData}
+            name: {ELEMENT_KEY: TextInput, "bound_data_factory": BoundData}
             for name in self.func_sig
         }
 
@@ -204,33 +209,33 @@ def dummy(t: Tuple[int, int]):
     return t
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = mk_app(
         [select_func, explore_mall],
         config={
-            APP_KEY: {'title': 'Rendering map'},
+            APP_KEY: {"title": "Rendering map"},
             RENDERING_KEY: {
-                'select_func': {
-                    'execution': {
-                        'inputs': {
-                            'func': {
+                "select_func": {
+                    "execution": {
+                        "inputs": {
+                            "func": {
                                 ELEMENT_KEY: SelectBox,
-                                'options': data,
-                                'value': b.selected_func,
+                                "options": data,
+                                "value": b.selected_func,
                                 # "on_value_change": populate_list_funcs,
                             },
-                            'store_name': {
+                            "store_name": {
                                 ELEMENT_KEY: SelectBox,
-                                'options': ['func_store'],
+                                "options": ["func_store"],
                                 # "value": b.selected_func,
                                 # "on_value_change": populate_list_funcs,
                             },
-                            'kwargs': {
+                            "kwargs": {
                                 ELEMENT_KEY: KwargsInput,
-                                'func_sig': Sig(metadata[b.selected_func()]),
+                                "func_sig": Sig(metadata[b.selected_func()]),
                             },
                         },
-                        'on_submit': send_message,
+                        "on_submit": send_message,
                     }
                 },
             },
