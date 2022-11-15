@@ -4,7 +4,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from functools import partial
-from typing import List, DefaultDict, Iterable
+from typing import List, DefaultDict, Iterable, Union
 
 from audiostream2py import PyAudioSourceReader
 
@@ -38,7 +38,7 @@ def time_string(timestamp):
     st.markdown(f'## time: {str(datetime.datetime.fromtimestamp(timestamp / 1e6))}')
 
 
-def line_plot(graph_data: Iterable[int | float], title: str, figsize=(15, 5)):
+def line_plot(graph_data: Iterable[Union[int, float]], title: str, figsize=(15, 5)):
     fig, ax = plt.subplots(figsize=figsize)
     st.markdown(f'## {title}')
     ax.plot(graph_data)
@@ -49,7 +49,7 @@ def line_plot(graph_data: Iterable[int | float], title: str, figsize=(15, 5)):
 PLOT_TYPES = {'line': line_plot}
 
 
-def plot(graph_type: str, graph_data: Iterable[int | float]):
+def plot(graph_type: str, graph_data: Iterable[Union[int, float]]):
     """Checks for plot type and draws plot
 
     :param graph_type:

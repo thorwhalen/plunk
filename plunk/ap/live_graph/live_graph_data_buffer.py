@@ -90,10 +90,10 @@ def audio_it(
         **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
 
-
+from typing import Union, Optional
 class SlabsSourceReader(SourceReader):
     def __init__(
-        self, slabs_it: SlabsIter, key: str | Callable, post_read: Callable = None
+        self, slabs_it: SlabsIter, key: Union[str, Callable], post_read: Callable = None
     ):
         self.slabs_it = slabs_it
         self._key = key
@@ -110,7 +110,7 @@ class SlabsSourceReader(SourceReader):
             return data.get(self._key)
         return self._key(data)
 
-    def read(self) -> dict | None:
+    def read(self) -> Optional[dict]:
         data = next(self.slabs_it)
         if self.post_read_func is not None:
             return self.post_read_func(data)
@@ -124,7 +124,7 @@ DATA_KEYS = (
 
 
 @if_not_none
-def post_read_data(data) -> dict | None:
+def post_read_data(data) -> Optional[dict]:
     if data.get('timestamp') is None:
         return None
     formatted_data = {k: data.get(k) for k in DATA_KEYS}
