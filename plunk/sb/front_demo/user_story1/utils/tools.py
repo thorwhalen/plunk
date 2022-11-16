@@ -33,6 +33,11 @@ chunker = simple_chunker
 WaveForm = Iterable[int]
 
 
+def clean_dict(kwargs):
+    result = {k: v for k, v in kwargs.items() if v != ""}
+    return result
+
+
 def store_to_key_fvs(wf_store, chunker=DFLT_CHUNKER, featurizer=DFLT_FEATURIZER):
     wf_items = wf_store.items()
     key_chk_tuples = fanout_and_flatten(wf_items, chunker, 1)

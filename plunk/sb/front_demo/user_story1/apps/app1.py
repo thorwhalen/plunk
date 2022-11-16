@@ -45,6 +45,7 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
     featurizer,
     WaveForm,
     Stroll,
+    clean_dict,
 )
 
 # DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
@@ -90,6 +91,8 @@ def mk_pipeline_maker_app_with_mall(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
     )
     def mk_step(step_factory: Callable, kwargs: dict):
+        st.write(f"current value of kwargs={kwargs}")
+        kwargs = clean_dict(kwargs)
         step = partial(step_factory, **kwargs)()  # TODO check this
         sig = Sig(step)
         st.write(f"Signature of step made: {sig}")
