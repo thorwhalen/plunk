@@ -11,6 +11,8 @@ from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
 import soundfile as sf
 from io import BytesIO
 import matplotlib.pyplot as plt
+import streamlit as st
+
 
 ###### ML Tools ###########################
 from omodel.gen_utils.chunker import fixed_step_chunker
@@ -31,6 +33,24 @@ DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 featurizer = DFLT_FEATURIZER
 chunker = simple_chunker
 WaveForm = Iterable[int]
+
+
+def pyplot_with_intervals(X, cutoff, intervals=None):
+    # xs = df['TIME']
+    min_x = np.mean(X)
+    xs = list(range(len(X)))
+    ys = X
+    fig, ax = plt.subplots(figsize=(7, 2))
+    ax.plot(xs, ys, linewidth=1)
+    ax.axhline(y=cutoff, xmin=0, xmax=1, c="r")
+    if intervals:
+        for i, interval in enumerate(intervals):
+            start, end = interval
+            plt.axvspan(start, end, facecolor="g", alpha=0.5)
+
+            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
+
+    st.pyplot(fig)
 
 
 def clean_dict(kwargs):
