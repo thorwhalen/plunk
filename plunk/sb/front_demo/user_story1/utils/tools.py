@@ -21,6 +21,55 @@ from omodel.outliers.pystroll import OutlierModel as Stroll
 DFLT_CHK_SIZE = 2048
 DFLT_CHK_STEP = 2048
 
+
+def grouper(arr, n):
+    """
+    Splits inputs into n consecutive non-overlapping groups
+    """
+    return np.array_split(arr, n)
+
+
+def apply_func_to_index_groups(func, arr, idx_groups):
+    """
+    Applies func to the slices of array arr specified by the groups
+    """
+    result = [func(arr[gp]) for gp in idx_groups]
+
+    return result
+
+
+DFLT_WINDOW_OUTLIER = 30
+DFLT_NUM_OUTLIERS = 3
+
+
+def arg_top_max(arr, num_elements):
+    """
+    returns the largest num_elements from the array arr
+    """
+    ind = np.argpartition(arr, -num_elements)[-num_elements:]
+    return ind
+
+
+def get_groups_extremities_all(
+    arr,
+    cutoff,
+    func=np.mean,
+    window_size=DFLT_WINDOW_OUTLIER,
+    num_outliers=DFLT_NUM_OUTLIERS,
+):
+
+    groups = grouper(np.arange(len(arr)), window_size)
+    means = apply_func_to_index_groups(func, arr, groups)
+    # arg = arg_top_max(means, num_outliers)
+    result = []
+    for idx, item in enumerate(groups):
+        if means[idx] <= cutoff:
+            continue
+        extremities = (groups[idx][0], groups[idx][-1])
+        result.append(extremities)
+    return result
+
+
 # Chunkers
 def simple_chunker(it, chk_size: int = DFLT_CHK_SIZE):
     return fixed_step_chunker(it=it, chk_size=chk_size, chk_step=chk_size)
