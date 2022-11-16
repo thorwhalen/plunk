@@ -45,13 +45,13 @@ class AudioDisplay(OutputBase):
         if not isinstance(sound, str):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
+        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
         with tab1:
             st.audio(sound)
         with tab2:
             fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(arr, label=f"Tag={tag}")
+            ax.plot(arr, label=f'Tag={tag}')
             ax.legend()
             st.pyplot(fig)
             # st.write(arr[:10])
@@ -77,12 +77,12 @@ class GraphOutput(OutputBase):
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = "step_factories",
-    steps: str = "steps",
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
     steps_store=None,
-    pipelines: str = "pipelines",
+    pipelines: str = 'pipelines',
     pipelines_store=None,
-    data: str = "data",
+    data: str = 'data',
     data_output=None,
     data_store=None,
 ):
@@ -92,7 +92,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "data_loader"  # TODO make this dynamic
+        b.selected_step_factory = 'data_loader'  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -117,15 +117,15 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
-        output_store="exec_outputs",
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data='sound_output'),
+        output_store='exec_outputs',
     )
     def exec_pipeline(pipeline: Callable, tagged_data):
         sound, tag = tagged_data
         if not isinstance(sound, str):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         result = list(
             pipeline(arr)()
         )  # TODO: because we use FuncFactories we need that hack
@@ -141,12 +141,12 @@ def mk_pipeline_maker_app_with_mall(
 
         return pipeline
 
-    @crudifier(output_store="sound_output")
+    @crudifier(output_store='sound_output')
     def upload_sound(train_audio: WaveForm, tag: str):
         # mall["tag_store"] = tag
         return (train_audio, tag)
 
-    @crudifier(param_to_mall_map={"result": "sound_output"})
+    @crudifier(param_to_mall_map={'result': 'sound_output'})
     def display_tag_sound(result):
         return result
 
@@ -171,124 +171,109 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "upload_sound": {
+            'upload_sound': {
                 # NAME_KEY: "Data Loader",
                 # "description": {"content": "A very simple learn model example."},
-                "execution": {
-                    "inputs": {
-                        "train_audio": {
+                'execution': {
+                    'inputs': {
+                        'train_audio': {
                             ELEMENT_KEY: MultiSourceInput,
-                            "From a file": {
-                                ELEMENT_KEY: FileUploader,
-                                "type": "wav",
-                            },
-                            "From the microphone": {ELEMENT_KEY: AudioRecorder},
+                            'From a file': {ELEMENT_KEY: FileUploader, 'type': 'wav',},
+                            'From the microphone': {ELEMENT_KEY: AudioRecorder},
                         },
                         # "tag": {
                         #     ELEMENT_KEY: TextInput,
                         # },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav loaded successfully.",
+                        'message': 'Wav loaded successfully.',
                     },
                 },
             },
-            "display_tag_sound": {
-                "execution": {
-                    "inputs": {
-                        "result": {
+            'display_tag_sound': {
+                'execution': {
+                    'inputs': {
+                        'result': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            'options': mall['sound_output'],
                         },
                     },
-                    "output": {
-                        ELEMENT_KEY: AudioDisplay,
-                    },
+                    'output': {ELEMENT_KEY: AudioDisplay,},
                 },
             },
-            "load_data": {
-                NAME_KEY: "Data Loader",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {
-                            "func_sig": Sig(
+            'load_data': {
+                NAME_KEY: 'Data Loader',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {'value': b.selected_step_factory,},
+                        'kwargs': {
+                            'func_sig': Sig(
                                 mall[step_factories][b.selected_step_factory()]
                             ),
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {
-                            "func_sig": Sig(
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {'value': b.selected_step_factory,},
+                        'kwargs': {
+                            'func_sig': Sig(
                                 mall[step_factories][b.selected_step_factory()]
                             ),
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
-                            "serializer": get_step_name,
+                            'items': list(mall[steps].values()),
+                            'serializer': get_step_name,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        'message': 'The pipeline has been created successfully.',
                     },
                 },
             },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                        "data": {
+            'exec_pipeline': {
+                NAME_KEY: 'Pipeline Executor',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {'value': b.selected_pipeline,},
+                        'data': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            'options': mall['sound_output'],
                         },
                     }
                 },
             },
-            "visualize_pipeline": {
-                NAME_KEY: "Pipeline Visualization",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                    },
-                    "output": {
+            'visualize_pipeline': {
+                NAME_KEY: 'Pipeline Visualization',
+                'execution': {
+                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
+                    'output': {
                         ELEMENT_KEY: GraphOutput,
-                        NAME_KEY: "Flow",
-                        "use_container_width": True,
+                        NAME_KEY: 'Flow',
+                        'use_container_width': True,
                     },
                 },
             },
@@ -309,7 +294,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     mall = dict(
         # Factory Input Stores
@@ -332,10 +317,10 @@ if __name__ == "__main__":
         chunker=FuncFactory(chunker),
     )
 
-    mall["step_factories"] = step_factories
+    mall['step_factories'] = step_factories
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
     )
 
     app()

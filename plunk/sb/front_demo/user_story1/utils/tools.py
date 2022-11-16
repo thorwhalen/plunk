@@ -91,19 +91,19 @@ def pyplot_with_intervals(X, cutoff, intervals=None):
     ys = X
     fig, ax = plt.subplots(figsize=(7, 2))
     ax.plot(xs, ys, linewidth=1)
-    ax.axhline(y=cutoff, xmin=0, xmax=1, c="r")
+    ax.axhline(y=cutoff, xmin=0, xmax=1, c='r')
     if intervals:
         for i, interval in enumerate(intervals):
             start, end = interval
-            plt.axvspan(start, end, facecolor="g", alpha=0.5)
+            plt.axvspan(start, end, facecolor='g', alpha=0.5)
 
-            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
+            ax.annotate(f'{i}', xy=(start, min_x), ha='left', va='top')
 
     st.pyplot(fig)
 
 
 def clean_dict(kwargs):
-    result = {k: v for k, v in kwargs.items() if v != ""}
+    result = {k: v for k, v in kwargs.items() if v != ''}
     return result
 
 
@@ -122,7 +122,7 @@ def key_fvs_to_tag_fvs(key_fvs, annots_df):
 
 
 def key_to_tag_from_annots(key, annots_df):
-    tag = annots_df["tag"][annots_df["key"] == key].values[0]
+    tag = annots_df['tag'][annots_df['key'] == key].values[0]
     return tag
 
 
@@ -131,7 +131,7 @@ def mk_Xy(tag_fv_iterator):
     return np.array(X), y
 
 
-DFLT_CHAIN = (({"type": "pca", "args": {"n_components": 5}},),)
+DFLT_CHAIN = (({'type': 'pca', 'args': {'n_components': 5}},),)
 
 
 def preprocess(X_train, n_components=5):
@@ -139,7 +139,7 @@ def preprocess(X_train, n_components=5):
     from shaded.chained_spectral_projector import learn_chain_proj_matrix
 
     chain = DFLT_CHAIN
-    chain["args"]["n_components"] = n_components
+    chain['args']['n_components'] = n_components
     proj_matrix = learn_chain_proj_matrix(X_train, chain=chain)
     X_train_proj = np.dot(X_train, proj_matrix)
 
@@ -151,10 +151,10 @@ def simple_model(tagged_data):
     if not isinstance(sound, str):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]
+    arr = sf.read(BytesIO(sound), dtype='int16')[0]
 
     wfs = np.array(arr)
-    st.write(f"wfs = {wfs[:200]}")
+    st.write(f'wfs = {wfs[:200]}')
     chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
     fvs = np.array(list(map(featurizer, chks)))
     model = Stroll(n_centroids=50)

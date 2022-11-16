@@ -56,10 +56,10 @@ def mk_Xy(wfs, annots):
         wf = normalize(np.float32(signal).reshape(1, -1))[0]
         for chk in chunker(wf):
 
-            if train_info == "train":
+            if train_info == 'train':
                 X_train.append(featurizer(chk))
                 y_train.append(tag)
-            if train_info == "test":
+            if train_info == 'test':
                 X_test.append(featurizer(chk))
                 y_test.append(tag)
 
@@ -105,18 +105,18 @@ def disp_results(results):
 
 # func_source: mapping
 d = {
-    "get_wfs": get_wfs,
-    "get_annots": get_annots,
-    "mk_Xy": mk_Xy,
-    "train": train,
-    "apply": apply,
+    'get_wfs': get_wfs,
+    'get_annots': get_annots,
+    'mk_Xy': mk_Xy,
+    'train': train,
+    'apply': apply,
 }
 
 
 if not b.mall():
     b.mall = dict(
-        learner={"rtree": RandomForestClassifier(max_depth=2, random_state=0)},
-        wfsource={"wf_src": dflt_wfsrc},
+        learner={'rtree': RandomForestClassifier(max_depth=2, random_state=0)},
+        wfsource={'wf_src': dflt_wfsrc},
         output={},
     )
 
@@ -125,8 +125,8 @@ mall = b.mall()
 
 @Crudifier(
     mall=mall,
-    param_to_mall_map={"learner": "learner", "wf_src": "wfsource"},
-    output_store="output",
+    param_to_mall_map={'learner': 'learner', 'wf_src': 'wfsource'},
+    output_store='output',
 )
 def classify(wf_src, learner):
     wf_store = get_wfs(wf_src)
@@ -138,30 +138,19 @@ def classify(wf_src, learner):
 
 
 config_ = {
-    APP_KEY: {"title": "Crudified learner"},
+    APP_KEY: {'title': 'Crudified learner'},
     RENDERING_KEY: {
-        "classify": {
-            "execution": {
-                "inputs": {
-                    "wf_src": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": mall["wfsource"],
-                    },
-                    "learner": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": mall["learner"],
-                    },
+        'classify': {
+            'execution': {
+                'inputs': {
+                    'wf_src': {ELEMENT_KEY: SelectBox, 'options': mall['wfsource'],},
+                    'learner': {ELEMENT_KEY: SelectBox, 'options': mall['learner'],},
                 },
-                "output": {
-                    ELEMENT_KEY: NumpyArrayDisplay,
-                },
+                'output': {ELEMENT_KEY: NumpyArrayDisplay,},
             }
         },
     },
 }
 
-app = mk_app(
-    [classify],
-    config=config_,
-)
+app = mk_app([classify], config=config_,)
 app()
