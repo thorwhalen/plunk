@@ -72,6 +72,8 @@ def mk_pipeline_maker_app_with_mall(
     data: str = "data",
     data_output=None,
     data_store=None,
+    learned_models=None,
+    models_scores=None,
 ):
     # TODO: Like to not have this binder logic involving streamlit state here! Contain it!
     if not b.mall():
@@ -181,7 +183,7 @@ def mk_pipeline_maker_app_with_mall(
             preprocess_pipeline="pipelines",
             fitted_model="learned_models",
         ),
-        output_store="learned_models",
+        output_store="models_scores",
     )
     def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
         sound, tag = tagged_data
@@ -210,6 +212,15 @@ def mk_pipeline_maker_app_with_mall(
         st.write(f"Signature of selected pipeline = {sig}")
 
         return pipeline
+
+    @crudifier(
+        # TODO: Does this work if pipelines_store is a mapping instead of a string?
+        param_to_mall_map=dict(scores="models_scores"),
+        # output_store='exec_outputs'
+    )
+    def visualize_scores(scores, threshold=95, num_segs=3):
+
+        return scores
 
     @crudifier(output_store="sound_output")
     def upload_sound(train_audio: WaveForm, tag: str):
@@ -336,6 +347,20 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            "visualize_scores": {
+                NAME_KEY: "Scores Visualization",
+                "execution": {
+                    "inputs": {
+                        "scores": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["models_scores"],
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
             "simple_model": {
                 NAME_KEY: "Learn model",
                 "execution": {
@@ -390,6 +415,7 @@ def mk_pipeline_maker_app_with_mall(
         apply_fitted_model,
         exec_pipeline,
         visualize_pipeline,
+        visualize_scores,
     ]
     app = mk_app(funcs, config=config)
 
@@ -408,6 +434,7 @@ if __name__ == "__main__":
         pipelines=dict(),
         exec_outputs=dict(),
         learned_models=dict(),
+        models_scores=dict(),
     )
 
     crudifier = partial(prepare_for_crude_dispatch, mall=mall)
