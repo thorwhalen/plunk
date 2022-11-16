@@ -41,6 +41,7 @@ from plunk.sb.front_demo.user_story1.components.components import (
 from plunk.sb.front_demo.user_story1.utils.tools import (
     DFLT_CHUNKER,
     DFLT_FEATURIZER,
+    DFLT_CHK_SIZE,
     chunker,
     featurizer,
     WaveForm,
@@ -51,9 +52,8 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
 # DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 
 
-@Sig(chunker)
-def simple_chunker(wfs):
-    return list(chunker(wfs))
+def simple_chunker(wfs, chk_size=DFLT_CHK_SIZE):
+    return list(chunker(wfs, chk_size=chk_size))
 
 
 def simple_featurizer(chks):
@@ -119,9 +119,11 @@ def mk_pipeline_maker_app_with_mall(
         #     sound = sound.getvalue()
 
         # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        result = list(
-            pipeline(sound)()
-        )  # TODO: because we use FuncFactories we need that hack
+        # result = list(
+        #     pipeline(sound)()
+        # )  # TODO: because we use FuncFactories we need that hack
+        # return result
+        result = pipeline(sound)
         return result
 
     @crudifier(
@@ -162,7 +164,7 @@ def mk_pipeline_maker_app_with_mall(
 
         wfs = np.array(sound)
         st.write(Sig(preprocess_pipeline))
-        fvs = preprocess_pipeline(wfs)()
+        fvs = preprocess_pipeline(wfs)
         # st.write(f"wfs = {wfs[:200]}")
         # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
         # fvs = np.array(list(map(featurizer, chks)))
@@ -171,6 +173,32 @@ def mk_pipeline_maker_app_with_mall(
         # scores = model.score_samples(X=fvs)
         # return scores
         return model
+
+    @crudifier(
+        # TODO: Does this work if pipelines_store is a mapping instead of a string?
+        param_to_mall_map=dict(
+            tagged_data="sound_output",
+            preprocess_pipeline="pipelines",
+            fitted_model="learned_models",
+        ),
+        output_store="learned_models",
+    )
+    def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
+        sound, tag = tagged_data
+        # if not isinstance(sound, str):
+        #     sound = sound.getvalue()
+
+        # arr = sf.read(BytesIO(sound), dtype="int16")[0]
+
+        wfs = np.array(sound)
+        fvs = preprocess_pipeline(wfs)
+        # st.write(f"wfs = {wfs[:200]}")
+        # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
+        # fvs = np.array(list(map(featurizer, chks)))
+        scores = fitted_model.score_samples(X=fvs)
+        # scores = model.score_samples(X=fvs)
+        # return scores
+        return scores
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
@@ -309,20 +337,6 @@ def mk_pipeline_maker_app_with_mall(
                 },
             },
             "simple_model": {
-                NAME_KEY: "Visualize outputs",
-                "execution": {
-                    "inputs": {
-                        "tagged_data": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
-            },
-            "simple_model": {
                 NAME_KEY: "Learn model",
                 "execution": {
                     "inputs": {
@@ -333,6 +347,28 @@ def mk_pipeline_maker_app_with_mall(
                         "preprocess_pipeline": {
                             ELEMENT_KEY: SelectBox,
                             "options": mall["pipelines"],
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
+            "apply_fitted_model": {
+                NAME_KEY: "Apply model",
+                "execution": {
+                    "inputs": {
+                        "tagged_data": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["sound_output"],
+                        },
+                        "preprocess_pipeline": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["pipelines"],
+                        },
+                        "learned_model": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["learned_models"],
                         },
                     },
                     "output": {
@@ -351,6 +387,7 @@ def mk_pipeline_maker_app_with_mall(
         mk_step,
         mk_pipeline,
         learn_outlier_model,
+        apply_fitted_model,
         exec_pipeline,
         visualize_pipeline,
     ]
