@@ -5,7 +5,7 @@
 [ ] Visualize graph.
 """
 from time import sleep, time
-from typing import Any, Callable
+from typing import Any, Callable, Union, Optional
 
 import numpy as np
 from audiostream2py import PyAudioSourceReader, get_input_device_index
@@ -90,7 +90,7 @@ def audio_it(
         **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
 
-from typing import Union, Optional
+
 class SlabsSourceReader(SourceReader):
     def __init__(
         self, slabs_it: SlabsIter, key: Union[str, Callable], post_read: Callable = None
@@ -160,9 +160,7 @@ def mk_live_graph_data_buffer(
     ).stream_buffer(maxlen)
 
 
-def _test_live_graph_data_buffer(
-    input_device='NexiGo N930AF FHD Webcam Audio', graph_types=(*GRAPH_TYPES,)
-):
+def _test_live_graph_data_buffer(input_device=None, graph_types=(*GRAPH_TYPES,)):
     recording_devices = PyAudioSourceReader.list_recording_devices()
     recording_devices.append(None)
     print(recording_devices)
@@ -191,4 +189,6 @@ def _test_live_graph_data_buffer(
 
 
 if __name__ == '__main__':
-    _test_live_graph_data_buffer(graph_types='volume')
+    _test_live_graph_data_buffer(
+        input_device='NexiGo N930AF FHD Webcam Audio', graph_types='volume'
+    )
