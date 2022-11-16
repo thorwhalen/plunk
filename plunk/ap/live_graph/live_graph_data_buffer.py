@@ -5,7 +5,7 @@
 [ ] Visualize graph.
 """
 from time import sleep, time
-from typing import Any, Callable
+from typing import Any, Callable, Union, Optional
 
 import numpy as np
 from audiostream2py import PyAudioSourceReader, get_input_device_index
@@ -93,7 +93,7 @@ def audio_it(
 
 class SlabsSourceReader(SourceReader):
     def __init__(
-        self, slabs_it: SlabsIter, key: str | Callable, post_read: Callable = None
+        self, slabs_it: SlabsIter, key: Union[str, Callable], post_read: Callable = None
     ):
         self.slabs_it = slabs_it
         self._key = key
@@ -110,7 +110,7 @@ class SlabsSourceReader(SourceReader):
             return data.get(self._key)
         return self._key(data)
 
-    def read(self) -> dict | None:
+    def read(self) -> Optional[dict]:
         data = next(self.slabs_it)
         if self.post_read_func is not None:
             return self.post_read_func(data)
@@ -124,7 +124,7 @@ DATA_KEYS = (
 
 
 @if_not_none
-def post_read_data(data) -> dict | None:
+def post_read_data(data) -> Optional[dict]:
     if data.get('timestamp') is None:
         return None
     formatted_data = {k: data.get(k) for k in DATA_KEYS}
@@ -160,9 +160,7 @@ def mk_live_graph_data_buffer(
     ).stream_buffer(maxlen)
 
 
-def _test_live_graph_data_buffer(
-    input_device='NexiGo N930AF FHD Webcam Audio', graph_types=(*GRAPH_TYPES,)
-):
+def _test_live_graph_data_buffer(input_device=None, graph_types=(*GRAPH_TYPES,)):
     recording_devices = PyAudioSourceReader.list_recording_devices()
     recording_devices.append(None)
     print(recording_devices)
@@ -191,4 +189,6 @@ def _test_live_graph_data_buffer(
 
 
 if __name__ == '__main__':
-    _test_live_graph_data_buffer(graph_types='volume')
+    _test_live_graph_data_buffer(
+        input_device='NexiGo N930AF FHD Webcam Audio', graph_types='volume'
+    )
