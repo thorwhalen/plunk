@@ -3,10 +3,18 @@
    :caption: Contents:
 
    module_docs/plunk/ap/audio_stream/audiostream_webservice
+   module_docs/plunk/ap/live_graph/audio_store
    module_docs/plunk/ap/live_graph/live_graph_data_buffer
    module_docs/plunk/ap/live_graph/live_graph_streamlitfront
+   module_docs/plunk/ap/snippets
    module_docs/plunk/sb/click_detection/analysis
    module_docs/plunk/sb/click_detection/clickified
+   module_docs/plunk/sb/front_demo/data_prep
+   module_docs/plunk/sb/front_demo/data_prep_scores
+   module_docs/plunk/sb/front_demo/data_viz
+   module_docs/plunk/sb/front_demo/learner_example
+   module_docs/plunk/sb/front_demo/record_load_play
+   module_docs/plunk/sb/front_demo/thor_dag_example
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
    module_docs/plunk/sb/front_experiments/edge_interface/js
    module_docs/plunk/sb/sig_compatibility/sig_builtins

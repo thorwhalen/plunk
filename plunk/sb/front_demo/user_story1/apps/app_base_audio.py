@@ -64,12 +64,12 @@ def simple_featurizer(chks):
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = "step_factories",
-    steps: str = "steps",
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
     steps_store=None,
-    pipelines: str = "pipelines",
+    pipelines: str = 'pipelines',
     pipelines_store=None,
-    data: str = "data",
+    data: str = 'data',
     data_output=None,
     data_store=None,
 ):
@@ -79,7 +79,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "chunker"  # TODO make this dynamic
+        b.selected_step_factory = 'chunker'  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -93,7 +93,7 @@ def mk_pipeline_maker_app_with_mall(
     def mk_step(step_factory: Callable, kwargs: dict):
         step = partial(step_factory, **kwargs)()  # TODO check this
         sig = Sig(step)
-        st.write(f"Signature of step made: {sig}")
+        st.write(f'Signature of step made: {sig}')
         return step
 
     #
@@ -108,8 +108,8 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
-        output_store="exec_outputs",
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data='sound_output'),
+        output_store='exec_outputs',
     )
     def exec_pipeline(pipeline: Callable, tagged_data):
         sound, tag = tagged_data
@@ -124,7 +124,7 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(tagged_data="sound_output"),
+        param_to_mall_map=dict(tagged_data='sound_output'),
         # output_store='exec_outputs'
     )
     def simple_model(tagged_data):
@@ -143,21 +143,21 @@ def mk_pipeline_maker_app_with_mall(
     )
     def visualize_pipeline(pipeline: LineParametrized):
         sig = Sig(pipeline)
-        st.write(f"Signature of selected pipeline = {sig}")
+        st.write(f'Signature of selected pipeline = {sig}')
 
         return pipeline
 
-    @crudifier(output_store="sound_output")
+    @crudifier(output_store='sound_output')
     def upload_sound(train_audio: WaveForm, tag: str):
         # mall["tag_store"] = tag
         sound, tag = train_audio, tag
         if not isinstance(sound, bytes):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         return arr, tag
 
-    @crudifier(param_to_mall_map={"result": "sound_output"})
+    @crudifier(param_to_mall_map={'result': 'sound_output'})
     def display_tag_sound(result):
         return result
 
@@ -170,56 +170,49 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {"title": "Base Audio"},
+        APP_KEY: {'title': 'Base Audio'},
         RENDERING_KEY: {
-            "upload_sound": {
+            'upload_sound': {
                 # NAME_KEY: "Data Loader",
                 # "description": {"content": "A very simple learn model example."},
-                "execution": {
-                    "inputs": {
-                        "train_audio": {
+                'execution': {
+                    'inputs': {
+                        'train_audio': {
                             ELEMENT_KEY: MultiSourceInput,
-                            "From a file": {
-                                ELEMENT_KEY: FileUploader,
-                                "type": "wav",
-                            },
-                            "From the microphone": {ELEMENT_KEY: AudioRecorder},
+                            'From a file': {ELEMENT_KEY: FileUploader, 'type': 'wav',},
+                            'From the microphone': {ELEMENT_KEY: AudioRecorder},
                         },
                         # "tag": {
                         #     ELEMENT_KEY: TextInput,
                         # },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav loaded successfully.",
+                        'message': 'Wav loaded successfully.',
                     },
                 },
             },
-            "display_tag_sound": {
-                "execution": {
-                    "inputs": {
-                        "result": {
+            'display_tag_sound': {
+                'execution': {
+                    'inputs': {
+                        'result': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            'options': mall['sound_output'],
                         },
                     },
-                    "output": {
-                        ELEMENT_KEY: AudioArrayDisplay,
-                    },
+                    'output': {ELEMENT_KEY: AudioArrayDisplay,},
                 },
             },
-            "simple_model": {
-                NAME_KEY: "Visualize outputs",
-                "execution": {
-                    "inputs": {
-                        "tagged_data": {
+            'simple_model': {
+                NAME_KEY: 'Visualize outputs',
+                'execution': {
+                    'inputs': {
+                        'tagged_data': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            'options': mall['sound_output'],
                         },
                     },
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
+                    'output': {ELEMENT_KEY: ArrayPlotter,},
                 },
             },
         },
@@ -235,7 +228,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     mall = dict(
         # Factory Input Stores
@@ -260,10 +253,10 @@ if __name__ == "__main__":
         featurizer=FuncFactory(simple_featurizer),
     )
 
-    mall["step_factories"] = step_factories
+    mall['step_factories'] = step_factories
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
     )
 
     app()
