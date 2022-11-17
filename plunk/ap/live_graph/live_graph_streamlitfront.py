@@ -125,7 +125,7 @@ class DataGraph(OutputBase):
                         time_string(timestamp)
                 else:
                     time.sleep(0.1)
-                    # print(f'sleeping...')
+                    # print('sleeping...')
             print('exit render')
 
 
@@ -172,16 +172,16 @@ if __name__ == '__main__':
                     NAME_KEY: 'Get Data Stream',
                     'description': {'content': 'Configure soundcard for data stream'},
                     'execution': {
-                        # 'inputs': {
-                        #     'input_device': {
-                        #         ELEMENT_KEY: SelectBox,
-                        #         'options': mall['input_device'],
-                        #     },
-                        #     'graph_types': {  # TODO option to select more than one graph type
-                        #         ELEMENT_KEY: SelectBox,
-                        #         'options': mall['graph_types'],
-                        #     },
-                        # },
+                        'inputs': {
+                            'input_device': {
+                                ELEMENT_KEY: SelectBox,
+                                'options': mall['input_device'],
+                            },
+                            'graph_types': {  # TODO option to select more than one graph type
+                                ELEMENT_KEY: SelectBox,
+                                'options': mall['graph_types'],
+                            },
+                        },
                         'output': {ELEMENT_KEY: DataGraph},
                     },
                 },
