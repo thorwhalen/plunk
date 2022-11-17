@@ -46,27 +46,51 @@ def arg_top_max(arr, num_elements):
     """
     returns the largest num_elements from the array arr
     """
-    ind = np.argpartition(arr, -num_elements)[-num_elements:]
-    return ind
+    result = [arr.index(i) for i in sorted(arr, reverse=True)][:num_elements]
+    return result
+
+
+from more_itertools import consecutive_groups
+
+
+def indices_for_percentile(arr, low=0, high=100):
+    return np.percentile(arr, [low, high])
+
+
+def consecutive_indices(arr):
+    return list(map(list, consecutive_groups(arr)))
 
 
 def get_groups_extremities_all(
     arr,
-    cutoff,
+    groups_indices,
     func=np.mean,
-    window_size=DFLT_WINDOW_OUTLIER,
     num_outliers=DFLT_NUM_OUTLIERS,
 ):
 
-    groups = grouper(np.arange(len(arr)), window_size)
-    means = apply_func_to_index_groups(func, arr, groups)
-    # arg = arg_top_max(means, num_outliers)
-    result = []
-    for idx, item in enumerate(groups):
-        if means[idx] <= cutoff:
-            continue
-        extremities = (groups[idx][0], groups[idx][-1])
-        result.append(extremities)
+    means = apply_func_to_index_groups(func, arr, groups_indices)
+    arg = arg_top_max(means, num_outliers)
+    result = [
+        (groups_indices[idx][0], groups_indices[idx][-1])
+        for idx, _ in enumerate(means)
+        if idx in arg
+    ]
+
+    return result
+
+
+def scores_to_intervals(scores, high_percentile=90, num_selected=3):
+    [low, high] = list(indices_for_percentile(scores, low=0, high=high_percentile))
+    arr_selected = np.nonzero(scores >= high)[0]
+    groups_indices = consecutive_indices(arr_selected)
+    intervals_all = get_groups_extremities_all(
+        scores,
+        groups_indices,
+        func=np.mean,
+        num_outliers=num_selected,
+    )
+    result = [(a, b) for a, b in intervals_all if b > a]
+
     return result
 
 
@@ -82,24 +106,6 @@ DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 featurizer = DFLT_FEATURIZER
 chunker = simple_chunker
 WaveForm = Iterable[int]
-
-
-def pyplot_with_intervals(X, cutoff, intervals=None):
-    # xs = df['TIME']
-    min_x = np.mean(X)
-    xs = list(range(len(X)))
-    ys = X
-    fig, ax = plt.subplots(figsize=(7, 2))
-    ax.plot(xs, ys, linewidth=1)
-    ax.axhline(y=cutoff, xmin=0, xmax=1, c="r")
-    if intervals:
-        for i, interval in enumerate(intervals):
-            start, end = interval
-            plt.axvspan(start, end, facecolor="g", alpha=0.5)
-
-            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
-
-    st.pyplot(fig)
 
 
 def clean_dict(kwargs):
