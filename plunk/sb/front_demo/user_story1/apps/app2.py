@@ -16,7 +16,6 @@ from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import (
     SelectBox,
     SuccessNotification,
-    KwargsInput,
     PipelineMaker,
 )
 from streamlitfront.elements import (
@@ -25,14 +24,9 @@ from streamlitfront.elements import (
     MultiSourceInput,
 )
 import streamlit as st
-from plunk.sb.front_experiments.streamlitfront_dataprep.data_prep2 import (
-    # DFLT_WF_PATH,
-    # DFLT_ANNOT_PATH,
-    data_from_wav_folder,
-)
+
 import soundfile as sf
 from io import BytesIO
-import matplotlib.pyplot as plt
 from plunk.sb.front_demo.user_story1.components.components import (
     AudioArrayDisplay,
     GraphOutput,
@@ -40,11 +34,9 @@ from plunk.sb.front_demo.user_story1.components.components import (
     ArrayWithIntervalsPlotter,
 )
 from plunk.sb.front_demo.user_story1.utils.tools import (
-    DFLT_CHUNKER,
     DFLT_FEATURIZER,
     DFLT_CHK_SIZE,
     chunker,
-    featurizer,
     WaveForm,
     Stroll,
     clean_dict,
