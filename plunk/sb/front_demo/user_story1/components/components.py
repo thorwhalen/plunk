@@ -3,6 +3,9 @@ from front.elements import OutputBase
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.preprocessing import normalize
+import soundfile as sf
+from io import BytesIO
 
 
 @dataclass
@@ -16,12 +19,16 @@ class AudioArrayDisplay(OutputBase):
 
         # arr = sf.read(BytesIO(sound), dtype="int16")[0]
         # st.write(type(arr))
-        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
+        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
         with tab1:
-            st.audio(sound)
+            if not isinstance(sound, bytes):
+                sound = sound.getvalue()
+            arr = sf.read(BytesIO(sound), dtype="int16")[0]
+
+            st.audio(arr)
         with tab2:
             fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(sound, label=f'Tag={tag}')
+            ax.plot(sound, label=f"Tag={tag}")
             ax.legend()
             st.pyplot(fig)
             # st.write(arr[:10])
