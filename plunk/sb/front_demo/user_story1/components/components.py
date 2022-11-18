@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from front.elements import OutputBase
 import streamlit as st
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 @dataclass
@@ -42,10 +43,31 @@ class GraphOutput(OutputBase):
 @dataclass
 class ArrayPlotter(OutputBase):
     def render(self):
-        # st.write(f"output = {self.output}")
         X = self.output
         fig, ax = plt.subplots(figsize=(15, 5))
         ax.plot(X)
-        # ax.vlines(range(len(X)), ymin=np.min(X), ymax=X)
         ax.legend()
         st.pyplot(fig)
+
+
+@dataclass
+class ArrayWithIntervalsPlotter(OutputBase):
+    def render(self):
+        X, intervals = self.output
+        fig = pyplot_with_intervals(X, intervals)
+        st.pyplot(fig)
+
+
+def pyplot_with_intervals(X, intervals=None):
+    min_x = np.mean(X)
+    xs = list(range(len(X)))
+    ys = X
+    fig, ax = plt.subplots(figsize=(7, 2))
+    ax.plot(xs, ys, linewidth=1)
+    if intervals:
+        for i, interval in enumerate(intervals):
+            start, end = interval
+            plt.axvspan(start, end, facecolor='g', alpha=0.5)
+
+            ax.annotate(f'{i}', xy=(start, min_x), ha='left', va='top')
+    return fig
