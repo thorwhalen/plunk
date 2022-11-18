@@ -74,7 +74,7 @@ def pyplot_with_intervals(X, intervals=None):
     if intervals:
         for i, interval in enumerate(intervals):
             start, end = interval
-            plt.axvspan(start, end, facecolor="g", alpha=0.5)
+            plt.axvspan(start, end, facecolor='g', alpha=0.5)
 
-            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
+            ax.annotate(f'{i}', xy=(start, min_x), ha='left', va='top')
     return fig
