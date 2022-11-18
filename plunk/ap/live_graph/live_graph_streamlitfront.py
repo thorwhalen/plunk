@@ -24,9 +24,7 @@ from plunk.ap.live_graph.live_graph_data_buffer import (
 )
 
 if not b.mall():
-    b.mall = dict(
-        source=None,
-    )
+    b.mall = dict(source=None,)
 
 mall = b.mall()
 if not b.input_devices():
@@ -138,9 +136,7 @@ def stop_stream():
             print(e)
 
 
-@crudifier(
-    output_store='source'
-)
+@crudifier(output_store='source')
 def data_stream(
     input_device=None,
     rate=44100,
