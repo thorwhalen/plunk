@@ -15,6 +15,15 @@
    module_docs/plunk/sb/front_demo/learner_example
    module_docs/plunk/sb/front_demo/record_load_play
    module_docs/plunk/sb/front_demo/thor_dag_example
+   module_docs/plunk/sb/front_demo/user_story1/apps/app0
+   module_docs/plunk/sb/front_demo/user_story1/apps/app1
+   module_docs/plunk/sb/front_demo/user_story1/apps/app2
+   module_docs/plunk/sb/front_demo/user_story1/apps/app3
+   module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
+   module_docs/plunk/sb/front_demo/user_story1/apps/app_choosing_model
+   module_docs/plunk/sb/front_demo/user_story1/apps/app_scrap
+   module_docs/plunk/sb/front_demo/user_story1/components/components
+   module_docs/plunk/sb/front_demo/user_story1/utils/tools
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
    module_docs/plunk/sb/front_experiments/edge_interface/js
    module_docs/plunk/sb/sig_compatibility/sig_builtins
