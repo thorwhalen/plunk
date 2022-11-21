@@ -66,12 +66,12 @@ def simple_featurizer(chks):
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = 'step_factories',
-    steps: str = 'steps',
+    step_factories: str = "step_factories",
+    steps: str = "steps",
     steps_store=None,
-    pipelines: str = 'pipelines',
+    pipelines: str = "pipelines",
     pipelines_store=None,
-    data: str = 'data',
+    data: str = "data",
     data_output=None,
     data_store=None,
     learned_models=None,
@@ -83,7 +83,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = 'chunker'  # TODO make this dynamic
+        b.selected_step_factory = "chunker"  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -95,11 +95,11 @@ def mk_pipeline_maker_app_with_mall(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
     )
     def mk_step(step_factory: Callable, kwargs: dict):
-        st.write(f'current value of kwargs={kwargs}')
+        st.write(f"current value of kwargs={kwargs}")
         kwargs = clean_dict(kwargs)
         step = partial(step_factory, **kwargs)()  # TODO check this
         sig = Sig(step)
-        st.write(f'Signature of step made: {sig}')
+        st.write(f"Signature of step made: {sig}")
         return step
 
     #
@@ -114,8 +114,8 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data='sound_output'),
-        output_store='exec_outputs',
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
+        output_store="exec_outputs",
     )
     def exec_pipeline(pipeline: Callable, tagged_data):
         sound, tag = tagged_data
@@ -132,7 +132,7 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(tagged_data='sound_output'),
+        param_to_mall_map=dict(tagged_data="sound_output"),
         # output_store='exec_outputs'
     )
     def simple_model(tagged_data):
@@ -140,10 +140,10 @@ def mk_pipeline_maker_app_with_mall(
         if not isinstance(sound, str):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype='int16')[0]
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
 
         wfs = np.array(arr)
-        st.write(f'wfs = {wfs[:200]}')
+        st.write(f"wfs = {wfs[:200]}")
         # chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
         # fvs = np.array(list(map(featurizer, chks)))
         # model = Stroll(n_centroids=50)
@@ -155,9 +155,9 @@ def mk_pipeline_maker_app_with_mall(
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(
-            tagged_data='sound_output', preprocess_pipeline='pipelines'
+            tagged_data="sound_output", preprocess_pipeline="pipelines"
         ),
-        output_store='learned_models',
+        output_store="learned_models",
     )
     def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=50):
         sound, tag = tagged_data
@@ -181,11 +181,11 @@ def mk_pipeline_maker_app_with_mall(
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
         param_to_mall_map=dict(
-            tagged_data='sound_output',
-            preprocess_pipeline='pipelines',
-            fitted_model='learned_models',
+            tagged_data="sound_output",
+            preprocess_pipeline="pipelines",
+            fitted_model="learned_models",
         ),
-        output_store='models_scores',
+        output_store="models_scores",
     )
     def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
         sound, tag = tagged_data
@@ -211,13 +211,13 @@ def mk_pipeline_maker_app_with_mall(
     )
     def visualize_pipeline(pipeline: LineParametrized):
         sig = Sig(pipeline)
-        st.write(f'Signature of selected pipeline = {sig}')
+        st.write(f"Signature of selected pipeline = {sig}")
 
         return pipeline
 
     @crudifier(
         # TODO: Does this work if pipelines_store is a mapping instead of a string?
-        param_to_mall_map=dict(scores='models_scores'),
+        param_to_mall_map=dict(scores="models_scores"),
         # output_store='exec_outputs'
     )
     def visualize_scores(scores, threshold=95, num_segs=3):
@@ -230,17 +230,17 @@ def mk_pipeline_maker_app_with_mall(
 
         return scores
 
-    @crudifier(output_store='sound_output')
+    @crudifier(output_store="sound_output")
     def upload_sound(train_audio: WaveForm, tag: str):
         # mall["tag_store"] = tag
         sound, tag = train_audio, tag
         if not isinstance(sound, bytes):
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype='int16')[0]
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
         return arr, tag
 
-    @crudifier(param_to_mall_map={'result': 'sound_output'})
+    @crudifier(param_to_mall_map={"result": "sound_output"})
     def display_tag_sound(result):
         return result
 
@@ -253,141 +253,160 @@ def mk_pipeline_maker_app_with_mall(
         return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
-        APP_KEY: {'title': 'Data Preparation'},
+        APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            'upload_sound': {
+            "upload_sound": {
                 # NAME_KEY: "Data Loader",
                 # "description": {"content": "A very simple learn model example."},
-                'execution': {
-                    'inputs': {
-                        'train_audio': {
+                "execution": {
+                    "inputs": {
+                        "train_audio": {
                             ELEMENT_KEY: MultiSourceInput,
-                            'From a file': {ELEMENT_KEY: FileUploader, 'type': 'wav',},
-                            'From the microphone': {ELEMENT_KEY: AudioRecorder},
+                            "From a file": {
+                                ELEMENT_KEY: FileUploader,
+                                "type": "wav",
+                            },
+                            "From the microphone": {ELEMENT_KEY: AudioRecorder},
                         },
                         # "tag": {
                         #     ELEMENT_KEY: TextInput,
                         # },
                     },
-                    'output': {
+                    "output": {
                         ELEMENT_KEY: SuccessNotification,
-                        'message': 'Wav loaded successfully.',
+                        "message": "Wav loaded successfully.",
                     },
                 },
             },
-            'display_tag_sound': {
-                'execution': {
-                    'inputs': {
-                        'result': {
+            "display_tag_sound": {
+                "execution": {
+                    "inputs": {
+                        "result": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
+                            "options": mall["sound_output"],
                         },
                     },
-                    'output': {ELEMENT_KEY: AudioArrayDisplay,},
+                    "output": {
+                        ELEMENT_KEY: AudioArrayDisplay,
+                    },
                 },
             },
-            'mk_step': {
-                NAME_KEY: 'Pipeline Step Maker',
-                'execution': {
-                    'inputs': {
-                        'step_factory': {'value': b.selected_step_factory,},
-                        'kwargs': {
-                            'func_sig': Sig(
+            "mk_step": {
+                NAME_KEY: "Pipeline Step Maker",
+                "execution": {
+                    "inputs": {
+                        "step_factory": {
+                            "value": b.selected_step_factory,
+                        },
+                        "kwargs": {
+                            "func_sig": Sig(
                                 mall[step_factories][b.selected_step_factory()]
                             ),
                         },
                     },
-                    'output': {
+                    "output": {
                         ELEMENT_KEY: SuccessNotification,
-                        'message': 'The step has been created successfully.',
+                        "message": "The step has been created successfully.",
                     },
                 },
             },
-            'mk_pipeline': {
-                NAME_KEY: 'Pipeline Maker',
-                'execution': {
-                    'inputs': {
+            "mk_pipeline": {
+                NAME_KEY: "Pipeline Maker",
+                "execution": {
+                    "inputs": {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            'items': list(mall[steps].values()),
-                            'serializer': get_step_name,
+                            "items": list(mall[steps].values()),
+                            "serializer": get_step_name,
                         },
                     },
-                    'output': {
+                    "output": {
                         ELEMENT_KEY: SuccessNotification,
-                        'message': 'The pipeline has been created successfully.',
+                        "message": "The pipeline has been created successfully.",
                     },
                 },
             },
-            'exec_pipeline': {
-                NAME_KEY: 'Pipeline Executor',
-                'execution': {
-                    'inputs': {
-                        'pipeline': {'value': b.selected_pipeline,},
-                        'data': {
+            "exec_pipeline": {
+                NAME_KEY: "Pipeline Executor",
+                "execution": {
+                    "inputs": {
+                        "pipeline": {
+                            "value": b.selected_pipeline,
+                        },
+                        "data": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
+                            "options": mall["sound_output"],
                         },
                     }
                 },
             },
-            'visualize_pipeline': {
-                NAME_KEY: 'Pipeline Visualization',
-                'execution': {
-                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
-                    'output': {
+            "visualize_pipeline": {
+                NAME_KEY: "Pipeline Visualization",
+                "execution": {
+                    "inputs": {
+                        "pipeline": {
+                            "value": b.selected_pipeline,
+                        },
+                    },
+                    "output": {
                         ELEMENT_KEY: GraphOutput,
-                        NAME_KEY: 'Flow',
-                        'use_container_width': True,
+                        NAME_KEY: "Flow",
+                        "use_container_width": True,
                     },
                 },
             },
-            'visualize_scores': {
-                NAME_KEY: 'Scores Visualization',
-                'execution': {
-                    'inputs': {
-                        'scores': {
+            "visualize_scores": {
+                NAME_KEY: "Scores Visualization",
+                "execution": {
+                    "inputs": {
+                        "scores": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['models_scores'],
+                            "options": mall["models_scores"],
                         },
                     },
-                    'output': {ELEMENT_KEY: ArrayPlotter,},
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
                 },
             },
-            'simple_model': {
-                NAME_KEY: 'Learn model',
-                'execution': {
-                    'inputs': {
-                        'tagged_data': {
+            "simple_model": {
+                NAME_KEY: "Learn model",
+                "execution": {
+                    "inputs": {
+                        "tagged_data": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
+                            "options": mall["sound_output"],
                         },
-                        'preprocess_pipeline': {
+                        "preprocess_pipeline": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
+                            "options": mall["pipelines"],
                         },
                     },
-                    'output': {ELEMENT_KEY: ArrayPlotter,},
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
                 },
             },
-            'apply_fitted_model': {
-                NAME_KEY: 'Apply model',
-                'execution': {
-                    'inputs': {
-                        'tagged_data': {
+            "apply_fitted_model": {
+                NAME_KEY: "Apply model",
+                "execution": {
+                    "inputs": {
+                        "tagged_data": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
+                            "options": mall["sound_output"],
                         },
-                        'preprocess_pipeline': {
+                        "preprocess_pipeline": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
+                            "options": mall["pipelines"],
                         },
-                        'learned_model': {
+                        "learned_model": {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['learned_models'],
+                            "options": mall["learned_models"],
                         },
                     },
-                    'output': {ELEMENT_KEY: ArrayPlotter,},
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
                 },
             },
         },
@@ -411,7 +430,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     mall = dict(
         # Factory Input Stores
@@ -437,10 +456,10 @@ if __name__ == '__main__':
         featurizer=FuncFactory(simple_featurizer),
     )
 
-    mall['step_factories'] = step_factories
+    mall["step_factories"] = step_factories
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
+        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
     )
 
     app()
