@@ -205,7 +205,7 @@ def mk_pipeline_maker_app_with_mall(
                         },
                     },
                     "output": {
-                        ELEMENT_KEY: AudioArrayDisplayTemp,
+                        ELEMENT_KEY: AudioArrayDisplay,
                     },
                 },
             },
