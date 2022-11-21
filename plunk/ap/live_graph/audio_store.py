@@ -1,17 +1,81 @@
 import shutil
+from abc import ABC, abstractmethod
 from functools import cached_property
 from itertools import chain
 from math import ceil
 from operator import itemgetter
 from pathlib import Path
+from typing import MutableSequence, Callable
 
-from dol import appendable, Files
+from dol import appendable, Files, wrap_kvs
 from mongodol.tracking_methods import (
     track_method_calls,
     track_calls_without_executing,
     TrackableMixin,
 )
-from recode import encode_pcm_bytes, decode_pcm_bytes
+from recode import (
+    encode_pcm_bytes,
+    decode_pcm_bytes,
+    encode_wav_header_bytes,
+    decode_wav_bytes,
+)
+
+
+class AbstractBulkAppend(TrackableMixin, ABC):
+    bulk_factory: Callable[[], MutableSequence] = list
+
+    @cached_property
+    def _bulk(self) -> MutableSequence:
+        """Sequence of items.
+
+        :return:
+        """
+        return self.bulk_factory()
+
+    def _execute_tracks(self):
+        for func, args, kwargs in self._tracks:
+            if kv := self._bulk_append(*args, **kwargs):
+                func(self, kv)
+        if len(self._bulk) > 0:
+            kv = self._bulk_kv(self._bulk)
+            func(self, kv)
+
+    def _bulk_append(self, item):
+        """Append item to bulk and return None, or combine bulk and return the resulting item.
+
+        :param item:
+        :return:
+        """
+        if len(self._bulk) > 0:
+            if self._should_bulk(item):
+                self._bulk.append(item)
+            else:
+                rv = self._bulk_kv(self._bulk)
+                self._bulk.clear()
+                self._bulk.append(item)
+                return rv
+        else:
+            self._bulk.append(item)
+        return None
+
+    @abstractmethod
+    def _should_bulk(self, item) -> bool:
+        """Check if next item triggers the condition to bulk all the items into a single item
+
+        :param item:
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def _bulk_kv(self, bulk):
+        """Takes the sequence of items and combines into a single item
+
+        :param bulk:
+        :return:
+        """
+        pass
+
 
 audio_slab_kv = itemgetter('timestamp', 'wf')
 
@@ -31,7 +95,7 @@ def join_ts_wf(self, bulk):
     """Merge bulk and return key and joined value
 
     :param bulk:
-    :return: 
+    :return:
     """
     print(self, bulk)
     ts = bulk[0]['timestamp']
@@ -40,37 +104,18 @@ def join_ts_wf(self, bulk):
 
 
 def bulk_append(
-    should_bulk=should_bulk_if_bt_within_n, bulk_kv=join_ts_wf,
+    should_bulk=should_bulk_if_bt_within_n,
+    bulk_kv=join_ts_wf,
+    bulk_factory_callable=AbstractBulkAppend.bulk_factory,
 ):
-    class BulkAppend(TrackableMixin):
-        bulk_factory = list
-        _should_bulk = should_bulk  # TODO: add as method
-        _bulk_kv = bulk_kv
+    class BulkAppend(AbstractBulkAppend):
+        bulk_factory = bulk_factory_callable
 
-        @cached_property
-        def _bulk(self):
-            return self.bulk_factory()
+        def _should_bulk(self, item) -> bool:
+            return should_bulk(self, item)
 
-        def _execute_tracks(self):
-            for func, args, kwargs in self._tracks:
-                if kv := self._bulk_append(*args, **kwargs):
-                    func(self, kv)
-            if len(self._bulk) > 0:
-                kv = self._bulk_kv(self._bulk)
-                func(self, kv)
-
-        def _bulk_append(self, item):
-            if len(self._bulk) > 0:
-                if self._should_bulk(item):
-                    self._bulk.append(item)
-                else:
-                    rv = self._bulk_kv(self._bulk)
-                    self._bulk.clear()
-                    self._bulk.append(item)
-                    return rv
-            else:
-                self._bulk.append(item)
-            return None
+        def _bulk_kv(self, bulk):
+            return bulk_kv(self, bulk)
 
     return BulkAppend
 
@@ -138,17 +183,36 @@ def _test_files_store():
         shutil.rmtree(rootdir)
     rootdir.mkdir()
 
-    def join_ts_wf_as_bytes(self, bulk):
-        rv = join_ts_wf(self, bulk)
-        rv['wf'] = encode_pcm_bytes(rv['wf'])
-        return rv
+    def ts_to_filename(ts, ext='.wav'):
+        return f'{ts}{ext}'
+
+    def filename_to_ts(name, ext='.wav'):
+        return int(name[: -len(ext)])
+
+    def wf_to_wav(wf, *, sr=44100, width_bytes=2, n_channels=1):
+        header = encode_wav_header_bytes(
+            sr, width_bytes, n_channels=n_channels, nframes=len(wf)
+        )
+        pcm = encode_pcm_bytes(wf, width_bytes * 8, n_channels)
+        return header + pcm
+
+    def wav_to_wf(wav):
+        print(f'{wav=}')
+        wf, sr = decode_wav_bytes(wav)
+        return wf
 
     @track_method_calls(
         tracked_methods='append',
-        tracking_mixin=bulk_append(bulk_kv=join_ts_wf_as_bytes),
+        tracking_mixin=bulk_append(bulk_kv=join_ts_wf),
         calls_tracker=track_calls_without_executing,
     )
     @appendable(item2kv=audio_slab_kv)
+    @wrap_kvs(
+        key_of_id=filename_to_ts,
+        id_of_key=ts_to_filename,
+        obj_of_data=wav_to_wf,
+        data_of_obj=wf_to_wav,
+    )
     class AudioStore(Files):
         def _id_of_key(self, k):
             return super()._id_of_key(str(k))
