@@ -24,13 +24,11 @@ from plunk.ap.live_graph.live_graph_data_buffer import (
 )
 
 if not b.mall():
-    b.mall = dict(
-        input_device=PyAudioSourceReader.list_recording_devices(),
-        source=None,
-        graph_types=list(GRAPH_TYPES),
-    )
+    b.mall = dict(source=None,)
 
 mall = b.mall()
+if not b.input_devices():
+    b.input_devices = PyAudioSourceReader.list_recording_devices()
 crudifier = partial(Crudifier, mall=mall)
 
 
@@ -175,11 +173,11 @@ if __name__ == '__main__':
                         'inputs': {
                             'input_device': {
                                 ELEMENT_KEY: SelectBox,
-                                'options': mall['input_device'],
+                                'options': b.input_devices(),
                             },
                             'graph_types': {  # TODO option to select more than one graph type
                                 ELEMENT_KEY: SelectBox,
-                                'options': mall['graph_types'],
+                                'options': list(GRAPH_TYPES),
                             },
                         },
                         'output': {ELEMENT_KEY: DataGraph},
