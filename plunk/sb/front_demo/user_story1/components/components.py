@@ -19,21 +19,17 @@ class AudioArrayDisplay(OutputBase):
 
         # arr = sf.read(BytesIO(sound), dtype="int16")[0]
         # st.write(type(arr))
-        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
+        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
         with tab1:
             # if not isinstance(sound, bytes):
             #     sound = sound.getvalue()
             # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-<<<<<<< HEAD
             st.write(f"type of data={type(sound)}")
             st.write(f"sample of data = {sound[:10]}")
-=======
-            st.write(f'type of data={type(sound)}')
->>>>>>> 95b16429e81530bf3d4e95599f14c5920c84d218
             st.audio(sound)
         with tab2:
             fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(sound, label=f'Tag={tag}')
+            ax.plot(sound, label=f"Tag={tag}")
             ax.legend()
             st.pyplot(fig)
             # st.write(arr[:10])
@@ -106,7 +102,7 @@ def pyplot_with_intervals(X, intervals=None):
     if intervals:
         for i, interval in enumerate(intervals):
             start, end = interval
-            plt.axvspan(start, end, facecolor='g', alpha=0.5)
+            plt.axvspan(start, end, facecolor="g", alpha=0.5)
 
-            ax.annotate(f'{i}', xy=(start, min_x), ha='left', va='top')
+            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
     return fig

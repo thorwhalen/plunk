@@ -28,7 +28,7 @@ import streamlit as st
 import soundfile as sf
 from io import BytesIO
 from plunk.sb.front_demo.user_story1.components.components import (
-    AudioArrayDisplay,
+    AudioArrayDisplayTemp,
     GraphOutput,
     ArrayPlotter,
     ArrayWithIntervalsPlotter,
