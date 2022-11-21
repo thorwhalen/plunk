@@ -25,7 +25,6 @@ class AudioArrayDisplay(OutputBase):
             #     sound = sound.getvalue()
             # arr = sf.read(BytesIO(sound), dtype="int16")[0]
             st.write(f"type of data={type(sound)}")
-            st.write(f"sample of data = {sound[:10]}")
             st.audio(sound)
         with tab2:
             fig, ax = plt.subplots(figsize=(15, 5))

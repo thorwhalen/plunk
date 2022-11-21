@@ -44,7 +44,7 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
 )
 
 
-def simple_chunker(wfs, chk_size=DFLT_CHK_SIZE):
+def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
     return list(chunker(wfs, chk_size=chk_size))
 
 
