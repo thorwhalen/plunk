@@ -116,3 +116,6 @@ venv.bak/
 
 # Streamlit secrets
 .streamlit
+
+# Scrap folders
+scrap/
