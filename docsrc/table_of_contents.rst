@@ -7,6 +7,7 @@
    module_docs/plunk/ap/live_graph/live_graph_data_buffer
    module_docs/plunk/ap/live_graph/live_graph_streamlitfront
    module_docs/plunk/ap/snippets
+   module_docs/plunk/ap/wav_encode
    module_docs/plunk/sb/click_detection/analysis
    module_docs/plunk/sb/click_detection/clickified
    module_docs/plunk/sb/front_demo/data_prep
