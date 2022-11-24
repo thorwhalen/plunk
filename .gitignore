@@ -113,3 +113,6 @@ venv.bak/
 
 # PyCharm
 .idea
+
+# Streamlit secrets
+.streamlit
