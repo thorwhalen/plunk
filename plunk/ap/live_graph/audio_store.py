@@ -5,7 +5,7 @@ from itertools import chain
 from math import ceil
 from operator import itemgetter
 from tempfile import TemporaryDirectory
-from typing import MutableSequence, Callable, MutableMapping
+from typing import MutableSequence, Callable, MutableMapping, Protocol, Iterator
 from wave import Wave_write
 
 from dol import appendable, Files, wrap_kvs
@@ -18,6 +18,28 @@ from recode import (
     encode_pcm_bytes,
     decode_wav_bytes,
 )
+
+
+class BulkStore(Protocol):
+    """Mutable Mapping with Append Method"""
+
+    def append(self, item):
+        pass
+
+    def __setitem__(self, __k, __v) -> None:
+        pass
+
+    def __delitem__(self, __v) -> None:
+        pass
+
+    def __getitem__(self, __k):
+        pass
+
+    def __len__(self) -> int:
+        pass
+
+    def __iter__(self) -> Iterator:
+        pass
 
 
 class AbstractBulkAppend(TrackableMixin, ABC):
@@ -153,7 +175,7 @@ def wav_to_wf(wav):
     obj_of_data=wav_to_wf,
     data_of_obj=wf_to_wav,
 )
-class WavFileStore(Files):
+class WavFileStore(Files, BulkStore):
     pass
 
 
@@ -163,7 +185,7 @@ class WavFileStore(Files):
     calls_tracker=track_calls_without_executing,
 )
 @appendable(item2kv=audio_slab_kv)
-class DictStore(dict):
+class DictStore(dict, BulkStore):
     pass
 
 

@@ -4,23 +4,29 @@
 [ ] Add to webservice.
 [ ] Visualize graph.
 """
+from contextlib import contextmanager
+from dataclasses import dataclass
+from tempfile import TemporaryDirectory
 from time import sleep, time
-from typing import Any, Callable, Union, Optional
+from typing import Any, Callable, Union, Optional, ContextManager
 
 import numpy as np
 from audiostream2py import PyAudioSourceReader, get_input_device_index
+from i2 import Sig
 from know.base import SlabsIter, IteratorExit
 from know.examples.keyboard_and_audio import only_if
 from recode import mk_codec
 from stream2py import SourceReader, StreamBuffer
 from stream2py.utility.typing_hints import ComparableType
 
+from plunk.ap.live_graph.audio_store import BulkStore, WavFileStore
+
 codec = mk_codec('h')
 
 
 def if_not_none(func):
-    def _is_none_dict(d):
-        return not all(v is None for k, v in d.items())
+    def _is_none_dict(**kw):
+        return not all(v is None for k, v in kw.items())
 
     return only_if(_is_none_dict)(func)
 
@@ -48,6 +54,42 @@ def audio_to_wf(audio):
     return wf
 
 
+@dataclass
+class ContextualFunc:
+    func_name: str = ''
+    context: ContextManager = None
+
+    def __call__(self, *args, **kwargs):
+        print(list(self._context))
+        return self.func(*args, **kwargs)
+
+    @if_not_none
+    @property
+    def func(self):
+        return self._context.get(self.func)
+
+    def __enter__(self):
+        self._context = self.context.__enter__()
+        self.__signature__ = Sig()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.context.__exit__(exc_type, exc_val, exc_tb)
+
+
+@contextmanager
+def mk_wav_file_store(rootdir=None) -> ContextManager[BulkStore]:
+    if rootdir is None:
+        tmpdir = TemporaryDirectory()
+        try:
+            yield WavFileStore(rootdir=tmpdir.name)
+
+        finally:
+            tmpdir.cleanup()
+    else:
+        yield WavFileStore(rootdir)
+
+
 def audio_it(
     input_device=None,
     rate=44100,
@@ -56,6 +98,7 @@ def audio_it(
     frames_per_buffer=44100,  # same as sample rate for 1 second intervals
     seconds_to_keep_in_stream_buffer=60,
     graph_types=(*GRAPH_TYPES,),
+    audio_store: BulkStore = mk_wav_file_store(),
 ):
     input_device_index = get_input_device_index(input_device=input_device)
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
@@ -73,6 +116,12 @@ def audio_it(
         frames_per_buffer=frames_per_buffer,
     ).stream_buffer(maxlen)
 
+    @if_not_none
+    def store_item(timestamp, wf):
+        return {'timestamp': timestamp, 'wf': wf}
+
+    _audio_store = ContextualFunc('append', audio_store)
+
     def stop_if_audio_not_running(audio_reader_instance):
         if audio_reader_instance is not None and not audio_reader_instance.is_running:
             raise IteratorExit("audio isn't running anymore!")
@@ -86,6 +135,9 @@ def audio_it(
         timestamp=get_timestamp,
         wf=audio_to_wf,
         audio_reader_instance=lambda: audio_buffer,
+        audio_store_instance=lambda: _audio_store,
+        item=store_item,
+        _store_audio=audio_store,
         _audio_stop=stop_if_audio_not_running,
         **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
@@ -160,7 +212,9 @@ def mk_live_graph_data_buffer(
     ).stream_buffer(maxlen)
 
 
-def _test_live_graph_data_buffer(input_device=None, graph_types=(*GRAPH_TYPES,)):
+def _test_live_graph_data_buffer(
+    input_device=None, graph_types=(*GRAPH_TYPES,), test_length=22
+):
     recording_devices = PyAudioSourceReader.list_recording_devices()
     recording_devices.append(None)
     print(recording_devices)
@@ -180,7 +234,7 @@ def _test_live_graph_data_buffer(input_device=None, graph_types=(*GRAPH_TYPES,))
             else:
                 sleep(0.1)
 
-            if i == 10:
+            if i == test_length:
                 break
 
         stop = time() * 1e6
@@ -189,6 +243,16 @@ def _test_live_graph_data_buffer(input_device=None, graph_types=(*GRAPH_TYPES,))
 
 
 if __name__ == '__main__':
-    _test_live_graph_data_buffer(
+    # _test_live_graph_data_buffer(
+    #     input_device='NexiGo N930AF FHD Webcam Audio', graph_types='volume'
+    # )
+
+    i = 0
+    for slab in audio_it(
         input_device='NexiGo N930AF FHD Webcam Audio', graph_types='volume'
-    )
+    ):
+        if slab.get('audio'):
+            print(post_read_data(slab))
+            i += 1
+            if i > 22:
+                break
