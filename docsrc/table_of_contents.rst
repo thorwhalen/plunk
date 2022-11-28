@@ -20,6 +20,7 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app1
    module_docs/plunk/sb/front_demo/user_story1/apps/app2
    module_docs/plunk/sb/front_demo/user_story1/apps/app3
+   module_docs/plunk/sb/front_demo/user_story1/apps/app4_5drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_s3dol
    module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
