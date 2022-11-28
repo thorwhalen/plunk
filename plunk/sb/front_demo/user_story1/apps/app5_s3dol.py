@@ -414,7 +414,7 @@ from s3dol import get_s3_client, S3BucketBaseReader
 
 
 # bucket_name ='s3://drillnoise/DrillDataset/'
-bucket_name = "drillnoise"
+bucket_name = 'drillnoise'
 
 # r = S3BucketBaseReader(S3BucketBaseReader.mk_client(**resources_kwargs), bucket='bucket_name', prefix='my_stuff/')
 client = get_s3_client(**st.secrets.s3_credentials)
