@@ -4,6 +4,7 @@ from io import BytesIO
 from itertools import chain
 from math import ceil
 from operator import itemgetter
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import MutableSequence, Callable, MutableMapping, Protocol, Iterator
 from wave import Wave_write
@@ -195,7 +196,10 @@ def _test_dict_store():
 
 def _test_files_store():
     with TemporaryDirectory() as tmpdirname:
-        _test_store(WavFileStore(rootdir=tmpdirname))
+        audio_store = WavFileStore(rootdir=tmpdirname)
+        _test_store(audio_store)
+        print(f'{len(list(Path(tmpdirname).iterdir()))=} == {len(audio_store)=}')
+        assert len(list(Path(tmpdirname).iterdir())) == len(audio_store)
 
 
 def _test_store(store_instance: MutableMapping, *, n=22, chk_size=2, log=print):
@@ -211,7 +215,9 @@ def _test_store(store_instance: MutableMapping, *, n=22, chk_size=2, log=print):
         for i in range(n):
             a.append({'timestamp': i, 'wf': [i] * chk_size})
             log('print#2', f'{i=}', f'{len(a._tracks)=}', a)
-            assert len(a._tracks) == i + 1
+            assert (
+                len(a._tracks) == (i + 1) % N_TO_BULK
+            ), 'Tracking should auto flush when size limit is reached'
             log('print#3', f'{len(a) == 0=}')
             assert len(a) == 0, list(a)
         log('print#4', f'{len(a._tracks) == n=}')
@@ -238,6 +244,8 @@ def _test_store(store_instance: MutableMapping, *, n=22, chk_size=2, log=print):
                 assert (
                     next(v_iter) == j
                 ), f'{i=}, {j=}, {k=}, {i * N_TO_BULK=}, {min((i + 1) * N_TO_BULK, n)=}'
+
+    print(f'Test passed with params: {store_instance=}, {n=}, {chk_size=}, {log=}')
 
 
 if __name__ == '__main__':
