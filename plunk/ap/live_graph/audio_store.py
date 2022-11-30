@@ -92,6 +92,7 @@ def merge_append_ts_wf(items: List[dict]):
 
 class CountMergeExecute(CountAndExecute):
     """Apply a merging method to join all arguments before executing tracked method once"""
+
     _MERGE_KWARGS_MAP = {'append': merge_append_ts_wf}
 
     def _execute_method_tracks(self, method: Callable):
