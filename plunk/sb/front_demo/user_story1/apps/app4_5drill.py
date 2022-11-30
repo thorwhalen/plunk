@@ -23,6 +23,9 @@ from streamlitfront.elements import (
     FileUploader,
     MultiSourceInput,
 )
+from functools import partial
+from front.crude import crudify_based_on_names, prepare_for_crude_dispatch
+from collections import defaultdict
 import streamlit as st
 
 import soundfile as sf
@@ -42,6 +45,9 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
     clean_dict,
     scores_to_intervals,
     lined_dag,
+    tagged_sound_to_array,
+    tagged_sounds_to_single_array,
+    assert_dims,
 )
 from typing import List
 
@@ -53,33 +59,6 @@ def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
 def simple_featurizer(chks):
     fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
     return fvs
-
-
-def tagged_sound_to_array(train_audio: WaveForm, tag: str):
-    sound, tag = train_audio, tag
-    if not isinstance(sound, bytes):
-        sound = sound.getvalue()
-
-    arr = sf.read(BytesIO(sound), dtype='int16')[0]
-    return arr, tag
-
-
-def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
-    sounds, tag = train_audio, tag
-    result = []
-    for sound in sounds:
-        # if not isinstance(sound, bytes):
-        sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype='int16')[0]
-        result.append(arr)
-    # print(np.hstack(result))
-    return np.hstack(result).reshape(-1, 1), tag
-
-
-def assert_dims(wfs):
-    if wfs.ndim >= 2:
-        wfs = wfs[:, 0]
-    return wfs
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -95,106 +74,88 @@ def mk_pipeline_maker_app_with_mall(
     learned_models=None,
     models_scores=None,
 ):
+    from plunk.sb.front_demo.user_story1.utils.funcs import (
+        upload_sound,
+        # display_tag_sound,
+        mk_step,
+        mk_pipeline,
+        learn_outlier_model,
+        apply_fitted_model,
+        # exec_pipeline,
+        visualize_pipeline,
+        visualize_scores,
+    )
+
     if not b.mall():
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
         b.selected_step_factory = 'chunker'  # TODO make this dynamic
 
-    crudifier = partial(Crudifier, mall=mall)
-
+    # mall = dict(
+    #     # Factory Input Stores
+    #     sound_output=dict(),
+    #     step_factories=dict(),
+    #     # Output Store
+    #     data=dict(),
+    #     steps=dict(),
+    #     steps_store=dict(),
+    #     pipelines=dict(),
+    #     exec_outputs=dict(),
+    #     learned_models=dict(),
+    #     pipelines_store=dict(),
+    #     models_scores=dict(),
+    # )
     steps_store = steps_store or steps
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
 
-    @crudifier(
-        param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
+    general_crudifier = partial(
+        crudify_based_on_names,
+        param_to_mall_map={
+            'step_factory': 'step_factories',
+            'tagged_data': 'sound_output',
+            'preprocess_pipeline': 'pipelines',
+            'tagged_data': 'sound_output',
+            'preprocess_pipeline': 'pipelines',
+            'fitted_model': 'learned_models',
+            'pipeline': 'pipelines_store',
+            'scores': 'models_scores',
+        },
+        output_store={
+            mk_step: 'steps_store',
+            mk_pipeline: 'pipelines_store',
+            learn_outlier_model: 'learned_models',
+            apply_fitted_model: 'models_scores',
+            upload_sound: 'sound_output',
+        },
+        crudifier=partial(prepare_for_crude_dispatch, mall=mall),
     )
-    def mk_step(step_factory: Callable, kwargs: dict):
-        kwargs = clean_dict(kwargs)  # TODO improve that logic
-        step = partial(step_factory, **kwargs)()
 
-        return step
-
-    #
-    @crudifier(output_store=pipelines_store,)
-    def mk_pipeline(steps: Iterable[Callable]):
-        return lined_dag(steps)
-        # return LineParametrized(*steps)
-
-    @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data='sound_output'),
-        output_store='exec_outputs',
+    [
+        upload_sound,
+        # display_tag_sound,
+        mk_step,
+        mk_pipeline,
+        learn_outlier_model,
+        apply_fitted_model,
+        # exec_pipeline,
+        visualize_pipeline,
+        visualize_scores,
+    ] = map(
+        general_crudifier,
+        [
+            upload_sound,
+            # display_tag_sound,
+            mk_step,
+            mk_pipeline,
+            learn_outlier_model,
+            apply_fitted_model,
+            # exec_pipeline,
+            visualize_pipeline,
+            visualize_scores,
+        ],
     )
-    def exec_pipeline(pipeline: Callable, tagged_data):
-
-        sound, _ = tagged_sound_to_array(*tagged_data)
-        wfs = np.array(sound)
-        wfs = assert_dims(wfs)
-
-        result = pipeline(wfs)
-        return result
-
-    @crudifier(
-        param_to_mall_map=dict(
-            tagged_data='sound_output', preprocess_pipeline='pipelines'
-        ),
-        output_store='learned_models',
-    )
-    def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=5):
-        sound, tag = tagged_sounds_to_single_array(*tagged_data)
-        wfs = np.array(sound)
-
-        wfs = assert_dims(wfs)
-
-        fvs = preprocess_pipeline(wfs)
-        model = Stroll(n_centroids=n_centroids)
-        model.fit(X=fvs)
-
-        return model
-
-    @crudifier(
-        param_to_mall_map=dict(
-            tagged_data='sound_output',
-            preprocess_pipeline='pipelines',
-            fitted_model='learned_models',
-        ),
-        output_store='models_scores',
-    )
-    def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
-        sound, tag = tagged_sounds_to_single_array(*tagged_data)
-        wfs = np.array(sound)
-        wfs = assert_dims(wfs)
-
-        fvs = preprocess_pipeline(wfs)
-        scores = fitted_model.score_samples(X=fvs)
-        return scores
-
-    @crudifier(param_to_mall_map=dict(pipeline=pipelines_store),)
-    def visualize_pipeline(pipeline: DAG):
-
-        return pipeline
-
-    @crudifier(param_to_mall_map=dict(scores='models_scores'),)
-    def visualize_scores(scores, threshold=80, num_segs=3):
-
-        intervals = scores_to_intervals(scores, threshold, num_segs)
-
-        return scores, intervals
-
-    @crudifier(output_store='sound_output')
-    def upload_sound(train_audio: List[WaveForm], tag: str):
-        # sound, tag = train_audio, tag
-        # if not isinstance(sound, bytes):
-        #     sound = sound.getvalue()
-
-        # arr = sf.read(BytesIO(sound), dtype='int16')[0]
-        # return arr, tag
-        return train_audio, tag
-
-    @crudifier(param_to_mall_map={'result': 'sound_output'})
-    def display_tag_sound(result):
-        return result
 
     def get_step_name(step):
         return [k for k, v in mall[steps].items() if v == step][0]
@@ -241,7 +202,7 @@ def mk_pipeline_maker_app_with_mall(
                         'step_factory': {'value': b.selected_step_factory,},
                         'kwargs': {
                             'func_sig': Sig(
-                                mall[step_factories][b.selected_step_factory()]
+                                mall['step_factories'][b.selected_step_factory()]
                             ),
                         },
                     },
@@ -346,11 +307,11 @@ def mk_pipeline_maker_app_with_mall(
         # display_tag_sound,
         mk_step,
         mk_pipeline,
-        learn_outlier_model,
-        apply_fitted_model,
-        # exec_pipeline,
-        visualize_pipeline,
-        visualize_scores,
+        # learn_outlier_model,
+        # apply_fitted_model,
+        # # exec_pipeline,
+        # visualize_pipeline,
+        # visualize_scores,
     ]
     app = mk_app(funcs, config=config)
 
@@ -366,13 +327,15 @@ if __name__ == '__main__':
         # Output Store
         data=dict(),
         steps=dict(),
+        steps_store=dict(),
+        pipelines_store=dict(),
         pipelines=dict(),
         exec_outputs=dict(),
         learned_models=dict(),
         models_scores=dict(),
     )
 
-    crudifier = partial(prepare_for_crude_dispatch, mall=mall)
+    # crudifier = partial(prepare_for_crude_dispatch, mall=mall)
 
     step_factories = dict(
         # ML
