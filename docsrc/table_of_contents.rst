@@ -28,6 +28,7 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app_dummy
    module_docs/plunk/sb/front_demo/user_story1/apps/app_scrap
    module_docs/plunk/sb/front_demo/user_story1/components/components
+   module_docs/plunk/sb/front_demo/user_story1/utils/funcs
    module_docs/plunk/sb/front_demo/user_story1/utils/tools
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
    module_docs/plunk/sb/front_experiments/edge_interface/js
