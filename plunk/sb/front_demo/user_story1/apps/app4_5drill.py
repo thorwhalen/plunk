@@ -50,17 +50,6 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
     assert_dims,
 )
 from typing import List
-from plunk.sb.front_demo.user_story1.utils.funcs import (
-    upload_sound,
-    # display_tag_sound,
-    mk_step,
-    mk_pipeline,
-    learn_outlier_model,
-    apply_fitted_model,
-    # exec_pipeline,
-    visualize_pipeline,
-    visualize_scores,
-)
 
 
 def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
@@ -85,14 +74,38 @@ def mk_pipeline_maker_app_with_mall(
     learned_models=None,
     models_scores=None,
 ):
+    from plunk.sb.front_demo.user_story1.utils.funcs import (
+        upload_sound,
+        # display_tag_sound,
+        mk_step,
+        mk_pipeline,
+        learn_outlier_model,
+        apply_fitted_model,
+        # exec_pipeline,
+        visualize_pipeline,
+        visualize_scores,
+    )
+
     if not b.mall():
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
         b.selected_step_factory = "chunker"  # TODO make this dynamic
 
-    crudifier = partial(Crudifier, mall=mall)
-
+    # mall = dict(
+    #     # Factory Input Stores
+    #     sound_output=dict(),
+    #     step_factories=dict(),
+    #     # Output Store
+    #     data=dict(),
+    #     steps=dict(),
+    #     steps_store=dict(),
+    #     pipelines=dict(),
+    #     exec_outputs=dict(),
+    #     learned_models=dict(),
+    #     pipelines_store=dict(),
+    #     models_scores=dict(),
+    # )
     steps_store = steps_store or steps
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
@@ -193,7 +206,7 @@ def mk_pipeline_maker_app_with_mall(
                         },
                         "kwargs": {
                             "func_sig": Sig(
-                                mall[step_factories][b.selected_step_factory()]
+                                mall["step_factories"][b.selected_step_factory()]
                             ),
                         },
                     },
@@ -310,11 +323,11 @@ def mk_pipeline_maker_app_with_mall(
         # display_tag_sound,
         mk_step,
         mk_pipeline,
-        learn_outlier_model,
-        apply_fitted_model,
-        # exec_pipeline,
-        visualize_pipeline,
-        visualize_scores,
+        # learn_outlier_model,
+        # apply_fitted_model,
+        # # exec_pipeline,
+        # visualize_pipeline,
+        # visualize_scores,
     ]
     app = mk_app(funcs, config=config)
 
@@ -330,13 +343,15 @@ if __name__ == "__main__":
         # Output Store
         data=dict(),
         steps=dict(),
+        steps_store=dict(),
+        pipelines_store=dict(),
         pipelines=dict(),
         exec_outputs=dict(),
         learned_models=dict(),
         models_scores=dict(),
     )
 
-    crudifier = partial(prepare_for_crude_dispatch, mall=mall)
+    # crudifier = partial(prepare_for_crude_dispatch, mall=mall)
 
     step_factories = dict(
         # ML
