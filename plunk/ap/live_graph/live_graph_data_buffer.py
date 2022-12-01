@@ -4,12 +4,11 @@
 [ ] Add to webservice.
 [ ] Visualize graph.
 """
-from contextlib import contextmanager
 from math import ceil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import sleep, time
-from typing import Any, Callable, Union, Optional, ContextManager
+from typing import Any, Callable, Union, Optional
 
 import numpy as np
 from audiostream2py import PyAudioSourceReader, get_input_device_index
@@ -55,19 +54,6 @@ def audio_to_wf(audio):
     return wf
 
 
-@contextmanager
-def mk_wav_file_store(rootdir=None) -> ContextManager[BulkStore]:
-    if rootdir is None:
-        tmpdir = TemporaryDirectory()
-        try:
-            yield WavFileStore(rootdir=tmpdir.name)
-
-        finally:
-            tmpdir.cleanup()
-    else:
-        yield WavFileStore(rootdir)
-
-
 def audio_it(
     input_device=None,
     rate=44100,
@@ -76,7 +62,7 @@ def audio_it(
     frames_per_buffer=44100,  # same as sample rate for 1 second intervals
     seconds_to_keep_in_stream_buffer=60,
     graph_types=(*GRAPH_TYPES,),
-    audio_store: BulkStore = mk_wav_file_store(),
+    audio_store: BulkStore = None,
 ):
     input_device_index = get_input_device_index(input_device=input_device)
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
@@ -94,11 +80,17 @@ def audio_it(
         frames_per_buffer=frames_per_buffer,
     ).stream_buffer(maxlen)
 
-    @if_not_none
-    def store_item(timestamp, wf):
-        return {'timestamp': timestamp, 'wf': wf}
+    store_components = {}
+    if audio_store is not None:
 
-    store_audio = if_not_none(ContextualFunc(audio_store.append, audio_store))
+        @if_not_none
+        def _append(timestamp, wf):
+            return audio_store.append({'timestamp': timestamp, 'wf': wf})
+
+        store_audio = ContextualFunc(_append, (audio_store,))
+        store_components.update(
+            audio_store_instance=lambda: audio_store, _store_audio=store_audio,
+        )
 
     def stop_if_audio_not_running(audio_reader_instance):
         if audio_reader_instance is not None and not audio_reader_instance.is_running:
@@ -113,10 +105,8 @@ def audio_it(
         timestamp=get_timestamp,
         wf=audio_to_wf,
         audio_reader_instance=lambda: audio_buffer,
-        audio_store_instance=lambda: audio_store,
-        item=store_item,
-        _store_audio=store_audio,
         _audio_stop=stop_if_audio_not_running,
+        **store_components,
         **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
 
@@ -195,18 +185,19 @@ def _test_audio_it(input_device=None, graph_types=(*GRAPH_TYPES,), test_length=2
         audio_store = WavFileStore(rootdir=tmpdirname)
 
         i = 0
-        for a in audio_it(
+        with audio_it(
             input_device=input_device, graph_types=graph_types, audio_store=audio_store
-        ):
-            if a.get('audio'):
-                slab = post_read_data(a)
-                slab.update()
-                print('slab', i, slab)
-                print(f'{len(a.get("audio_store_instance")._tracks)=}')
-                assert all(k in slab for k in DATA_KEYS)
-                i += 1
-                if i >= test_length:
-                    break
+        ) as a_it:
+            for a in a_it:
+                if a.get('audio'):
+                    slab = post_read_data(a)
+                    slab.update()
+                    print('slab', i, slab)
+                    print(f'{len(a.get("audio_store_instance")._tracks)=}')
+                    assert all(k in slab for k in DATA_KEYS)
+                    i += 1
+                    if i >= test_length:
+                        break
 
         n_tracks = len(audio_store._tracks)
         print(f'{n_tracks=}')
@@ -218,11 +209,16 @@ def _test_audio_it(input_device=None, graph_types=(*GRAPH_TYPES,), test_length=2
 
         if n_tracks:
             audio_store.flush()
-        print(f'{len(audio_store)=}')
-        print(list(audio_store))
-        print(list(Path(tmpdirname).iterdir()))
+            print(f'{len(audio_store)=}')
+            print(list(audio_store))
+            print(list(Path(tmpdirname).iterdir()))
+            assert len(audio_store) == ceil(test_length / N_TO_BULK), (
+                'Failed to bulk items: '
+                f'{len(a)=} == {ceil(test_length / N_TO_BULK)=}'
+            )
 
     assert Path(tmpdirname).is_dir() is False
+    print('Test passed: _test_audio_it')
 
 
 def _test_live_graph_data_buffer(
@@ -253,6 +249,7 @@ def _test_live_graph_data_buffer(
         stop = time() * 1e6
         print(f'{(len(slab_reader.range(start, stop)) == i)=}')
         assert len(slab_reader.range(start, stop)) == i
+    print('Test passed: _test_live_graph_data_buffer')
 
 
 if __name__ == '__main__':
@@ -260,4 +257,4 @@ if __name__ == '__main__':
     graph_types = 'volume'
 
     _test_audio_it(input_device=input_device, graph_types=graph_types)
-    # _test_live_graph_data_buffer(input_device=input_device, graph_types=graph_types)
+    _test_live_graph_data_buffer(input_device=input_device, graph_types=graph_types)

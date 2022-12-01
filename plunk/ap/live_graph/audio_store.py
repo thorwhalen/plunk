@@ -49,6 +49,12 @@ class BulkStore(Protocol):
     def __iter__(self) -> Iterator:
         pass
 
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
 
 audio_slab_kv = itemgetter('timestamp', 'wf')
 
@@ -71,17 +77,20 @@ class CountAndExecute(TrackableMixin):
 
 
 def merge_append_ts_wf(items: List[dict]):
-    """Take a list of kwargs and return a single kwargs
+    """Take a list of kwargs for method append(item) and return a single kwargs
 
-    :param items: [{item: {timestamp: 0, wf: [1, 2, 3]}, ...]
-    :return:
+
+    :param items: [{'item': {'timestamp': 0, 'wf': [0, 0]}},
+                   {'item': {'timestamp': 1, 'wf': [1, 1]}},
+                   ...]
+    :return: {'item': {'timestamp': 0, 'wf': [0, 0, 1, 1, ...]}}
     """
     ts = items[0]['item']['timestamp']
     joined_wf = list(
         chain.from_iterable(
             map(
                 partial(
-                    reduce, lambda x, y: y(x), [itemgetter('item'), itemgetter('wf')],
+                    reduce, lambda x, y: y(x), (itemgetter('item'), itemgetter('wf')),
                 ),
                 items,
             )
@@ -175,8 +184,9 @@ def _test_merge_append_ts_wf():
     for i in range(10):
         a.append({'item': {'timestamp': i, 'wf': [i] * 2}})
     ma = merge_append_ts_wf(a)
-    print(ma)
     assert 'item' in ma
+    assert 'timestamp' in ma['item']
+    assert 'wf' in ma['item']
 
 
 def _test_dict_store():
