@@ -186,12 +186,12 @@ def mk_pipeline_maker_app_with_mall(
             },
             'display_tag_sound': {
                 'execution': {
-                    'inputs': {
-                        'result': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                    },
+                    # 'inputs': {
+                    #     'result': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['sound_output'],
+                    #     },
+                    # },
                     'output': {ELEMENT_KEY: AudioArrayDisplay,},
                 },
             },
@@ -233,10 +233,10 @@ def mk_pipeline_maker_app_with_mall(
                 'execution': {
                     'inputs': {
                         'pipeline': {'value': b.selected_pipeline,},
-                        'data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
+                        # 'tagged_data': {
+                        #     ELEMENT_KEY: SelectBox,
+                        #     'options': mall['sound_output'],
+                        # },
                     }
                 },
             },
@@ -254,48 +254,48 @@ def mk_pipeline_maker_app_with_mall(
             'visualize_scores': {
                 NAME_KEY: 'Scores Visualization',
                 'execution': {
-                    'inputs': {
-                        'scores': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['models_scores'],
-                        },
-                    },
+                    # 'inputs': {
+                    #     'scores': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['models_scores'],
+                    #     },
+                    # },
                     'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},
                 },
             },
             'simple_model': {
                 NAME_KEY: 'Learn model',
                 'execution': {
-                    'inputs': {
-                        'tagged_data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                        'preprocess_pipeline': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
-                        },
-                    },
+                    # 'inputs': {
+                    #     'tagged_data': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['sound_output'],
+                    #     },
+                    #     'preprocess_pipeline': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['pipelines'],
+                    #     },
+                    # },
                     'output': {ELEMENT_KEY: ArrayPlotter,},
                 },
             },
             'apply_fitted_model': {
                 NAME_KEY: 'Apply model',
                 'execution': {
-                    'inputs': {
-                        'tagged_data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                        'preprocess_pipeline': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
-                        },
-                        'learned_model': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['learned_models'],
-                        },
-                    },
+                    # 'inputs': {
+                    #     'tagged_data': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['sound_output'],
+                    #     },
+                    #     'preprocess_pipeline': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['pipelines'],
+                    #     },
+                    #     'learned_model': {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         'options': mall['learned_models'],
+                    #     },
+                    # },
                     'output': {ELEMENT_KEY: ArrayPlotter,},
                 },
             },
