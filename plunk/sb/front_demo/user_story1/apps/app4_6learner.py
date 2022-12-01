@@ -6,7 +6,7 @@ from typing import Mapping
 from know.boxes import *
 from functools import partial
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
-from front.crude import Crudifier, prepare_for_crude_dispatch
+from front.crude import Crudifier
 from lined import LineParametrized
 import numpy as np
 
@@ -124,16 +124,19 @@ def mk_pipeline_maker_app_with_mall(
             "learn_apply_model": {
                 NAME_KEY: "Apply model",
                 "execution": {
-                    "inputs": {
-                        "tagged_data": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
-                        },
-                        "pipeline": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["pipelines"],
-                        },
-                    },
+                    # "inputs": {
+                    #     "tagged_data": {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         "options": mall["sound_output"], #must be a list, when explicit
+                    #     },
+                    #     # "pipeline": {
+                    #     #     ELEMENT_KEY: SelectBox,
+                    #     #     "options": mall["pipelines"],
+                    #     # },
+                    #     # "pipeline": {
+                    #     #     "value": b.selected_pipeline,
+                    #     # },
+                    # },
                     "output": {
                         ELEMENT_KEY: ArrayPlotter,
                     },
@@ -160,12 +163,12 @@ if __name__ == "__main__":
     )
 
     # crudifier = partial(prepare_for_crude_dispatch, mall=mall)
-
+    mall["sound_output"] = dict()
     mall["pipelines"] = dict(
         # ML
         default_pipeline=DFLT_PIPELINE
     )
-    st.write(mall)
+    # st.write(mall)
 
     app = mk_pipeline_maker_app_with_mall(
         mall, pipelines="pipelines", sound_output="sound_output"

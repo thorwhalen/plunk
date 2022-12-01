@@ -6,11 +6,12 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
     Stroll,
     clean_dict,
     scores_to_intervals,
-    lined_dag,
+    # lined_dag,
     tagged_sounds_to_single_array,
     tagged_sound_to_array,
     assert_dims,
 )
+from meshed.makers import lined_dag
 from omodel.outliers.pystroll import OutlierModel as Stroll
 from meshed import DAG
 
