@@ -15,15 +15,11 @@ from streamlitfront.elements import (
     SelectBox,
     SuccessNotification,
 )
-from streamlitfront.elements import (
-    FileUploader,
-)
+from streamlitfront.elements import FileUploader
 
 import soundfile as sf
 from io import BytesIO
-from plunk.sb.front_demo.user_story1.components.components import (
-    ArrayPlotter,
-)
+from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
 from plunk.sb.front_demo.user_story1.utils.tools import (
     DFLT_FEATURIZER,
     DFLT_CHK_SIZE,
@@ -49,7 +45,7 @@ def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
     result = []
     for sound in sounds:
         sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         result.append(arr)
     return np.hstack(result).reshape(-1, 1), tag
 
@@ -79,11 +75,8 @@ def mk_pipeline_maker_app_with_mall(
     crudifier = partial(Crudifier, mall=mall)
 
     @crudifier(
-        param_to_mall_map=dict(
-            tagged_data="sound_output",
-            pipeline="pipelines",
-        ),
-        output_store="models_scores",
+        param_to_mall_map=dict(tagged_data='sound_output', pipeline='pipelines',),
+        output_store='models_scores',
     )
     def learn_apply_model(tagged_data, pipeline):
         n_centroids = 15
@@ -97,30 +90,31 @@ def mk_pipeline_maker_app_with_mall(
         scores = fitted_model.score_samples(X=fvs)
         return scores
 
-    @crudifier(output_store="sound_output")
+    @crudifier(output_store='sound_output')
     def upload_sound(train_audio: List[WaveForm], tag: str):
 
         return train_audio, tag
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "upload_sound": {
+            'upload_sound': {
                 # NAME_KEY: "Data Loader",
-                "execution": {
-                    "inputs": {
-                        "train_audio": {
+                'execution': {
+                    'inputs': {
+                        'train_audio': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav files loaded successfully.",
+                        'message': 'Wav files loaded successfully.',
                     },
                 },
             },
+<<<<<<< HEAD
             "learn_apply_model": {
                 NAME_KEY: "Apply model",
                 "execution": {
@@ -140,6 +134,22 @@ def mk_pipeline_maker_app_with_mall(
                     "output": {
                         ELEMENT_KEY: ArrayPlotter,
                     },
+=======
+            'learn_apply_model': {
+                NAME_KEY: 'Apply model',
+                'execution': {
+                    'inputs': {
+                        'tagged_data': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['sound_output'],
+                        },
+                        'pipeline': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['pipelines'],
+                        },
+                    },
+                    'output': {ELEMENT_KEY: ArrayPlotter,},
+>>>>>>> 43f870a785069958eb68f18c86df77282e288a01
                 },
             },
         },
@@ -154,24 +164,25 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    mall = dict(
-        sound_output=dict(),
-        pipelines=dict(),
-        models_scores=dict(),
-    )
+    mall = dict(sound_output=dict(), pipelines=dict(), models_scores=dict(),)
 
     # crudifier = partial(prepare_for_crude_dispatch, mall=mall)
+<<<<<<< HEAD
     mall["sound_output"] = dict()
     mall["pipelines"] = dict(
+=======
+
+    mall['pipelines'] = dict(
+>>>>>>> 43f870a785069958eb68f18c86df77282e288a01
         # ML
         default_pipeline=DFLT_PIPELINE
     )
     # st.write(mall)
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, pipelines="pipelines", sound_output="sound_output"
+        mall, pipelines='pipelines', sound_output='sound_output'
     )
 
     app()
