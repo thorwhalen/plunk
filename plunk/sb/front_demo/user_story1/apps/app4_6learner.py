@@ -114,7 +114,6 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-<<<<<<< HEAD
             "learn_apply_model": {
                 NAME_KEY: "Apply model",
                 "execution": {
@@ -134,22 +133,6 @@ def mk_pipeline_maker_app_with_mall(
                     "output": {
                         ELEMENT_KEY: ArrayPlotter,
                     },
-=======
-            'learn_apply_model': {
-                NAME_KEY: 'Apply model',
-                'execution': {
-                    'inputs': {
-                        'tagged_data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                        'pipeline': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
-                        },
-                    },
-                    'output': {ELEMENT_KEY: ArrayPlotter,},
->>>>>>> 43f870a785069958eb68f18c86df77282e288a01
                 },
             },
         },
