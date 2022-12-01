@@ -40,14 +40,6 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
     DFLT_FEATURIZER,
     DFLT_CHK_SIZE,
     chunker,
-    WaveForm,
-    Stroll,
-    clean_dict,
-    scores_to_intervals,
-    lined_dag,
-    tagged_sound_to_array,
-    tagged_sounds_to_single_array,
-    assert_dims,
 )
 from typing import List
 
@@ -92,20 +84,6 @@ def mk_pipeline_maker_app_with_mall(
     if not b.selected_step_factory():
         b.selected_step_factory = "chunker"  # TODO make this dynamic
 
-    # mall = dict(
-    #     # Factory Input Stores
-    #     sound_output=dict(),
-    #     step_factories=dict(),
-    #     # Output Store
-    #     data=dict(),
-    #     steps=dict(),
-    #     steps_store=dict(),
-    #     pipelines=dict(),
-    #     exec_outputs=dict(),
-    #     learned_models=dict(),
-    #     pipelines_store=dict(),
-    #     models_scores=dict(),
-    # )
     steps_store = steps_store or steps
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines

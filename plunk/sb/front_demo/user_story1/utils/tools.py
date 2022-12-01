@@ -170,17 +170,6 @@ def simple_model(tagged_data):
     return scores
 
 
-def lined_dag(funcs):
-    dag = DAG(funcs)
-    if not funcs:
-        return dag
-    else:
-        names = [name_of_obj(func) for func in funcs]
-        pairs = zip(names, names[1:])
-        dag = dag.add_edges(pairs)
-        return dag
-
-
 def assert_dims(wfs):
     if wfs.ndim >= 2:
         wfs = wfs[:, 0]
@@ -192,7 +181,7 @@ def tagged_sound_to_array(train_audio: WaveForm, tag: str):
     if not isinstance(sound, bytes):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype='int16')[0]
+    arr = sf.read(BytesIO(sound), dtype="int16")[0]
     return arr, tag
 
 
@@ -202,7 +191,7 @@ def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
     for sound in sounds:
         # if not isinstance(sound, bytes):
         sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype='int16')[0]
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
         result.append(arr)
     # print(np.hstack(result))
     return np.hstack(result).reshape(-1, 1), tag
