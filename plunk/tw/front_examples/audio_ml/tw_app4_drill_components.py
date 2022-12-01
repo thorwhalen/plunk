@@ -29,7 +29,7 @@ def simple_chunker(it, chk_size: int = DFLT_CHK_SIZE):
 
 
 def clean_dict(kwargs):
-    result = {k: v for k, v in kwargs.items() if v != ""}
+    result = {k: v for k, v in kwargs.items() if v != ''}
     return result
 
 
@@ -38,7 +38,7 @@ def tagged_sound_to_array(train_audio: WaveForm, tag: str):
     if not isinstance(sound, bytes):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]  # TODO: use recode
+    arr = sf.read(BytesIO(sound), dtype='int16')[0]  # TODO: use recode
     return arr, tag
 
 
@@ -48,7 +48,7 @@ def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
     for sound in sounds:
         # if not isinstance(sound, bytes):
         sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         result.append(arr)
     # print(np.hstack(result))
     return np.hstack(result).reshape(-1, 1), tag
@@ -162,6 +162,3 @@ def upload_sound(train_audio: List[WaveForm], tag: str):
 # @crudifier(param_to_mall_map={'result': 'sound_output'})
 def display_tag_sound(result):
     return result
-
-
-

@@ -45,6 +45,7 @@ DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 DFLT_CHK_SIZE = 2048
 DFLT_CHK_STEP = 2048
 
+
 def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
     return list(chunker(wfs, chk_size=chk_size))
 
@@ -81,10 +82,7 @@ def assert_dims(wfs):
     return wfs
 
 
-
 from meshed import code_to_fnodes
-
-
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -377,6 +375,7 @@ if __name__ == '__main__':
     # )
     # TODO: OR (pros cons?) (could make a defaultdict with key constraints too!)
     from collections import defaultdict
+
     mall = defaultdict(dict)
 
     crudifier = partial(prepare_for_crude_dispatch, mall=mall)
