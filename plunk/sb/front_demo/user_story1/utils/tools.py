@@ -64,10 +64,7 @@ def consecutive_indices(arr):
 
 
 def get_groups_extremities_all(
-    arr,
-    groups_indices,
-    func=np.mean,
-    num_outliers=DFLT_NUM_OUTLIERS,
+    arr, groups_indices, func=np.mean, num_outliers=DFLT_NUM_OUTLIERS,
 ):
 
     means = apply_func_to_index_groups(func, arr, groups_indices)
@@ -86,10 +83,7 @@ def scores_to_intervals(scores, high_percentile=90, num_selected=3):
     arr_selected = np.nonzero(scores >= high)[0]
     groups_indices = consecutive_indices(arr_selected)
     intervals_all = get_groups_extremities_all(
-        scores,
-        groups_indices,
-        func=np.mean,
-        num_outliers=num_selected,
+        scores, groups_indices, func=np.mean, num_outliers=num_selected,
     )
     result = [(a, b) for a, b in intervals_all if b > a]
 
@@ -119,7 +113,7 @@ WaveForm = Iterable[int]
 
 
 def clean_dict(kwargs):
-    result = {k: v for k, v in kwargs.items() if v != ""}
+    result = {k: v for k, v in kwargs.items() if v != ''}
     return result
 
 
@@ -138,7 +132,7 @@ def key_fvs_to_tag_fvs(key_fvs, annots_df):
 
 
 def key_to_tag_from_annots(key, annots_df):
-    tag = annots_df["tag"][annots_df["key"] == key].values[0]
+    tag = annots_df['tag'][annots_df['key'] == key].values[0]
     return tag
 
 
@@ -147,7 +141,7 @@ def mk_Xy(tag_fv_iterator):
     return np.array(X), y
 
 
-DFLT_CHAIN = (({"type": "pca", "args": {"n_components": 5}},),)
+DFLT_CHAIN = (({'type': 'pca', 'args': {'n_components': 5}},),)
 
 
 def preprocess(X_train, n_components=5):
@@ -155,7 +149,7 @@ def preprocess(X_train, n_components=5):
     from shaded.chained_spectral_projector import learn_chain_proj_matrix
 
     chain = DFLT_CHAIN
-    chain["args"]["n_components"] = n_components
+    chain['args']['n_components'] = n_components
     proj_matrix = learn_chain_proj_matrix(X_train, chain=chain)
     X_train_proj = np.dot(X_train, proj_matrix)
 
@@ -167,10 +161,10 @@ def simple_model(tagged_data):
     if not isinstance(sound, str):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]
+    arr = sf.read(BytesIO(sound), dtype='int16')[0]
 
     wfs = np.array(arr)
-    st.write(f"wfs = {wfs[:200]}")
+    st.write(f'wfs = {wfs[:200]}')
     chks = list(chunker(wfs, chk_size=DFLT_CHK_SIZE))
     fvs = np.array(list(map(featurizer, chks)))
     model = Stroll(n_centroids=50)
@@ -190,7 +184,7 @@ def tagged_sound_to_array(train_audio: WaveForm, tag: str):
     if not isinstance(sound, bytes):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]
+    arr = sf.read(BytesIO(sound), dtype='int16')[0]
     return arr, tag
 
 
@@ -200,7 +194,7 @@ def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
     for sound in sounds:
         # if not isinstance(sound, bytes):
         sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         result.append(arr)
     # print(np.hstack(result))
     return np.hstack(result).reshape(-1, 1), tag

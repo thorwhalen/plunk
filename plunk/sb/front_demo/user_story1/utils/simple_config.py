@@ -3,9 +3,7 @@ from typing import Callable, Dict
 from front import ELEMENT_KEY
 from streamlitfront.elements import SuccessNotification
 from i2 import Sig
-from streamlitfront.elements import (
-    FileUploader,
-)
+from streamlitfront.elements import FileUploader
 from dol.paths import KeyPath
 
 
@@ -21,12 +19,7 @@ def overwrite_dict(d1, d2):
 
 
 dflt_template = {
-    "execution": {
-        "inputs": dict(),
-        "output": {
-            ELEMENT_KEY: SuccessNotification,
-        },
-    },
+    'execution': {'inputs': dict(), 'output': {ELEMENT_KEY: SuccessNotification,},},
 }
 
 
@@ -42,9 +35,13 @@ class Component:  # more like preferences
         s = dflt_template
         sig = Sig(self.func)
 
+<<<<<<< HEAD
         # s["execution"]["inputs"] = {arg_name: dict() for arg_name in sig.names}
+=======
+        s['execution']['inputs'] = {arg_name: dict() for arg_name in sig.names}
+>>>>>>> d4f623ee66131eb6416e67904f311e6ee01c236c
 
-        s = KeyPath(".")(s)
+        s = KeyPath('.')(s)
 
         return s
 
@@ -53,23 +50,23 @@ class Component:  # more like preferences
     ):  # use may be the keypath here only for the overwrites
         # might need to cast the overwrites and also the output to keypath
         # overwrites  = KeyPath('.')(overwrites)
-        result = KeyPath(".")(overwrite_dict(self.configs, overwrites))
+        result = KeyPath('.')(overwrite_dict(self.configs, overwrites))
         return result
 
     __call__ = mk_configs
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from plunk.sb.front_demo.user_story1.utils.funcs import upload_sound
 
     upload_component = Component(func=upload_sound)
     print(upload_component.configs)
     result = upload_component.mk_configs(
         {
-            "execution.inputs.train_audio": {
+            'execution.inputs.train_audio': {
                 ELEMENT_KEY: FileUploader,
-                "type": "wav",
-                "accept_multiple_files": True,
+                'type': 'wav',
+                'accept_multiple_files': True,
             },
         }
     )
