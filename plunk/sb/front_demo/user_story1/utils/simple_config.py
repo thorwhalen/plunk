@@ -3,14 +3,10 @@ from typing import Callable, Dict
 from front import ELEMENT_KEY
 from streamlitfront.elements import SuccessNotification
 from i2 import Sig
-<<<<<<< HEAD
 from streamlitfront.elements import (
     FileUploader,
 )
 from dol.paths import KeyPath
-=======
-from streamlitfront.elements import FileUploader
->>>>>>> 2c760bdc257be5b48aad7a03592d4fb6a581499b
 
 
 def merge_dicts(d1, d2):
@@ -19,13 +15,18 @@ def merge_dicts(d1, d2):
 
 def overwrite_dict(d1, d2):
     for key, val in d2.items():
-        print(f'{key=}, {val=}')
+        # print(f"{key=}, {val=}")
         d1[key] = val
     return d1
 
 
 dflt_template = {
-    'execution': {'inputs': dict(), 'output': {ELEMENT_KEY: SuccessNotification,},},
+    "execution": {
+        "inputs": dict(),
+        "output": {
+            ELEMENT_KEY: SuccessNotification,
+        },
+    },
 }
 
 
@@ -41,9 +42,9 @@ class Component:  # more like preferences
         s = dflt_template
         sig = Sig(self.func)
 
-        s['execution']['inputs'] = {arg_name: dict() for arg_name in sig.names}
+        s["execution"]["inputs"] = {arg_name: dict() for arg_name in sig.names}
 
-        s = KeyPath('.')(s)
+        s = KeyPath(".")(s)
 
         return s
 
@@ -52,23 +53,23 @@ class Component:  # more like preferences
     ):  # use may be the keypath here only for the overwrites
         # might need to cast the overwrites and also the output to keypath
         # overwrites  = KeyPath('.')(overwrites)
-        result = KeyPath('.')(overwrite_dict(self.configs, overwrites))
+        result = KeyPath(".")(overwrite_dict(self.configs, overwrites))
         return result
 
     __call__ = mk_configs
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from plunk.sb.front_demo.user_story1.utils.funcs import upload_sound
 
     upload_component = Component(func=upload_sound)
     print(upload_component.configs)
     result = upload_component.mk_configs(
         {
-            'execution.inputs.train_audio': {
+            "execution.inputs.train_audio": {
                 ELEMENT_KEY: FileUploader,
-                'type': 'wav',
-                'accept_multiple_files': True,
+                "type": "wav",
+                "accept_multiple_files": True,
             },
         }
     )

@@ -18,6 +18,9 @@ from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
 from plunk.sb.front_demo.user_story1.utils.tools import (
     DFLT_PIPELINE,
 )
+from plunk.sb.front_demo.user_story1.utils.simple_config import (
+    Component,
+)
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -39,6 +42,14 @@ def mk_pipeline_maker_app_with_mall(
 
     crudifier = partial(Crudifier, mall=mall)
 
+    learn_component = Component(func=learn_apply_model)
+    learn_config = learn_component.mk_configs(
+        {
+            "execution.output": {
+                ELEMENT_KEY: ArrayPlotter,
+            },
+        }
+    )
     learn_apply_model = crudifier(
         param_to_mall_map=dict(
             tagged_data="sound_output",
@@ -47,7 +58,33 @@ def mk_pipeline_maker_app_with_mall(
         output_store="models_scores",
     )(learn_apply_model)
 
+    upload_component = Component(func=upload_sound)
+    upload_config = upload_component.mk_configs(
+        {
+            "execution.inputs.train_audio": {
+                ELEMENT_KEY: FileUploader,
+                "type": "wav",
+                "accept_multiple_files": True,
+            },
+        }
+    )
+
     upload_sound = crudifier(output_store="sound_output")(upload_sound)
+
+    # do the whole config to view and compare with old-style one
+    # config = {
+    #     APP_KEY: {"title": "Data Preparation"},
+    #     RENDERING_KEY: {
+    #         "upload_sound": upload_config,
+    #         "learn_apply_model": {
+    #             "execution": {
+    #                 "output": {
+    #                     ELEMENT_KEY: ArrayPlotter,
+    #                 },
+    #             }
+    #         },
+    #     },
+    # }
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -60,10 +97,6 @@ def mk_pipeline_maker_app_with_mall(
                             "type": "wav",
                             "accept_multiple_files": True,
                         },
-                    },
-                    "output": {
-                        ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav files loaded successfully.",
                     },
                 },
             },
