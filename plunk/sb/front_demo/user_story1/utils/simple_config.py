@@ -8,6 +8,7 @@ from i2 import Sig
 from streamlitfront.elements import (
     FileUploader,
 )
+from dol.paths import KeyPath
 
 
 def merge_dicts(d1, d2):

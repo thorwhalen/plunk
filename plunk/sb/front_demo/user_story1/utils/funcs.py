@@ -90,14 +90,14 @@ def display_tag_sound(result):
     return result
 
 
-# [
-#         upload_sound,
-#         # display_tag_sound,
-#         mk_step,
-#         mk_pipeline,
-#         learn_outlier_model,
-#         apply_fitted_model,
-#         # exec_pipeline,
-#         visualize_pipeline,
-#         visualize_scores,
-#     ]
+def learn_apply_model(tagged_data, pipeline):
+    n_centroids = 15
+    sound, _ = tagged_sounds_to_single_array(*tagged_data)
+    wfs = np.array(sound)
+    wfs = assert_dims(wfs)
+
+    fvs = pipeline(wfs)
+    model = Stroll(n_centroids=n_centroids)
+    fitted_model = model.fit(X=fvs)
+    scores = fitted_model.score_samples(X=fvs)
+    return scores
