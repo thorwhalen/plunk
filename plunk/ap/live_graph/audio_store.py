@@ -65,7 +65,6 @@ N_TO_BULK = 10
 def merge_append_ts_wf(items: List[dict]):
     """Take a list of kwargs for method append(item) and return a single kwargs
 
-
     :param items: [{'item': {'timestamp': 0, 'wf': [0, 0]}},
                    {'item': {'timestamp': 1, 'wf': [1, 1]}},
                    ...]
@@ -232,11 +231,6 @@ class WavFileStore(Files, BulkStore):
     pass
 
 
-@merge_and_write_upon_count
-class DictStore(dict, BulkStore):
-    pass
-
-
 def _test_merge_append_ts_wf():
     a = []
     for i in range(10):
@@ -248,6 +242,12 @@ def _test_merge_append_ts_wf():
 
 
 def _test_dict_store():
+    """Test decorator usage with basic dict store mapping"""
+
+    @merge_and_write_upon_count
+    class DictStore(dict, BulkStore):
+        pass
+
     _test_store(DictStore())
 
     @merge_and_write_upon_count(n_calls_to_execute=7)
@@ -258,6 +258,8 @@ def _test_dict_store():
 
 
 def _test_files_store():
+    """Test decorator usage with file store"""
+
     with TemporaryDirectory() as tmpdirname:
         audio_store = WavFileStore(rootdir=tmpdirname)
         _test_store(audio_store)
@@ -268,7 +270,7 @@ def _test_files_store():
 def _test_store(
     store_instance: MutableMapping, *, n=22, chk_size=2, log=print, n_bulk=N_TO_BULK
 ):
-    """Test append, tracking, input, and output
+    """Test append, tracking, input, and output usage
 
     :param store_instance:
     :param n: number of chunks
