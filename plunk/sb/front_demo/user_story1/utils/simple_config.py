@@ -42,7 +42,7 @@ class Component:  # more like preferences
         s = dflt_template
         sig = Sig(self.func)
 
-        s["execution"]["inputs"] = {arg_name: dict() for arg_name in sig.names}
+        # s["execution"]["inputs"] = {arg_name: dict() for arg_name in sig.names}
 
         s = KeyPath(".")(s)
 
