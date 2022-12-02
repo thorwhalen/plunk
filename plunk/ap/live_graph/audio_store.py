@@ -62,23 +62,8 @@ audio_slab_kv = itemgetter('timestamp', 'wf')
 N_TO_BULK = 10
 
 
-class CountAndExecute(TrackableMixin):
-    """Make tracks factory count method calls when order of different methods is not important"""
-
-    tracks_factory: DefaultDict[Callable, List[tuple]] = partial(defaultdict, list)
-
-    def _execute_method_tracks(self, method: Callable):
-        for args, kwargs in self._tracks[method]:
-            method(self, *args, **kwargs)
-
-    def _execute_tracks(self):
-        for method in self._tracks:
-            self._execute_method_tracks(method)
-
-
 def merge_append_ts_wf(items: List[dict]):
     """Take a list of kwargs for method append(item) and return a single kwargs
-
 
     :param items: [{'item': {'timestamp': 0, 'wf': [0, 0]}},
                    {'item': {'timestamp': 1, 'wf': [1, 1]}},
@@ -99,8 +84,12 @@ def merge_append_ts_wf(items: List[dict]):
     return {'item': {'timestamp': ts, 'wf': joined_wf}}
 
 
-class CountMergeExecute(CountAndExecute):
-    """Apply a merging method to join all arguments before executing tracked method once"""
+class CountMergeExecute(TrackableMixin):
+    """Make tracks factory count method calls when order of different methods is not important.
+    Apply a merging method to join all arguments before executing tracked method once.
+    """
+
+    tracks_factory: DefaultDict[Callable, List[tuple]] = partial(defaultdict, list)
 
     _MERGE_KWARGS_MAP = {'append': merge_append_ts_wf}
 
@@ -114,18 +103,97 @@ class CountMergeExecute(CountAndExecute):
             merged_kwargs = merge_kwargs_method(kwargs_list)
             method(self, **merged_kwargs)
         else:
-            super()._execute_method_tracks(method)
+            for args, kwargs in self._tracks[method]:
+                method(self, *args, **kwargs)
+
+    def _execute_tracks(self):
+        for method in self._tracks:
+            self._execute_method_tracks(method)
 
 
 def track_n_calls_of_method_then_execute(method: Callable, n_calls=N_TO_BULK):
     @wraps(method)
-    def tracked_method(self: CountAndExecute, *args, **kwargs):
+    def tracked_method(self: CountMergeExecute, *args, **kwargs):
         self._tracks[method].append((args, kwargs))
         if len(self._tracks[method]) >= n_calls:
             self._execute_method_tracks(method)
             del self._tracks[method]
 
     return tracked_method
+
+
+def merge_and_write_upon_count(
+    store_cls: MutableMapping = None,
+    *,
+    tracked_methods='append',
+    tracking_mixin=CountMergeExecute,
+    tracking_merge_map=None,
+    calls_tracker=track_n_calls_of_method_then_execute,
+    n_calls_to_execute=N_TO_BULK,
+    item2kv=audio_slab_kv,
+    key_of_id=None,
+    id_of_key=None,
+    obj_of_data=None,
+    data_of_obj=None,
+):
+    """Equivalent of using the following 3 decorators
+
+    @track_method_calls(
+        tracked_methods='append',
+        tracking_mixin=CountMergeExecute,
+        calls_tracker=track_n_calls_of_method_then_execute,
+    )
+    @appendable(item2kv=audio_slab_kv)
+    @wrap_kvs(
+        key_of_id=filename_to_ts,
+        id_of_key=ts_to_filename,
+        obj_of_data=wav_to_wf,
+        data_of_obj=wf_to_wav,
+    )
+    class WavFileStore(Files, BulkStore):
+        pass
+
+    :param store_cls:
+    :param tracked_methods:
+    :param tracking_mixin:
+    :param tracking_merge_map:
+    :param calls_tracker:
+    :param n_calls_to_execute:
+    :param item2kv:
+    :param key_of_id:
+    :param id_of_key:
+    :param obj_of_data:
+    :param data_of_obj:
+    :return:
+    """
+
+    def _decorator(cls):
+        if isinstance(tracking_merge_map, MutableMapping):
+            _tracking_mixin = type(
+                tracking_mixin.__name__,
+                (tracking_mixin,),
+                {'_MERGE_KWARGS_MAP': tracking_merge_map},
+            )
+        else:
+            _tracking_mixin = tracking_mixin
+
+        return track_method_calls(
+            appendable(
+                wrap_kvs(
+                    cls,
+                    key_of_id=key_of_id,
+                    id_of_key=id_of_key,
+                    obj_of_data=obj_of_data,
+                    data_of_obj=data_of_obj,
+                ),
+                item2kv=item2kv,
+            ),
+            tracked_methods=tracked_methods,
+            tracking_mixin=_tracking_mixin,
+            calls_tracker=partial(calls_tracker, n_calls=n_calls_to_execute),
+        )
+
+    return _decorator(store_cls) if callable(store_cls) else _decorator
 
 
 def ts_to_filename(ts, ext='.wav'):
@@ -153,29 +221,13 @@ def wav_to_wf(wav):
     return wf
 
 
-@track_method_calls(
-    tracked_methods='append',
-    tracking_mixin=CountMergeExecute,
-    calls_tracker=track_n_calls_of_method_then_execute,
-)
-@appendable(item2kv=audio_slab_kv)
-@wrap_kvs(
+@merge_and_write_upon_count(
     key_of_id=filename_to_ts,
     id_of_key=ts_to_filename,
     obj_of_data=wav_to_wf,
     data_of_obj=wf_to_wav,
 )
 class WavFileStore(Files, BulkStore):
-    pass
-
-
-@track_method_calls(
-    tracked_methods='append',
-    tracking_mixin=CountMergeExecute,
-    calls_tracker=track_n_calls_of_method_then_execute,
-)
-@appendable(item2kv=audio_slab_kv)
-class DictStore(dict, BulkStore):
     pass
 
 
@@ -190,10 +242,24 @@ def _test_merge_append_ts_wf():
 
 
 def _test_dict_store():
+    """Test decorator usage with basic dict store mapping"""
+
+    @merge_and_write_upon_count
+    class DictStore(dict, BulkStore):
+        pass
+
     _test_store(DictStore())
+
+    @merge_and_write_upon_count(n_calls_to_execute=7)
+    class DictStore7(dict, BulkStore):
+        pass
+
+    _test_store(DictStore7(), n_bulk=7)
 
 
 def _test_files_store():
+    """Test decorator usage with file store"""
+
     with TemporaryDirectory() as tmpdirname:
         audio_store = WavFileStore(rootdir=tmpdirname)
         _test_store(audio_store)
@@ -201,8 +267,10 @@ def _test_files_store():
         assert len(list(Path(tmpdirname).iterdir())) == len(audio_store)
 
 
-def _test_store(store_instance: MutableMapping, *, n=22, chk_size=2, log=print):
-    """Test append, tracking, input, and output
+def _test_store(
+    store_instance: MutableMapping, *, n=22, chk_size=2, log=print, n_bulk=N_TO_BULK
+):
+    """Test append, tracking, input, and output usage
 
     :param store_instance:
     :param n: number of chunks
@@ -218,40 +286,40 @@ def _test_store(store_instance: MutableMapping, *, n=22, chk_size=2, log=print):
 
             log('print#2', f'{i=}', f'{len(append_track)=}', a)
             assert (
-                len(append_track) == (i + 1) % N_TO_BULK
+                len(append_track) == (i + 1) % n_bulk
             ), 'Tracking should auto flush when size limit is reached'
             log('print#3', f'{len(a) == 0=}')
-            assert len(a) == (i + 1) // N_TO_BULK, list(a)
+            assert len(a) == (i + 1) // n_bulk, list(a)
             log(a._tracks)
 
         _, append_track = next(iter(a._tracks.items()), (None, tuple()))
 
         log('print#4', f'{len(append_track) == n=}')
-        assert len(append_track) == n % N_TO_BULK
+        assert len(append_track) == n % n_bulk
         log('print#5', a, len(append_track))
 
     _, append_track = next(iter(a._tracks.items()), (None, tuple()))
 
     log('print#6', len(append_track), a)
     assert len(append_track) == 0
-    assert len(a) == ceil(n / N_TO_BULK), f'{len(a)=} == {ceil(n / N_TO_BULK)=}'
+    assert len(a) == ceil(n / n_bulk), f'{len(a)=} == {ceil(n / n_bulk)=}'
     for i, (k, v) in enumerate(sorted(a.items())):
         log('print#7', f'{(k, v)=}')
-        assert k == i * N_TO_BULK
-        if k + N_TO_BULK > n:
+        assert k == i * n_bulk
+        if k + n_bulk > n:
             assert (
                 len(v) / chk_size == n - k
             ), f'{i=}, {k=}, {len(v) / chk_size=}, {n - k=}'
         else:
             assert (
-                len(v) / chk_size == N_TO_BULK
-            ), f'{i=}, {k=}, {len(v) / chk_size=}, {N_TO_BULK=}'
+                len(v) / chk_size == n_bulk
+            ), f'{i=}, {k=}, {len(v) / chk_size=}, {n_bulk=}'
         v_iter = iter(v)
-        for j in range(i * N_TO_BULK, min((i + 1) * N_TO_BULK, n)):
+        for j in range(i * n_bulk, min((i + 1) * n_bulk, n)):
             for _ in range(chk_size):
                 assert (
                     next(v_iter) == j
-                ), f'{i=}, {j=}, {k=}, {i * N_TO_BULK=}, {min((i + 1) * N_TO_BULK, n)=}'
+                ), f'{i=}, {j=}, {k=}, {i * n_bulk=}, {min((i + 1) * n_bulk, n)=}'
 
     print(f'Test passed with params: {store_instance=}, {n=}, {chk_size=}, {log=}')
 
