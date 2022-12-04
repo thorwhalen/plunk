@@ -38,32 +38,25 @@ def mk_pipeline_maker_app_with_mall(
 
     learn_component = Component(func=learn_apply_model)
     learn_config = learn_component.mk_configs(
-        {
-            "execution.output": {
-                ELEMENT_KEY: ArrayPlotter,
-            },
-        }
+        {'execution.output': {ELEMENT_KEY: ArrayPlotter,},}
     )
     learn_apply_model = crudifier(
-        param_to_mall_map=dict(
-            tagged_data="sound_output",
-            pipeline="pipelines",
-        ),
-        output_store="models_scores",
+        param_to_mall_map=dict(tagged_data='sound_output', pipeline='pipelines',),
+        output_store='models_scores',
     )(learn_apply_model)
 
     upload_component = Component(func=upload_sound)
     upload_config = upload_component.mk_configs(
         {
-            "execution.inputs.train_audio": {
+            'execution.inputs.train_audio': {
                 ELEMENT_KEY: FileUploader,
-                "type": "wav",
-                "accept_multiple_files": True,
+                'type': 'wav',
+                'accept_multiple_files': True,
             },
         }
     )
 
-    upload_sound = crudifier(output_store="sound_output")(upload_sound)
+    upload_sound = crudifier(output_store='sound_output')(upload_sound)
 
     # do the whole config to view and compare with old-style one
     # config = {
@@ -81,26 +74,22 @@ def mk_pipeline_maker_app_with_mall(
     # }
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "upload_sound": {
-                "execution": {
-                    "inputs": {
-                        "train_audio": {
+            'upload_sound': {
+                'execution': {
+                    'inputs': {
+                        'train_audio': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         },
                     },
                 },
             },
-            "learn_apply_model": {
-                NAME_KEY: "Apply model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
+            'learn_apply_model': {
+                NAME_KEY: 'Apply model',
+                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
         },
     }
@@ -114,22 +103,18 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
-    mall = dict(
-        sound_output=dict(),
-        pipelines=dict(),
-        models_scores=dict(),
-    )
+    mall = dict(sound_output=dict(), pipelines=dict(), models_scores=dict(),)
 
-    mall["sound_output"] = dict()
-    mall["pipelines"] = dict(
+    mall['sound_output'] = dict()
+    mall['pipelines'] = dict(
         # ML
         default_pipeline=DFLT_PIPELINE
     )
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, pipelines="pipelines", sound_output="sound_output"
+        mall, pipelines='pipelines', sound_output='sound_output'
     )
 
     app()
