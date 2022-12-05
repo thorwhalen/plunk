@@ -197,10 +197,10 @@ def mk_pipeline_maker_app_with_mall(
     def get_step_name(step):
         return [k for k, v in mall[steps].items() if v == step][0]
 
-    def get_selected_pipeline_sig():
-        if not b.selected_pipeline():
-            return Sig()
-        return Sig(mall[pipelines][b.selected_pipeline()])
+    def get_selected_step_factory_sig():
+        selected_step_factory = mall['step_factories'].get(b.selected_step_factory.get())
+        if selected_step_factory:
+            return Sig(selected_step_factory)
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -223,12 +223,6 @@ def mk_pipeline_maker_app_with_mall(
             },
             'display_tag_sound': {
                 'execution': {
-                    'inputs': {
-                        'result': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                    },
                     'output': {ELEMENT_KEY: AudioArrayDisplay,},
                 },
             },
@@ -238,9 +232,7 @@ def mk_pipeline_maker_app_with_mall(
                     'inputs': {
                         'step_factory': {'value': b.selected_step_factory,},
                         'kwargs': {
-                            'func_sig': Sig(
-                                mall[step_factories][b.selected_step_factory()]
-                            ),
+                            'func_sig': get_selected_step_factory_sig
                         },
                     },
                     'output': {
@@ -291,48 +283,18 @@ def mk_pipeline_maker_app_with_mall(
             'visualize_scores': {
                 NAME_KEY: 'Scores Visualization',
                 'execution': {
-                    'inputs': {
-                        'scores': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['models_scores'],
-                        },
-                    },
                     'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},
                 },
             },
             'simple_model': {
                 NAME_KEY: 'Learn model',
                 'execution': {
-                    'inputs': {
-                        'tagged_data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                        'preprocess_pipeline': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
-                        },
-                    },
                     'output': {ELEMENT_KEY: ArrayPlotter,},
                 },
             },
             'apply_fitted_model': {
                 NAME_KEY: 'Apply model',
                 'execution': {
-                    'inputs': {
-                        'tagged_data': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
-                        },
-                        'preprocess_pipeline': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['pipelines'],
-                        },
-                        'learned_model': {
-                            ELEMENT_KEY: SelectBox,
-                            'options': mall['learned_models'],
-                        },
-                    },
                     'output': {ELEMENT_KEY: ArrayPlotter,},
                 },
             },
