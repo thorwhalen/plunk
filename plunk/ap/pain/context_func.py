@@ -49,29 +49,57 @@ def not_working2():
 
 
 def not_working3():
+    _enter = False
+
     def data_gen():
         for i in range(3):
             yield {'timestamp': i, 'wf': [i]}
 
-    for d in data_gen():
-        print(d)
+    class Store(dict):
+        def __enter__(self):
+            self._enter = True
 
-    with TemporaryDirectory() as tmpdirname:
-        audio_store = WavFileStore(rootdir=tmpdirname)
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self._enter = False
 
-        @if_not_none
-        def wrapped_append(item):
-            return audio_store.append(item)
+        def append(self, item):
+            if self._enter is True:
+                self[item['timestamp']] = item['wf']
 
-        wrapped_context_manager = [audio_store]
-        cf_store_audio = ContextualFunc(wrapped_append, wrapped_context_manager)
-        with SlabsIter(item=data_gen(), store_audio=cf_store_audio) as sit:
-            for s in sit:
-                print(s)
+    store = Store()
+
+    @if_not_none
+    def wrapped_append(item):
+        store.append(item)
+
+    def print_item(item):
+        print(item)
+
+    wrapped_context_manager = [store]
+    cf_store = ContextualFunc(wrapped_append, wrapped_context_manager)
+    with SlabsIter(
+        item=iter(data_gen()).__next__, store_audio=cf_store, print_item=print_item,
+    ) as sit:
+        for _ in sit:
+            pass
+
+
+def _weak_error_message():
+    def item_generator():
+        for i in range(3):
+            yield {'index': i}
+
+    def print_item(item):
+        print(item)
+
+    with SlabsIter(item=item_generator(), print_item=print_item) as sit:
+        for _ in sit:
+            pass
 
 
 if __name__ == '__main__':
-    the_way_that_works()
-    not_working()
-    not_working2()
-    not_working3()
+    # the_way_that_works()
+    # not_working()
+    # not_working2()
+    # not_working3()
+    _weak_error_message()
