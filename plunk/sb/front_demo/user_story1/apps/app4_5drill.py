@@ -139,7 +139,9 @@ def mk_pipeline_maker_app_with_mall(
         return [k for k, v in mall[steps].items() if v == step][0]
 
     def get_selected_step_factory_sig():
-        selected_step_factory = mall['step_factories'].get(b.selected_step_factory.get())
+        selected_step_factory = mall['step_factories'].get(
+            b.selected_step_factory.get()
+        )
         if selected_step_factory:
             return Sig(selected_step_factory)
 
@@ -178,9 +180,7 @@ def mk_pipeline_maker_app_with_mall(
                 'execution': {
                     'inputs': {
                         'step_factory': {'value': b.selected_step_factory,},
-                        'kwargs': {
-                            'func_sig': get_selected_step_factory_sig
-                        },
+                        'kwargs': {'func_sig': get_selected_step_factory_sig},
                     },
                     'output': {
                         ELEMENT_KEY: SuccessNotification,
