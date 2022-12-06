@@ -278,15 +278,20 @@ def _test_store(
     :param log: print
     :return:
     """
+
+    def n_append_tracks(store):
+        _, append_track = next(iter(store._tracks.items()), (None, tuple()))
+        return len(append_track)
+
     with store_instance as a:
         for i in range(n):
             a.append({'timestamp': i, 'wf': [i] * chk_size})
 
             _, append_track = next(iter(a._tracks.items()), (None, tuple()))
 
-            log('print#2', f'{i=}', f'{len(append_track)=}', a)
+            log('print#2', f'{i=}', f'{n_append_tracks(a)=}', a)
             assert (
-                len(append_track) == (i + 1) % n_bulk
+                n_append_tracks(a) == (i + 1) % n_bulk
             ), 'Tracking should auto flush when size limit is reached'
             log('print#3', f'{len(a) == 0=}')
             assert len(a) == (i + 1) // n_bulk, list(a)
@@ -294,14 +299,14 @@ def _test_store(
 
         _, append_track = next(iter(a._tracks.items()), (None, tuple()))
 
-        log('print#4', f'{len(append_track) == n=}')
-        assert len(append_track) == n % n_bulk
+        log('print#4', f'{n_append_tracks(a) == n=}')
+        assert n_append_tracks(a) == n % n_bulk
         log('print#5', a, len(append_track))
 
     _, append_track = next(iter(a._tracks.items()), (None, tuple()))
 
-    log('print#6', len(append_track), a)
-    assert len(append_track) == 0
+    log('print#6', n_append_tracks(a), a)
+    assert n_append_tracks(a) == 0
     assert len(a) == ceil(n / n_bulk), f'{len(a)=} == {ceil(n / n_bulk)=}'
     for i, (k, v) in enumerate(sorted(a.items())):
         log('print#7', f'{(k, v)=}')
