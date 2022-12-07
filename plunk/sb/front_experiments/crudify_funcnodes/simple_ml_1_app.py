@@ -16,7 +16,7 @@ mall = dict()
 
 audio_anomalies = sml.audio_anomalies
 
-it = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+it = crudify_funcs(var_nodes='wf model results', dag=audio_anomalies, mall=mall)
 step1, step2, step3 = list(it)
 
 from i2 import Sig
@@ -24,15 +24,15 @@ from i2 import Sig
 print(Sig(step1))
 
 config = {
-    APP_KEY: {"title": "Data Preparation"},
+    APP_KEY: {'title': 'Data Preparation'},
     RENDERING_KEY: {
-        "step1": {
-            "execution": {
-                "inputs": {
-                    "audio_source": {
+        'step1': {
+            'execution': {
+                'inputs': {
+                    'audio_source': {
                         ELEMENT_KEY: FileUploader,
-                        "type": "wav",
-                        "accept_multiple_files": True,
+                        'type': 'wav',
+                        'accept_multiple_files': True,
                     },
                 },
             },
