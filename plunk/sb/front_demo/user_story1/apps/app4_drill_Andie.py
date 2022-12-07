@@ -27,33 +27,6 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
 from typing import List
 
 
-def tagged_sound_to_array(train_audio: WaveForm, tag: str):
-    sound, tag = train_audio, tag
-    if not isinstance(sound, bytes):
-        sound = sound.getvalue()
-
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]
-    return arr, tag
-
-
-def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
-    sounds, tag = train_audio, tag
-    result = []
-    for sound in sounds:
-        # if not isinstance(sound, bytes):
-        sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
-        result.append(arr)
-    # print(np.hstack(result))
-    return np.hstack(result).reshape(-1, 1), tag
-
-
-def assert_dims(wfs):
-    if wfs.ndim >= 2:
-        wfs = wfs[:, 0]
-    return wfs
-
-
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
