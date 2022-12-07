@@ -1,13 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable, Dict
 from front import ELEMENT_KEY
-from streamlitfront.elements import (
-    SuccessNotification,
-)
+from streamlitfront.elements import SuccessNotification
 from i2 import Sig
-from streamlitfront.elements import (
-    FileUploader,
-)
+from streamlitfront.elements import FileUploader
 
 from collections import defaultdict, ChainMap
 import collections.abc
@@ -56,7 +52,7 @@ recursivedict = lambda: defaultdict(recursivedict)
 
 def mk_dotted_recursive_dict():
     d = recursivedict()
-    d = KeyPath(".")(d)
+    d = KeyPath('.')(d)
     return d
 
 
@@ -69,7 +65,7 @@ def todict(d):
 
 
 dflt_template = mk_dotted_recursive_dict()
-dflt_template["execution.output"] = {
+dflt_template['execution.output'] = {
     ELEMENT_KEY: SuccessNotification,
 }
 
@@ -99,7 +95,7 @@ class Component:
     __call__ = mk_configs
 
 
-if __name__ == "__main__":  # put in a module in plunk and make it a test
+if __name__ == '__main__':  # put in a module in plunk and make it a test
     from plunk.sb.front_demo.user_story1.utils.funcs import upload_sound
     from pprint import pprint
 
@@ -107,10 +103,10 @@ if __name__ == "__main__":  # put in a module in plunk and make it a test
     pprint(upload_component.to_dict())
     result = upload_component.mk_configs(
         {
-            "execution.inputs.train_audio": {
+            'execution.inputs.train_audio': {
                 ELEMENT_KEY: FileUploader,
-                "type": "wav",
-                "accept_multiple_files": True,
+                'type': 'wav',
+                'accept_multiple_files': True,
             },
         }
     )
