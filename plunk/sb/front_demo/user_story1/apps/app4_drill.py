@@ -308,6 +308,7 @@ def mk_pipeline_maker_app_with_mall(
 
     return app
 
+
 mall = dict(
     # Factory Input Stores
     sound_output=dict(),

@@ -33,14 +33,41 @@
    module_docs/plunk/sb/front_demo/user_story1/utils/funcs
    module_docs/plunk/sb/front_demo/user_story1/utils/simple_config
    module_docs/plunk/sb/front_demo/user_story1/utils/tools
+   module_docs/plunk/sb/front_experiments/audio_app
+   module_docs/plunk/sb/front_experiments/audio_histo
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
    module_docs/plunk/sb/front_experiments/edge_interface/js
+   module_docs/plunk/sb/front_experiments/streamlit_front_example
+   module_docs/plunk/sb/meshed_experiments/meshed_kwargs
+   module_docs/plunk/sb/meshed_experiments/scrap_dag
+   module_docs/plunk/sb/meshed_experiments/scrap_dotdigraph
+   module_docs/plunk/sb/metaflow_practice/classify
+   module_docs/plunk/sb/metaflow_practice/classify_phone
+   module_docs/plunk/sb/odat_lab/circuit_breaker
+   module_docs/plunk/sb/odat_lab/functional_dacc
+   module_docs/plunk/sb/odat_lab/guns
+   module_docs/plunk/sb/odat_lab/hamlet
+   module_docs/plunk/sb/odat_lab/heartbeat
+   module_docs/plunk/sb/ordering_funcnodes/reorder
+   module_docs/plunk/sb/ordering_funcnodes/tests/test_reorder
+   module_docs/plunk/sb/pydantic_for_front/func_to_opyrator
+   module_docs/plunk/sb/pydantic_for_front/opyrator_multiple_funcs
+   module_docs/plunk/sb/pydantic_for_front/pydantic_dispatch_enum
+   module_docs/plunk/sb/pydantic_for_front/pydantic_streamlit_front
+   module_docs/plunk/sb/pydantic_for_front/pydantic_streamlit_input
+   module_docs/plunk/sb/pydantic_for_front/tooltips_app
    module_docs/plunk/sb/sig_compatibility/sig_builtins
    module_docs/plunk/sb/sig_compatibility/sig_code_to_dag
    module_docs/plunk/sb/sig_compatibility/sig_comp
+   module_docs/plunk/sb/sig_compatibility/tests/test_sig_builtins
+   module_docs/plunk/sb/sig_compatibility/tests/test_sig_code_to_dag
+   module_docs/plunk/sb/sig_compatibility/tests/test_sig_comp
    module_docs/plunk/sb/slabsiter_experiments/dict_generators
    module_docs/plunk/sb/slabsiter_experiments/livewf_slabs
+   module_docs/plunk/sb/slabsiter_experiments/tests/test_dict_generators
    module_docs/plunk/sb/type_compatibility/compatible
+   module_docs/plunk/sb/type_compatibility/tests/scrap
+   module_docs/plunk/sb/type_compatibility/tests/test_compatible
    module_docs/plunk/tw/echoed_clicks
    module_docs/plunk/tw/empty_sentinel_options
    module_docs/plunk/tw/front_examples/audio_ml/take01_simple_pipeline
