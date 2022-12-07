@@ -97,6 +97,7 @@ def mk_pipeline_maker_app_with_mall(
     if not b.mall():
         b.mall = mall
     mall = b.mall()
+    print(b.selected_step_factory())
     if not b.selected_step_factory():
         b.selected_step_factory = 'chunker'  # TODO make this dynamic
 
@@ -197,12 +198,10 @@ def mk_pipeline_maker_app_with_mall(
     def get_step_name(step):
         return [k for k, v in mall[steps].items() if v == step][0]
 
-    def get_selected_step_factory_sig():
-        selected_step_factory = mall['step_factories'].get(
-            b.selected_step_factory.get()
-        )
-        if selected_step_factory:
-            return Sig(selected_step_factory)
+    def get_selected_pipeline_sig():
+        if not b.selected_pipeline():
+            return Sig()
+        return Sig(mall[pipelines][b.selected_pipeline()])
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -224,14 +223,26 @@ def mk_pipeline_maker_app_with_mall(
                 },
             },
             'display_tag_sound': {
-                'execution': {'output': {ELEMENT_KEY: AudioArrayDisplay,},},
+                'execution': {
+                    'inputs': {
+                        'result': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['sound_output'],
+                        },
+                    },
+                    'output': {ELEMENT_KEY: AudioArrayDisplay,},
+                },
             },
             'mk_step': {
                 NAME_KEY: 'Pipeline Step Maker',
                 'execution': {
                     'inputs': {
                         'step_factory': {'value': b.selected_step_factory,},
-                        'kwargs': {'func_sig': get_selected_step_factory_sig},
+                        'kwargs': {
+                            'func_sig': Sig(
+                                mall[step_factories][b.selected_step_factory()]
+                            ),
+                        },
                     },
                     'output': {
                         ELEMENT_KEY: SuccessNotification,
@@ -280,15 +291,51 @@ def mk_pipeline_maker_app_with_mall(
             },
             'visualize_scores': {
                 NAME_KEY: 'Scores Visualization',
-                'execution': {'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},},
+                'execution': {
+                    'inputs': {
+                        'scores': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['models_scores'],
+                        },
+                    },
+                    'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},
+                },
             },
             'simple_model': {
                 NAME_KEY: 'Learn model',
-                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
+                'execution': {
+                    'inputs': {
+                        'tagged_data': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['sound_output'],
+                        },
+                        'preprocess_pipeline': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['pipelines'],
+                        },
+                    },
+                    'output': {ELEMENT_KEY: ArrayPlotter,},
+                },
             },
             'apply_fitted_model': {
                 NAME_KEY: 'Apply model',
-                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
+                'execution': {
+                    'inputs': {
+                        'tagged_data': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['sound_output'],
+                        },
+                        'preprocess_pipeline': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['pipelines'],
+                        },
+                        'learned_model': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': mall['learned_models'],
+                        },
+                    },
+                    'output': {ELEMENT_KEY: ArrayPlotter,},
+                },
             },
         },
     }
@@ -308,35 +355,31 @@ def mk_pipeline_maker_app_with_mall(
 
     return app
 
-mall = dict(
-    # Factory Input Stores
-    sound_output=dict(),
-    step_factories=dict(
+
+if __name__ == '__main__':
+
+    mall = dict(
+        # Factory Input Stores
+        sound_output=dict(),
+        step_factories=dict(),
+        # Output Store
+        data=dict(),
+        steps=dict(),
+        pipelines=dict(),
+        exec_outputs=dict(),
+        learned_models=dict(),
+        models_scores=dict(),
+    )
+
+    crudifier = partial(prepare_for_crude_dispatch, mall=mall)
+
+    step_factories = dict(
         # ML
         chunker=FuncFactory(simple_chunker),
         featurizer=FuncFactory(simple_featurizer),
-    ),
-    # Output Store
-    data=dict(),
-    steps=dict(),
-    pipelines=dict(),
-    exec_outputs=dict(),
-    learned_models=dict(),
-    models_scores=dict(),
-)
+    )
 
-# crudifier = partial(prepare_for_crude_dispatch, mall=mall)
-
-# step_factories = dict(
-#     # ML
-#     chunker=FuncFactory(simple_chunker),
-#     featurizer=FuncFactory(simple_featurizer),
-# )
-
-# mall['step_factories'] = step_factories
-
-
-if __name__ == '__main__':
+    mall['step_factories'] = step_factories
 
     app = mk_pipeline_maker_app_with_mall(
         mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
