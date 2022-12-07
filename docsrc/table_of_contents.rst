@@ -35,9 +35,70 @@
    module_docs/plunk/sb/front_demo/user_story1/utils/tools
    module_docs/plunk/sb/front_experiments/audio_app
    module_docs/plunk/sb/front_experiments/audio_histo
+   module_docs/plunk/sb/front_experiments/data_visualizer/apps/app0
+   module_docs/plunk/sb/front_experiments/data_visualizer/apps/app0_5_folder_picker
+   module_docs/plunk/sb/front_experiments/data_visualizer/apps/app0_6_folder_picker
+   module_docs/plunk/sb/front_experiments/data_visualizer/apps/app1
+   module_docs/plunk/sb/front_experiments/data_visualizer/components/elements
+   module_docs/plunk/sb/front_experiments/data_visualizer/components/folder_picker
+   module_docs/plunk/sb/front_experiments/data_visualizer/dags/wfstore_and_annots_to_dataset
    module_docs/plunk/sb/front_experiments/data_visualizer/streamlit-folder-browser/streamlit_folder_browser
+   module_docs/plunk/sb/front_experiments/data_visualizer/utils/tools
+   module_docs/plunk/sb/front_experiments/edge_interface/aggrid
+   module_docs/plunk/sb/front_experiments/edge_interface/barfi_app
+   module_docs/plunk/sb/front_experiments/edge_interface/chk_if_click
+   module_docs/plunk/sb/front_experiments/edge_interface/crudified_ag_table
+   module_docs/plunk/sb/front_experiments/edge_interface/edge_1
+   module_docs/plunk/sb/front_experiments/edge_interface/edge_2
+   module_docs/plunk/sb/front_experiments/edge_interface/edge_3
+   module_docs/plunk/sb/front_experiments/edge_interface/edge_app/Home
+   module_docs/plunk/sb/front_experiments/edge_interface/edge_impulse_like_bytes
+   module_docs/plunk/sb/front_experiments/edge_interface/elements
    module_docs/plunk/sb/front_experiments/edge_interface/js
+   module_docs/plunk/sb/front_experiments/edge_interface/kmeans_streamz
+   module_docs/plunk/sb/front_experiments/edge_interface/learner_example
+   module_docs/plunk/sb/front_experiments/edge_interface/river_t
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap2
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap3
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap_crude
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap_dash
+   module_docs/plunk/sb/front_experiments/edge_interface/scrap_sound_tagger
+   module_docs/plunk/sb/front_experiments/edge_interface/scrapsound
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_store_explorer
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_store_explorer2
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger2
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger3
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger4
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger5
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger6
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger7_with_tabs
+   module_docs/plunk/sb/front_experiments/edge_interface/sound_tagger8_input_with_audio
+   module_docs/plunk/sb/front_experiments/edge_interface/stream_df
+   module_docs/plunk/sb/front_experiments/edge_interface/stream_live
+   module_docs/plunk/sb/front_experiments/edge_interface/stream_taped
+   module_docs/plunk/sb/front_experiments/edge_interface/tagging_tool
+   module_docs/plunk/sb/front_experiments/edge_interface/tagging_tool_scrap
+   module_docs/plunk/sb/front_experiments/edge_interface/utils
+   module_docs/plunk/sb/front_experiments/sensor_stream/get_stream
+   module_docs/plunk/sb/front_experiments/sensor_stream/get_stream2
+   module_docs/plunk/sb/front_experiments/sensor_stream/get_stream3
    module_docs/plunk/sb/front_experiments/streamlit_front_example
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/analysis
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep10
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep11
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep2
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep3
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep4
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep5
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep6
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep7
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep8
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep9
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/data_prep_scrap
+   module_docs/plunk/sb/front_experiments/streamlitfront_dataprep/tackle_args
    module_docs/plunk/sb/meshed_experiments/meshed_kwargs
    module_docs/plunk/sb/meshed_experiments/scrap_dag
    module_docs/plunk/sb/meshed_experiments/scrap_dotdigraph
