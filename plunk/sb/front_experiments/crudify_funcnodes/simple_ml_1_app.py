@@ -24,25 +24,25 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     store = dict()
-    mall["wf_store"] = store
+    mall['wf_store'] = store
     audio_anomalies = sml.audio_anomalies
 
-    it = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    it = crudify_funcs(var_nodes='wf model results', dag=audio_anomalies, mall=mall)
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
     print(audio_anomalies.synopsis_string())
 
     step1, step2, step3 = list(it)
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "step1": {
-                "execution": {
-                    "inputs": {
-                        "audio_source": {
+            'step1': {
+                'execution': {
+                    'inputs': {
+                        'audio_source': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         },
                     },
                 },
@@ -59,7 +59,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     mall = dict(
         # sound_output=dict(),
