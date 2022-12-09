@@ -52,8 +52,17 @@ audio_anomalies = audio_anomalies.ch_funcs(
     #     train=lambda wf, learner: auto_spectral_anomaly_learner(wf, learner=learner),
     #     train=auto_spectral_anomaly_learner,
     train=include_exclude(
-        sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
+        # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
+        sml.auto_spectral_anomaly_learner,
+        include="wf learner",
+        # exclude="learner",
     ),
+    # train=FuncFactory(
+    #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
+    #     sml.auto_spectral_anomaly_learner,
+    #     # include="wf",
+    #     exclude=("learner",),
+    # ),
     apply=lambda model, wf: model(wf),
 )
 
@@ -124,6 +133,7 @@ def mk_pipeline_maker_app_with_mall(
     }
     funcs = [
         step1,
+        step2,
         debug_check_mall,
     ]
     app = mk_app(funcs, config=config)
