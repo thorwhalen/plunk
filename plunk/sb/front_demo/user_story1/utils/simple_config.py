@@ -4,66 +4,103 @@ from front import ELEMENT_KEY
 from streamlitfront.elements import SuccessNotification
 from i2 import Sig
 from streamlitfront.elements import FileUploader
+
+from collections import defaultdict, ChainMap
+import collections.abc
 from dol.paths import KeyPath
+from dol import Store
+
+# recursive defaultdict
 from collections import defaultdict
 
+recursivedict = lambda: defaultdict(recursivedict)
 
-def merge_dicts(d1, d2):
-    return {**d1, **d2}
+# def update(d, u):
+#     for k, v in u.items():
+#         if isinstance(v, collections.abc.Mapping):
+#             d[k] = update(d.get(k, {}), v)
+#         else:
+#             d[k] = v
+#     return d
+
+# def expand_dotted_dict(d):
+#     dict_list = [process(k,v) for k, v in d.items()]
+#     print(dict_list)
+#     d={}
+#     result=deep_update(d, dict_list)
+
+#     return result
+
+# def process(dotted_key, value):
+#     head, *tail = dotted_key.split('.')
+#     res = dict()
+#     if not tail:
+#         return {head:value}
+#     res[head]=process('.'.join(tail), value)
+#     return res
+
+# def deep_update(mapping, *updating_mappings):
+#     updated_mapping = mapping.copy()
+#     for updating_mapping in updating_mappings:
+#         for k, v in updating_mapping.items():
+#             if k in updated_mapping and isinstance(updated_mapping[k], dict) and isinstance(v, dict):
+#                 updated_mapping[k] = deep_update(updated_mapping[k], v)
+#             else:
+#                 updated_mapping[k] = v
+#     return updated_mapping
 
 
-def overwrite_dict(d1, d2):
-    for key, val in d2.items():
-        # print(f"{key=}, {val=}")
-        d1[key] = val
-    return d1
+def mk_dotted_recursive_dict():
+    d = recursivedict()
+    d = KeyPath('.')(d)
+    return d
 
 
-dflt_template = defaultdict(
-    dict,
-    {
-        'execution': {
-            # "inputs": dict(),
-            'output': {ELEMENT_KEY: SuccessNotification,},
-        },
-    },
-)
+def todict(d):
+    if not isinstance(d, defaultdict) and not isinstance(
+        d, Store
+    ):  # make recursivedict a type and recognize it
+        return d
+    return {k: todict(v) for k, v in d.items()}
+
+
+dflt_template = mk_dotted_recursive_dict()
+dflt_template['execution.output'] = {
+    ELEMENT_KEY: SuccessNotification,
+}
 
 
 @dataclass
-class Component:  # more like preferences
-    func: Callable
+class Component:
+    func: Callable = None
     label: str = None
+    _configs = dflt_template
     # param_to_mall_map: Dict[str, str] = ()
     # output_store_name: str = None
 
     @property
     def configs(self):
-        s = dflt_template
-        sig = Sig(self.func)
-
-        # s["execution"]["inputs"] = {arg_name: dict() for arg_name in sig.names}
-
-        s = KeyPath('.')(s)
+        s = self._configs
 
         return s
 
-    def mk_configs(
-        self, overwrites
-    ):  # use may be the keypath here only for the overwrites
-        # might need to cast the overwrites and also the output to keypath
-        # overwrites  = KeyPath('.')(overwrites)
-        result = KeyPath('.')(merge_dicts(self.configs, overwrites))
-        return result
+    def mk_configs(self, overwrites=()):  # list of KV or
+        overwrites = dict(overwrites)
+        self._configs.update(overwrites)
+        return self.configs
+
+    def to_dict(self):
+        return todict(self.configs)
 
     __call__ = mk_configs
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # put in a module in plunk and make it a test
     from plunk.sb.front_demo.user_story1.utils.funcs import upload_sound
+    from pprint import pprint
 
     upload_component = Component(func=upload_sound)
-    print(upload_component.configs)
+    pprint(upload_component.to_dict())
     result = upload_component.mk_configs(
         {
             'execution.inputs.train_audio': {
@@ -73,5 +110,4 @@ if __name__ == '__main__':
             },
         }
     )
-    # print(upload_component.configs)
-    print(result)
+    pprint(upload_component.to_dict())
