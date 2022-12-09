@@ -1,14 +1,19 @@
+from contextlib import contextmanager
 from operator import itemgetter
 from tempfile import TemporaryDirectory
 
 from audiostream2py import get_input_device_index, PyAudioSourceReader
 from dol import appendable
+from i2 import ContextFanout
 from know.base import SlabsIter
 from know.util import ContextualFunc
+from mongodol.tracking_methods import track_method_calls
 from plunk.ap.live_graph.audio_store import (
     WavFileStore,
     merge_and_write_upon_count,
     BulkStore,
+    CountMergeExecute,
+    track_n_calls_of_method_then_execute,
 )
 from plunk.ap.live_graph.live_graph_data_buffer import if_not_none, audio_to_wf
 
@@ -158,10 +163,76 @@ def audio_it():
     print(store)
 
 
+def cf_self_wrap():
+    # @track_method_calls(
+    #     tracked_methods='append',
+    #     tracking_mixin=CountMergeExecute,
+    #     calls_tracker=track_n_calls_of_method_then_execute,
+    # )
+    @appendable(item2kv=lambda item: (item['timestamp'], item['wf']))
+    class Store(dict):
+        def __enter__(self):
+            print('enter')
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            print('exit')
+
+    # with Store() as s:
+    #     s.append({'timestamp': 0, 'wf': [1]})
+
+    # print(s)
+
+    store0 = Store()
+    with ContextFanout(store0) as cfan:
+        store0.append({'timestamp': 0, 'wf': [1]})
+        print(store0)
+
+    # store = Store()
+    # with ContextualFunc(if_not_none(store.append), store=store) as cf:
+    #     for i in range(22):
+    #         cf({'timestamp': i, 'wf': [i]})
+    #         cf(None)
+    #
+    # print(store)
+
+
+def context_fanout():
+    def mk_test_context(name, enter_obj=None):
+        @contextmanager
+        def test_context():
+            print(f'entering {name} context')
+            yield enter_obj
+            print(f'exiting {name} context')
+
+        return test_context()
+
+    @appendable(item2kv=lambda item: (item['timestamp'], item['wf']))
+    class TestContext:
+        def __init__(self, name):
+            self.name = name
+
+        def __enter__(self):
+            print(f'entering {self.name} context')
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            print(f'exiting {self.name} context')
+
+    foo_context = mk_test_context('foo')
+    with ContextFanout(foo_context) as cf:
+        pass
+
+    with ContextFanout(TestContext('bar')) as cf:
+        pass
+
+
 if __name__ == '__main__':
     # the_way_that_works()
     # not_working()
     # not_working2()
-    not_working3()
+    # not_working3()
     # _weak_error_message()
-    audio_it()
+    # audio_it()
+    cf_self_wrap()
+    # context_fanout()
