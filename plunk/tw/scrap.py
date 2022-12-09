@@ -3,7 +3,7 @@ from typing import Callable, Any
 
 
 def __call_func_handling_error(
-        error_handler: Callable, func: Callable, *args, **kwargs
+    error_handler: Callable, func: Callable, *args, **kwargs
 ):
     try:
         return func(*args, **kwargs)
@@ -21,9 +21,10 @@ def _handle_error(error_handler: Callable):
 
 HandlerSpecs = Any
 ErrorHandlerFactory = Callable[[HandlerSpecs], Callable]
+
+
 def handle_error(
-        handler_specs: HandlerSpecs,
-        error_handler_factory: ErrorHandlerFactory
+    handler_specs: HandlerSpecs, error_handler_factory: ErrorHandlerFactory
 ):
     error_handler = error_handler_factory(handler_specs)
     return _handle_error(error_handler)
