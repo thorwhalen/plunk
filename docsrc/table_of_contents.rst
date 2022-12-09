@@ -154,5 +154,6 @@
    module_docs/plunk/tw/py2py_front_example/simple_front
    module_docs/plunk/tw/py2py_front_example/simple_py2http_service
    module_docs/plunk/tw/py2py_front_example/simple_pycode
+   module_docs/plunk/tw/scrap
    module_docs/plunk/tw/things_decorators_break
    module_docs/plunk/tw/user_story_to_poc_demo
