@@ -63,7 +63,7 @@ audio_anomalies = audio_anomalies.ch_funcs(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
         sml.auto_spectral_anomaly_learner,
         include="wf learner",
-        # exclude="learner",
+        exclude="learner",
     ),
     # train=rm_params(
     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
