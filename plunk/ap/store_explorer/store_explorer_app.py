@@ -67,7 +67,13 @@ mall = dict(
     # Factory Input Stores
     sound_output=dict(),
     # Output Store
-    data=dict(),
+    data=dict(
+        a=1,
+        b='2',
+        c=[3],
+        d={'4': 4, '5': [{'e': 6}, {'f': 7}, ['g', 'h', 'i']]},
+        j=[{'k': 8, 'l': 9}, 'm', 10],
+    ),
 )
 
 
