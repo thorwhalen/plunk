@@ -29,7 +29,7 @@ def audio_anomalies():
 
 # filepath = /Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/train/noise.AirConditioner_2.9.1440000-1600000.wav.23q8e34o.ingestion-6bc8b65f8c-vrv59.wav
 
-file_to_bytes = Pipe(Path, methodcaller("read_bytes"))
+file_to_bytes = Pipe(Path, methodcaller('read_bytes'))
 wav_file_to_array = Pipe(
     file_to_bytes,
     decode_wav_bytes,
@@ -43,7 +43,7 @@ from i2 import include_exclude, rm_params
 
 
 def get_sound(audio_source, tag):
-    return upload_sound(audio_source, "")[0]
+    return upload_sound(audio_source, '')[0]
 
 
 # learner = OutlierModel()
@@ -62,7 +62,7 @@ audio_anomalies = audio_anomalies.ch_funcs(
     train=include_exclude(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
         sml.auto_spectral_anomaly_learner,
-        include="wf learner",
+        include='wf learner',
         # exclude="learner",
     ),
     # train=rm_params(
@@ -80,7 +80,7 @@ audio_anomalies = audio_anomalies.ch_funcs(
 )
 
 # filepath = '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
-filepath = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
+filepath = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -98,7 +98,7 @@ def mk_pipeline_maker_app_with_mall(
     # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
-    it = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    it = crudify_funcs(var_nodes='wf model results', dag=audio_anomalies, mall=mall)
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
     print(audio_anomalies.synopsis_string())
     print(mall)
@@ -109,35 +109,35 @@ def mk_pipeline_maker_app_with_mall(
 
     step1, step2, step3 = list(it)
     # name becomes actually "get_sound"
-    print(f"{step1.__name__ =}")
+    print(f'{step1.__name__ =}')
 
     from functools import partial
 
-    step1 = partial(step1, save_name="a_wf")
+    step1 = partial(step1, save_name='a_wf')
     # step1.__name__ = "step1"
     #
-    step2 = partial(step2, save_name="a_model")
+    step2 = partial(step2, save_name='a_model')
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "get_sound": {
-                "execution": {
-                    "inputs": {
-                        "audio_source": {
+            'get_sound': {
+                'execution': {
+                    'inputs': {
+                        'audio_source': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         },
                     },
                 },
             },
-            "step2": {
-                "execution": {
-                    "inputs": {
-                        "audio_source": {
+            'step2': {
+                'execution': {
+                    'inputs': {
+                        'audio_source': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["wf_store"],
+                            'options': mall['wf_store'],
                         },
                     },
                 },
@@ -158,7 +158,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import streamlit as st
 
     mall = dict(
