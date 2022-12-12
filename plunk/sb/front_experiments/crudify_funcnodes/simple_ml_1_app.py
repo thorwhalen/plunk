@@ -39,12 +39,20 @@ wav_file_to_array = Pipe(
     itemgetter(0),
 )
 
-from i2 import include_exclude
+from i2 import include_exclude, rm_params
 
 
 def get_sound(audio_source, tag):
     return upload_sound(audio_source, "")[0]
 
+
+# learner = OutlierModel()
+# how to make that field appear correctly?
+# convention: if value is an object, do crudification automatically: make a dict
+# and give a name to it.
+# TODO: names of funcs in the config should be actual names, not strings
+# TODO: at least get some warnings when doing a config (like check args names)
+# name-based routing: if func has this name, do this
 
 audio_anomalies = audio_anomalies.ch_funcs(
     # get_audio=lambda audio_source: wav_file_to_array(audio_source),
@@ -57,6 +65,11 @@ audio_anomalies = audio_anomalies.ch_funcs(
         include="wf learner",
         # exclude="learner",
     ),
+    # train=rm_params(
+    #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
+    #     sml.auto_spectral_anomaly_learner,
+    #     params_to_remove=("learner",),
+    # ),
     # train=FuncFactory(
     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
     #     sml.auto_spectral_anomaly_learner,
@@ -75,7 +88,7 @@ def mk_pipeline_maker_app_with_mall(
     *,
     pipelines: str = None,
     sound_output: str = None,
-    models_scores: str = None
+    models_scores: str = None,
 ):
 
     if not b.mall():
@@ -95,16 +108,20 @@ def mk_pipeline_maker_app_with_mall(
         return None
 
     step1, step2, step3 = list(it)
+    # name becomes actually "get_sound"
+    print(f"{step1.__name__ =}")
 
     from functools import partial
 
     step1 = partial(step1, save_name="a_wf")
+    # step1.__name__ = "step1"
+    #
     step2 = partial(step2, save_name="a_model")
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            "step1": {
+            "get_sound": {
                 "execution": {
                     "inputs": {
                         "audio_source": {
