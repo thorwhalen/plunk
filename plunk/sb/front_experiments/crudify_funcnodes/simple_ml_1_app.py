@@ -9,7 +9,8 @@ from operator import methodcaller
 from pathlib import Path
 import numpy as np
 from recode import decode_wav_bytes
-
+from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
+from i2 import Sig
 from front.dag import crudify_funcs
 from meshed import code_to_dag
 
@@ -63,7 +64,7 @@ audio_anomalies = audio_anomalies.ch_funcs(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
         sml.auto_spectral_anomaly_learner,
         include="wf learner",
-        exclude="learner",
+        # exclude="learner",
     ),
     # train=rm_params(
     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
@@ -98,7 +99,7 @@ def mk_pipeline_maker_app_with_mall(
     # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
-    it = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
     print(audio_anomalies.synopsis_string())
     print(mall)
@@ -107,16 +108,28 @@ def mk_pipeline_maker_app_with_mall(
         st.write(mall)
         return None
 
-    step1, step2, step3 = list(it)
+    step1, step2, step3 = list(_funcs)  # remove list
     # name becomes actually "get_sound"
     print(f"{step1.__name__ =}")
+    print(f"{step2.__name__ =}")
+    print(f"{step3.__name__ =}")
 
+    # step2 = FuncFactory(
+    #     step2, exclude=("learner",)
+    # )  # when you want to not display some arg
+    step2 = rm_params(step2, params_to_remove=("learner",))
+    print(f"name after param removal: {step2.__name__}")
+    print(Sig(step2))
+    # step2 = include_exclude(step2, exclude=("learner",))
+
+    step2.__name__ = "step2"
     from functools import partial
 
     step1 = partial(step1, save_name="a_wf")
     # step1.__name__ = "step1"
     #
-    step2 = partial(step2, save_name="a_model")
+    # step2 = partial(step2, save_name="a_model")
+    step3.__name__ = "step3"
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -135,24 +148,31 @@ def mk_pipeline_maker_app_with_mall(
             "step2": {
                 "execution": {
                     "inputs": {
-                        "audio_source": {
+                        "wf": {
                             ELEMENT_KEY: SelectBox,
                             "options": mall["wf_store"],
                         },
                     },
                 },
             },
-            # "learn_apply_model": {
-            #     NAME_KEY: "Apply model",
-            #     #'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
-            # },
+            "step3": {
+                NAME_KEY: "Apply model",
+                "execution": {
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
         },
     }
     funcs = [
         step1,
         step2,
+        step3,
         debug_check_mall,
     ]
+    print(f"after config : {Sig(step2)}")
+
     app = mk_app(funcs, config=config)
 
     return app
