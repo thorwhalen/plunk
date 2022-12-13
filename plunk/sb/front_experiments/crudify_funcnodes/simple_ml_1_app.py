@@ -104,11 +104,7 @@ def mk_pipeline_maker_app_with_mall(
     # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
-<<<<<<< HEAD
     _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
-=======
-    it = crudify_funcs(var_nodes='wf model results', dag=audio_anomalies, mall=mall)
->>>>>>> e1f6109bca8ee7b09b937d180c1f049185cbbf06
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
     print(audio_anomalies.synopsis_string())
     print(mall)
@@ -119,7 +115,6 @@ def mk_pipeline_maker_app_with_mall(
 
     step1, step2, step3 = list(_funcs)  # remove list
     # name becomes actually "get_sound"
-<<<<<<< HEAD
     print(f"{step1.__name__ =}")
     print(f"{step2.__name__ =}")
     print(f"{step3.__name__ =}")
@@ -133,10 +128,6 @@ def mk_pipeline_maker_app_with_mall(
     # step2 = include_exclude(step2, exclude=("learner",))
 
     step2.__name__ = "step2"
-=======
-    print(f'{step1.__name__ =}')
-
->>>>>>> e1f6109bca8ee7b09b937d180c1f049185cbbf06
     from functools import partial
 
     step1 = partial(step1, save_name='a_wf')
