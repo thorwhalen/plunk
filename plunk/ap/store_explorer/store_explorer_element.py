@@ -11,10 +11,10 @@ from streamlitfront import binder as b
 def get_mall(defaults: dict):
     if not b.mall():
         b.mall = defaults
-    mall = b.mall()
-    if not all(k in mall for k in defaults):
-        mall.update(defaults)
-    return mall
+    m = b.mall()
+    if not all(k in m for k in defaults):
+        m.update(defaults)
+    return m
 
 
 mall = get_mall({'__store_explorer_state': {'depth_keys': []}})
