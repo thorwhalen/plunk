@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import reduce, cached_property, wraps
-from typing import Callable, Any, Mapping, Union, Hashable, List, TypeVar, Protocol
+from typing import Any, Mapping, Union, Hashable, List, TypeVar, Protocol
 
 import streamlit as st
 from boltons.typeutils import make_sentinel
@@ -18,22 +18,18 @@ def get_mall(defaults: dict):
     return m
 
 
-__store_explorer_state__ = '__store_explorer_state__'
-mall = get_mall({__store_explorer_state__: {'depth_keys': []}})
-NOT_SELECTED = make_sentinel(name='Not Selected', var_name='Not Selected')
-
-
-Depth = TypeVar('Depth', bound=int)
-
-
 class _RenderAction(Protocol):
     def __call__(
-        _self, self: 'StoreExplorer', depth: Depth, obj: Any, is_changed_depth: bool
+        _self, self: 'StoreExplorer', depth: 'Depth', obj: Any, is_changed_depth: bool
     ) -> None:
         ...
 
 
 RenderAction = TypeVar('RenderAction', bound=_RenderAction)
+Depth = TypeVar('Depth', bound=int)
+NOT_SELECTED = make_sentinel('Not Selected', 'Not Selected')
+STORE_EXPLORER_STATE = '__STORE_EXPLORER_STATE__'
+mall = get_mall({STORE_EXPLORER_STATE: {'depth_keys': []}})
 
 
 def write_obj_after(method: RenderAction) -> RenderAction:
@@ -51,50 +47,57 @@ class StoreExplorer(OutputBase):
     output: Mapping = None
 
     @cached_property
-    def stores(self):
-        """Remove __store_explorer_state__ from selection"""
-        return {
-            k: v for k, v in self.output.items() if k is not __store_explorer_state__
-        }
+    def stores(self) -> Mapping:
+        """Remove STORE_EXPLORER_STATE from selection"""
+        return {k: v for k, v in self.output.items() if k is not STORE_EXPLORER_STATE}
 
     @property
     def depth_keys(self) -> List[Union[Hashable, int]]:
-        return mall[__store_explorer_state__]['depth_keys']
+        return mall[STORE_EXPLORER_STATE]['depth_keys']
 
     @depth_keys.setter
     def depth_keys(self, value: List[Union[Hashable, int]]):
-        mall[__store_explorer_state__]['depth_keys'] = value
+        mall[STORE_EXPLORER_STATE]['depth_keys'] = value
 
-    def get_item(self, obj: Mapping, key: Union[Hashable, int]):
+    @staticmethod
+    def st_key(depth):
+        return f'depth {depth}'
+
+    @staticmethod
+    def get_item(obj: Mapping, key: Union[Hashable, int]) -> Any:
+        if key is NOT_SELECTED:
+            return NOT_SELECTED
         return obj[key]
 
-    def get_obj(self, store: Mapping):
-        return reduce(self.get_item, self.depth_keys, store)
+    def get_depth_obj(self) -> Any:
+        """Get object by following selected depth keys"""
+        return reduce(self.get_item, self.depth_keys, self.stores)
 
     def selectbox(self, depth: Depth, options: List[Union[Hashable, int]]):
         st.selectbox(
-            key := f'depth_{depth}',
+            key := self.st_key(depth),
             options=options,
             key=key,
             on_change=self._render,
             args=(depth + 1, True),
         )
 
-    def _render(self, depth: Depth, is_changed_depth=False):
+    def _render(self, depth: Depth, is_changed_depth=False) -> None:
         """Recursive render dives into the depths of a nested structure
 
         :param depth: number of steps into the store
         :param is_changed_depth: is the depth changed by user action
-        :return:
+        :return: None
         """
         self.depth_keys = self.depth_keys[:depth]
         if depth > 0:
-            self._render(depth - 1)
-            self.depth_keys.append(st.session_state.get(f'depth_{depth - 1}'))
+            dk = st.session_state.get(self.st_key(depth - 1))
+            self._render(depth - 1, is_changed_depth=dk is NOT_SELECTED)
+            self.depth_keys.append(dk)
 
-        obj = self.get_obj(self.stores)
-        action_method: RenderAction = getattr(self, type(obj).__name__, self.default)
-        action_method(depth, obj, is_changed_depth)
+        if (obj := self.get_depth_obj()) is not NOT_SELECTED:
+            action: RenderAction = getattr(self, type(obj).__name__, self.default)
+            action(depth, obj, is_changed_depth)
 
     def render(self):
         self._render(depth=0, is_changed_depth=True)
@@ -102,12 +105,14 @@ class StoreExplorer(OutputBase):
     @write_obj_after
     def dict(self, depth: Depth, obj: dict, is_changed_depth: bool):
         """RenderAction for dict"""
-        self.selectbox(depth, options=[NOT_SELECTED, *obj])
+        if len(obj) != 0:
+            self.selectbox(depth, [NOT_SELECTED, *obj])
 
     @write_obj_after
     def list(self, depth: Depth, obj: list, is_changed_depth: bool):
         """RenderAction for list"""
-        self.selectbox(depth, options=[NOT_SELECTED, *(i for i in range(len(obj)))])
+        if len(obj) != 0:
+            self.selectbox(depth, options=[NOT_SELECTED, *(i for i in range(len(obj)))])
 
     def default(self, depth: Depth, obj: Any, is_changed_depth: bool):
         """Default RenderAction"""
