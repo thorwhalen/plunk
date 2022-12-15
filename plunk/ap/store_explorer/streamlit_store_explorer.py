@@ -2,7 +2,7 @@ from typing import Mapping
 
 import streamlit as st
 
-from plunk.ap.store_explorer.store_explorer_app import mall
+from plunk.ap.store_explorer.store_explorer_app import _mall
 
 
 def store_explorer(store: Mapping):
@@ -51,4 +51,4 @@ def store_explorer(store: Mapping):
 
 
 if __name__ == '__main__':
-    store_explorer(store=mall['data'])
+    store_explorer(store=_mall['data'])

@@ -1,21 +1,18 @@
 """An app that loads wav file from local folder"""
-from typing import Mapping
 from functools import partial
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
 
 from front.crude import Crudifier
 
-from streamlitfront import mk_app, binder as b
-from streamlitfront.elements import SuccessNotification, SelectBox
+from streamlitfront import mk_app
+from streamlitfront.elements import SuccessNotification
 from streamlitfront.elements import FileUploader
 
-from plunk.ap.store_explorer.store_explorer_element import StoreExplorer
+from plunk.ap.store_explorer.store_explorer_element import StoreExplorer, get_mall
 
 
-def mk_pipeline_maker_app_with_mall(mall: Mapping,):
-    if not b.mall():
-        b.mall = mall
-    mall = b.mall()
+def mk_pipeline_maker_app_with_mall(mall: dict):
+    mall = get_mall(mall)
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -23,8 +20,8 @@ def mk_pipeline_maker_app_with_mall(mall: Mapping,):
     def upload_sound(train_audio: list, tag: str):
         return train_audio, tag
 
-    def explore_mall(key):
-        return mall[key]
+    def explore_mall():
+        return mall
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -45,12 +42,7 @@ def mk_pipeline_maker_app_with_mall(mall: Mapping,):
                     },
                 },
             },
-            'explore_mall': {
-                'execution': {
-                    'inputs': {'key': {ELEMENT_KEY: SelectBox, 'options': list(mall)}},
-                    'output': {ELEMENT_KEY: StoreExplorer},
-                }
-            },
+            'explore_mall': {'execution': {'output': {ELEMENT_KEY: StoreExplorer}}},
         },
     }
 
@@ -63,7 +55,7 @@ def mk_pipeline_maker_app_with_mall(mall: Mapping,):
     return app
 
 
-mall = dict(
+_mall = dict(
     # Factory Input Stores
     sound_output=dict(),
     # Output Store
@@ -79,6 +71,6 @@ mall = dict(
 
 if __name__ == '__main__':
 
-    app = mk_pipeline_maker_app_with_mall(mall)
+    app = mk_pipeline_maker_app_with_mall(_mall)
 
     app()
