@@ -160,3 +160,4 @@
    module_docs/plunk/tw/scrap
    module_docs/plunk/tw/things_decorators_break
    module_docs/plunk/tw/user_story_to_poc_demo
+   module_docs/plunk/vf/front/store_explorer

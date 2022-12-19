@@ -1,5 +1,3 @@
-
-
 import re
 from streamlitfront import mk_app
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
@@ -46,6 +44,7 @@ def explore_mall(
     if not match_case:
         key_filter = key_filter.lower()
     if use_regex:
+
         def include_key(key):
             if not match_case:
                 key = key.lower()
@@ -53,13 +52,16 @@ def explore_mall(
             if re.search(regex, str(key)):
                 return True
             return False
+
     else:
+
         def include_key(key):
             if not match_case:
                 key = key.lower()
             if match_whole_key:
                 return key_filter == key
             return key_filter in str(key)
+
     return filter_dict_in_depth(mall, include_key)
 
 
@@ -69,13 +71,7 @@ if __name__ == '__main__':
         [explore_mall],
         config={
             APP_KEY: {'title': 'Store Explorer'},
-            RENDERING_KEY: {
-                'explore_mall': {
-                    'execution': {
-                        'auto_submit': True,
-                    }
-                }
-            }
+            RENDERING_KEY: {'explore_mall': {'execution': {'auto_submit': True,}}},
         },
     )
     app()
