@@ -1,5 +1,7 @@
 """An app that loads wav file from local folder"""
-from functools import partial
+from functools import partial, reduce
+from typing import Iterable
+
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
 
 from front.crude import Crudifier
@@ -8,7 +10,11 @@ from streamlitfront import mk_app
 from streamlitfront.elements import SuccessNotification
 from streamlitfront.elements import FileUploader
 
-from plunk.ap.store_explorer.store_explorer_element import StoreExplorer, get_mall
+from plunk.ap.store_explorer.store_explorer_element import (
+    get_mall,
+    StoreExplorerOutput,
+    StoreExplorerInput,
+)
 
 
 def mk_pipeline_maker_app_with_mall(mall: dict):
@@ -20,8 +26,8 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
     def upload_sound(train_audio: list, tag: str):
         return train_audio, tag
 
-    def explore_mall():
-        return mall
+    def explore_mall(depth_keys: Iterable = ()):
+        return depth_keys, reduce(lambda o, k: o[k], depth_keys, mall)
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -42,7 +48,18 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
                     },
                 },
             },
-            'explore_mall': {'execution': {'output': {ELEMENT_KEY: StoreExplorer}}},
+            'explore_mall': {
+                'execution': {
+                    'inputs': {
+                        'depth_keys': {ELEMENT_KEY: StoreExplorerInput, 'mall': mall}
+                    },
+                    'output': {
+                        ELEMENT_KEY: StoreExplorerOutput,
+                        'write_depth_keys': True,
+                    },
+                    'auto_submit': True,
+                },
+            },
         },
     }
 
