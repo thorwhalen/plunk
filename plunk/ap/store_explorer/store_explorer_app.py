@@ -1,5 +1,6 @@
 """An app that loads wav file from local folder"""
-from functools import partial, reduce
+import re
+from functools import partial, reduce, wraps
 from typing import Iterable
 
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
@@ -17,6 +18,14 @@ from plunk.ap.store_explorer.store_explorer_element import (
 )
 
 
+def tuple_wrap(f):
+    @wraps(f)
+    def _wrap(*a, **kw):
+        return (), f(*a, **kw)
+
+    return _wrap
+
+
 def mk_pipeline_maker_app_with_mall(mall: dict):
     mall = get_mall(mall)
 
@@ -28,6 +37,52 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
 
     def explore_mall(depth_keys: Iterable = ()):
         return depth_keys, reduce(lambda o, k: o[k], depth_keys, mall)
+
+    @tuple_wrap
+    def search_mall(
+        key_filter: str,
+        match_case: bool = False,
+        match_whole_key: bool = False,
+        use_regex: bool = False,
+    ):
+        """By vf"""
+
+        def filter_dict_in_depth(d, predicate):
+            def build_filtered_dict():
+                for k, v in d.items():
+                    if predicate(k):
+                        yield k, v
+                    elif isinstance(v, dict):
+                        _v = filter_dict_in_depth(v, predicate)
+                        if _v:
+                            yield k, _v
+
+            return {k: v for k, v in build_filtered_dict()}
+
+        if not key_filter:
+            return mall
+        if not match_case:
+            key_filter = key_filter.lower()
+        if use_regex:
+
+            def include_key(key):
+                if not match_case:
+                    key = key.lower()
+                regex = f'^{key_filter}$' if match_whole_key else key_filter
+                if re.search(regex, str(key)):
+                    return True
+                return False
+
+        else:
+
+            def include_key(key):
+                if not match_case:
+                    key = key.lower()
+                if match_whole_key:
+                    return key_filter == key
+                return key_filter in str(key)
+
+        return filter_dict_in_depth(mall, include_key)
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -51,11 +106,20 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
             'explore_mall': {
                 'execution': {
                     'inputs': {
-                        'depth_keys': {ELEMENT_KEY: StoreExplorerInput, 'mall': mall}
+                        'depth_keys': {ELEMENT_KEY: StoreExplorerInput, 'mall': mall},
                     },
                     'output': {
                         ELEMENT_KEY: StoreExplorerOutput,
                         'write_depth_keys': True,
+                    },
+                    'auto_submit': True,
+                },
+            },
+            'search_mall': {
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: StoreExplorerOutput,
+                        'write_depth_keys': False,
                     },
                     'auto_submit': True,
                 },
@@ -65,6 +129,7 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
 
     funcs = [
         explore_mall,
+        search_mall,
         upload_sound,
     ]
     app = mk_app(funcs, config=config)

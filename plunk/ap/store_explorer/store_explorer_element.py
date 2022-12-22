@@ -84,12 +84,12 @@ class StoreExplorerInput(InputBase):
             key := self.st_key(depth),
             options=options,
             key=key,
-            on_change=self._on_change,
+            on_change=self._update_depth_keys,
             args=(depth,),
         )
 
-    def _on_change(self, depth: Depth) -> None:
-        """Recursive render dives into the depths of a nested structure
+    def _update_depth_keys(self, depth: Depth) -> None:
+        """Update depth keys on change in streamlit component
 
         :param depth: number of steps into the store
         :return: None
