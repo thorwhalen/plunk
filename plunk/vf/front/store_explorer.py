@@ -20,11 +20,11 @@ DOUBLE_WILDCARD = str(uuid.uuid4())
 
 
 _mall = dict(
-    search_mode = {
+    search_mode={
         'Keys Only': SEARCH_MODE_KEYS,
         'Values Only': SEARCH_MODE_VALUES,
         'Keys and Values': SEARCH_MODE_KEYS_AND_VALUES,
-        'Path': SEARCH_MODE_PATH
+        'Path': SEARCH_MODE_PATH,
     },
     sound_output=dict(),
     data=dict(
@@ -56,11 +56,11 @@ class DictExplorer:
         search: str,
         match_case: bool = False,
         match_whole_word: bool = False,
-        use_regex: bool = False
+        use_regex: bool = False,
     ):
         if not search:
             return self.dict_to_explore
-        
+
         self.match_case = match_case
         self.match_whole_word = match_whole_word
         self.use_regex = use_regex
@@ -73,11 +73,19 @@ class DictExplorer:
         if not self.match_case:
             self.search = search.lower()
 
-        self.search_keys = search_mode in (SEARCH_MODE_KEYS, SEARCH_MODE_KEYS_AND_VALUES, SEARCH_MODE_PATH)
-        self.search_values = search_mode in (SEARCH_MODE_VALUES, SEARCH_MODE_KEYS_AND_VALUES)
+        self.search_keys = search_mode in (
+            SEARCH_MODE_KEYS,
+            SEARCH_MODE_KEYS_AND_VALUES,
+            SEARCH_MODE_PATH,
+        )
+        self.search_values = search_mode in (
+            SEARCH_MODE_VALUES,
+            SEARCH_MODE_KEYS_AND_VALUES,
+        )
 
         return (
-            self._search_path() if search_mode == SEARCH_MODE_PATH 
+            self._search_path()
+            if search_mode == SEARCH_MODE_PATH
             else self._filter_dict_from_str()
         )
 
@@ -89,13 +97,13 @@ class DictExplorer:
                 r'(?<!\.)\*',
                 '.*',
                 re.sub(  # escape the double wildcards first ('**' -> value of DOUBLE_WILDCARD)
-                    r'^\*\*$',
-                    DOUBLE_WILDCARD,
-                    el
-                )
+                    r'^\*\*$', DOUBLE_WILDCARD, el
+                ),
             )
-            for el in re.split(r'(?<!\\)\/', self.search)  # (?<!\\) is for escaping slash characters using a backslash ('\/')
-            if el  
+            for el in re.split(
+                r'(?<!\\)\/', self.search
+            )  # (?<!\\) is for escaping slash characters using a backslash ('\/')
+            if el
         ]
         return self._filter_dict_from_path()
 
@@ -115,7 +123,9 @@ class DictExplorer:
                         _path_tail = [next_el] + path_tail
                 if match or _double_wildcard:
                     if isinstance(v, dict):
-                        _v = self._filter_dict_from_path(v, _path_tail, _double_wildcard)
+                        _v = self._filter_dict_from_path(
+                            v, _path_tail, _double_wildcard
+                        )
                         if _v != {} or (v == {} and not _path_tail):
                             yield k, _v
                     elif not _path_tail:
@@ -145,8 +155,7 @@ class DictExplorer:
         d = self.dict_to_explore if d is None else d
         return {k: v for k, v in build_dict()}
 
-    
-    def _include_item(self, search, key, value = ''):
+    def _include_item(self, search, key, value=''):
         _key = str(key)
         _value = str(value)
         if not self.match_case:
@@ -154,12 +163,17 @@ class DictExplorer:
             _value = _value.lower()
         if self.use_regex:
             regex = f'^{search}$' if self.match_whole_word else search
-            return (self.search_keys and re.search(regex, _key)) or (self.search_values and re.search(regex, _value))
+            return (self.search_keys and re.search(regex, _key)) or (
+                self.search_values and re.search(regex, _value)
+            )
         else:
             if self.match_whole_word:
-                return (self.search_keys and search == _key) or (self.search_values and search == _value)
-            return (self.search_keys and search in _key) or (self.search_values and search in _value)
-
+                return (self.search_keys and search == _key) or (
+                    self.search_values and search == _value
+                )
+            return (self.search_keys and search in _key) or (
+                self.search_values and search in _value
+            )
 
 
 @crudifier(param_to_mall_map=['search_mode'])
@@ -193,7 +207,7 @@ if __name__ == '__main__':
             APP_KEY: {'title': 'Store Explorer'},
             RENDERING_KEY: {
                 'upload_sound': {
-                    NAME_KEY: "Data Loader",
+                    NAME_KEY: 'Data Loader',
                     'execution': {
                         'inputs': {
                             'train_audio': {
@@ -222,7 +236,7 @@ if __name__ == '__main__':
                         # },
                         'auto_submit': True,
                     }
-                }
+                },
             },
         },
     )
