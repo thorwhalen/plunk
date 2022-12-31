@@ -14,7 +14,7 @@ def identity(x):
 
 def wrap(wrapper, f, f_name):
     _f = wrapper(f)
-    _f.__name__ = f_name  
+    _f.__name__ = f_name
     _f.__qualname__ = f_name
     return _f
 

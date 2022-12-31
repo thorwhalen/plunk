@@ -11,7 +11,7 @@ from streamlitfront.elements import (
     FileUploader,
     MultiSourceInput,
     SuccessNotification,
-    TextInput
+    TextInput,
 )
 
 from plunk.vf.extrude.edge_impulse_like import funcs
@@ -68,14 +68,14 @@ if __name__ == '__main__':
                                 'From the microphone': {
                                     ELEMENT_KEY: AudioRecorder,
                                     # "save_dir": rootdir,
-                                }
+                                },
                             },
-                            'save_name': {NAME_KEY: 'Save as',}
+                            'save_name': {NAME_KEY: 'Save as',},
                         },
                         'output': {
                             ELEMENT_KEY: SuccessNotification,
                             'message': 'The wave form has been uploaded successfully.',
-                        }
+                        },
                     }
                 },
                 'get_data': {
@@ -83,9 +83,9 @@ if __name__ == '__main__':
                     'execution': {
                         'output': {ELEMENT_KEY: AudioPlayer,},
                         'auto_submit': True,
-                    }
-                }
-            }
-        }
+                    },
+                },
+            },
+        },
     )
     app()

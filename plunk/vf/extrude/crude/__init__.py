@@ -2,10 +2,7 @@ from functools import partial
 from front.crude import Crudifier
 
 mall = dict(
-    a=dict(one=1, two=2),
-    b=dict(three=3, four=4),
-    foo_output=dict(),
-    bar_output=dict(),
+    a=dict(one=1, two=2), b=dict(three=3, four=4), foo_output=dict(), bar_output=dict(),
 )
 crudifier = partial(Crudifier, mall=mall, include_stores_attribute=True)
 
