@@ -28,6 +28,7 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_7_funcnodes_exclude
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_drill_Andie
+   module_docs/plunk/sb/front_demo/user_story1/apps/app5_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_s3dol
    module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
    module_docs/plunk/sb/front_demo/user_story1/apps/app_choosing_model
