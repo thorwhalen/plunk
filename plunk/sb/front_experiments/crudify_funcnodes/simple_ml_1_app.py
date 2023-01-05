@@ -24,7 +24,9 @@ from streamlitfront.elements import SelectBox
 @code_to_dag
 def audio_anomalies():
     wf = get_audio(audio_source)
-    model = train(learner, wf)
+    # model = train(wf, learner)
+    model = train(wf)
+
     results = apply(model, wf)
 
 
@@ -60,17 +62,18 @@ audio_anomalies = audio_anomalies.ch_funcs(
     get_audio=get_sound,
     #     train=lambda wf, learner: auto_spectral_anomaly_learner(wf, learner=learner),
     #     train=auto_spectral_anomaly_learner,
-    train=include_exclude(
-        # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-        sml.auto_spectral_anomaly_learner,
-        include='wf learner',
-        # exclude="learner",
-    ),
-    # train=rm_params(
+    # train=include_exclude(
     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
     #     sml.auto_spectral_anomaly_learner,
-    #     params_to_remove=("learner",),
+    #     include="wf learner",
+    #     exclude="learner",
     # ),
+    train=rm_params(
+        # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
+        sml.auto_spectral_anomaly_learner,
+        allow_removal_of_non_defaulted_params=True,
+        params_to_remove=('learner',),
+    ),
     # train=FuncFactory(
     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
     #     sml.auto_spectral_anomaly_learner,
