@@ -32,7 +32,7 @@ def func(x: int, y=3, z=None, other=MyClass(z=3)):
     return type(other)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     app = mk_app([func])
 
