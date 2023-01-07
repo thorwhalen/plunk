@@ -2,24 +2,18 @@ from functools import partial
 from typing import Any
 from front.crude import Crudifier
 
-mall = dict(wf=dict())
+mall = dict(tagged_wf=dict())
 crudifier = partial(Crudifier, mall=mall, include_stores_attribute=True)
+WaveForm = Any
 
 
-def identity(x):
-    print(x)
-    print(type(x))
+@crudifier(output_store='tagged_wf', output_trans=lambda: None)
+def tag_wf(wf: WaveForm, tag: str):
+    return (wf, tag)
+
+
+@crudifier(param_to_mall_map=dict(x='tagged_wf'))
+def get_tagged_wf(x: Any):
     return x
 
-
-def wrap(wrapper, f, f_name):
-    _f = wrapper(f)
-    _f.__name__ = f_name
-    _f.__qualname__ = f_name
-    return _f
-
-
-upload_data = wrap(crudifier(output_store='wf'), identity, 'upload_data')
-get_data = wrap(crudifier(param_to_mall_map=dict(x='wf')), identity, 'get_data')
-
-funcs = [upload_data, get_data]
+funcs = [tag_wf, get_tagged_wf]
