@@ -18,14 +18,8 @@ def get_tagged_wf_output_handler(output, **input_kwargs):
 
 
 handlers = [
-    dict(
-        endpoint=tag_wf,
-        input_mapper=tag_wf_input_handler,
-    ),
-    dict(
-        endpoint=get_tagged_wf,
-        output_mapper=get_tagged_wf_output_handler,
-    )
+    dict(endpoint=tag_wf, input_mapper=tag_wf_input_handler,),
+    dict(endpoint=get_tagged_wf, output_mapper=get_tagged_wf_output_handler,)
     # get_tagged_wf
 ]
 _app = mk_api(handlers, mall)

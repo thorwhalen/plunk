@@ -97,7 +97,7 @@ if __name__ == '__main__':
                         'auto_submit': True,
                     },
                 },
-            }
-        }
+            },
+        },
     )
     app()

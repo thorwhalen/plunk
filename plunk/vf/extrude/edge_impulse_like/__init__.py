@@ -16,4 +16,5 @@ def tag_wf(wf: WaveForm, tag: str):
 def get_tagged_wf(x: Any):
     return x
 
+
 funcs = [tag_wf, get_tagged_wf]
