@@ -72,10 +72,7 @@ func_mapping = dict(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
         FuncFactory(fake_auto_spectral_anomaly_learner),
         allow_removal_of_non_defaulted_params=True,
-        params_to_remove=[
-            "learner",
-            "chk_size",
-        ],
+        params_to_remove=['learner', 'chk_size',],
     ),
     # apply=lambda model, wf: model(wf),
     apply=apply_func,
@@ -84,13 +81,13 @@ audio_anomalies = ch_funcs(
     audio_anomalies, func_mapping=func_mapping, ch_func_node_func=ch_func_node_func2
 )
 
-if __name__ == "__main__":
-    source = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
-    print(Sig(func_mapping["train"]))
+if __name__ == '__main__':
+    source = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
+    print(Sig(func_mapping['train']))
     mall = dict()
     audio_anomalies(source)
     result = crudify_func_nodes(
-        var_nodes="wf model results", dag=audio_anomalies, mall=mall
+        var_nodes='wf model results', dag=audio_anomalies, mall=mall
     )
 
     result(source)
