@@ -50,36 +50,31 @@ def apply_func(model, wf):
     return model(wf)
 
 
-# file_to_bytes = Pipe(Path, methodcaller("read_bytes"))
-# wav_file_to_array = Pipe(
-#     file_to_bytes,
-#     decode_wav_bytes,
-#     itemgetter(0),
-#     np.array,
-#     np.transpose,
-#     itemgetter(0),
-# )
-
 from i2 import include_exclude, rm_params
 
 
 def get_sound(audio_source):
-    return upload_sound(audio_source, "")[0]
+    return audio_source
+
+
+class MyClass:
+    def __init__(self) -> None:
+        pass
+
+
+def fake_auto_spectral_anomaly_learner(wf, learner=MyClass(), chk_size=2048):
+    return lambda wf: wf
 
 
 func_mapping = dict(
     get_audio=get_sound,
     train=rm_params(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-        FuncFactory(sml.auto_spectral_anomaly_learner),
+        FuncFactory(fake_auto_spectral_anomaly_learner),
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
             "learner",
             "chk_size",
-            "chk_step",
-            "n_features",
-            "n_centroids",
-            "log_factor",
         ],
     ),
     # apply=lambda model, wf: model(wf),
