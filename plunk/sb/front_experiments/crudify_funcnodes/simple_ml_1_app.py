@@ -140,7 +140,7 @@ audio_anomalies = ch_funcs(
     audio_anomalies, func_mapping=func_mapping, ch_func_node_func=ch_func_node_func2
 )
 
-
+print(f'{Sig(func_mapping["train"])=}')
 # filepath = '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
 filepath = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
 
@@ -157,7 +157,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     store = dict()
-    mall["wf_store"] = store
+    # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
     # _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
@@ -199,10 +199,44 @@ def mk_pipeline_maker_app_with_mall(
     # step3.__name__ = "step3"
     # print(f"{Sig(step2a)=}")
 
+    # config = {
+    #     APP_KEY: {"title": "Data Preparation"},
+    #     RENDERING_KEY: {
+    #         "step1": {
+    #             "execution": {
+    #                 "inputs": {
+    #                     "audio_source": {
+    #                         ELEMENT_KEY: FileUploader,
+    #                         "type": "wav",
+    #                         "accept_multiple_files": True,
+    #                     },
+    #                 },
+    #             },
+    #         },
+    #         "step2a": {
+    #             "execution": {
+    #                 "inputs": {
+    #                     "wf": {
+    #                         ELEMENT_KEY: SelectBox,
+    #                         "options": mall["wf_store"],
+    #                     },
+    #                 },
+    #             },
+    #         },
+    #         "step3": {
+    #             NAME_KEY: "Apply model",
+    #             "execution": {
+    #                 "output": {
+    #                     ELEMENT_KEY: ArrayPlotter,
+    #                 },
+    #             },
+    #         },
+    #     },
+    # }
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            "step1": {
+            "result": {
                 "execution": {
                     "inputs": {
                         "audio_source": {
@@ -213,33 +247,18 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "step2a": {
-                "execution": {
-                    "inputs": {
-                        "wf": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["wf_store"],
-                        },
-                    },
-                },
-            },
-            "step3": {
-                NAME_KEY: "Apply model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
-            },
         },
     }
+    # funcs = [
+    #     step1,
+    #     step2a,
+    #     step3,
+    #     debug_check_mall,
+    # ]
     funcs = [
-        step1,
-        step2a,
-        step3,
+        result,
         debug_check_mall,
     ]
-    funcs = [result]
     # print(f"after config : {Sig(step2a)}")
 
     app = mk_app(funcs, config=config)
