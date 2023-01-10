@@ -82,9 +82,11 @@ audio_anomalies = ch_funcs(
 )
 
 if __name__ == '__main__':
-    source = '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
+    source = (
+        '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
+    )
 
-    #source = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
+    # source = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
     print(Sig(func_mapping['train']))
     mall = dict()
     audio_anomalies(source)
