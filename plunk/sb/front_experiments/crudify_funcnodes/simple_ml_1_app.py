@@ -160,22 +160,22 @@ def mk_pipeline_maker_app_with_mall(
     # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
-    # _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
     # _funcs = _crudified_func_nodes(
     #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
     # )
-    result = crudify_func_nodes(
-        var_nodes="wf model results", dag=audio_anomalies, mall=mall
-    )
+    # result = crudify_func_nodes(
+    #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
+    # )
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
-    print(audio_anomalies.synopsis_string())
-    print(mall)
+    # print(audio_anomalies.synopsis_string())
+    # print(mall)
 
     def debug_check_mall():
         st.write(mall)
         return None
 
-    # step1, step2, step3 = _funcs  # remove list
+    step1, step2, step3 = _funcs  # remove list
     # name becomes actually "get_sound"
     # print(f"{step1.__name__ =}")
     # print(f"{step2.__name__ =}")
@@ -192,51 +192,20 @@ def mk_pipeline_maker_app_with_mall(
     # step2a.__name__ = "step2a"
     # from functools import partial
 
-    # step1 = partial(step1, save_name="a_wf")
-    # step1.__name__ = "step1"
+    step1 = partial(step1, save_name="a_wf")
+    step1.__name__ = "step1"
     # #
-    # # step2 = partial(step2, save_name="a_model")
-    # step3.__name__ = "step3"
-    # print(f"{Sig(step2a)=}")
+    step2 = partial(step2, save_name="a_model")
+    step2.__name__ = "step2"
 
-    # config = {
-    #     APP_KEY: {"title": "Data Preparation"},
-    #     RENDERING_KEY: {
-    #         "step1": {
-    #             "execution": {
-    #                 "inputs": {
-    #                     "audio_source": {
-    #                         ELEMENT_KEY: FileUploader,
-    #                         "type": "wav",
-    #                         "accept_multiple_files": True,
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #         "step2a": {
-    #             "execution": {
-    #                 "inputs": {
-    #                     "wf": {
-    #                         ELEMENT_KEY: SelectBox,
-    #                         "options": mall["wf_store"],
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #         "step3": {
-    #             NAME_KEY: "Apply model",
-    #             "execution": {
-    #                 "output": {
-    #                     ELEMENT_KEY: ArrayPlotter,
-    #                 },
-    #             },
-    #         },
-    #     },
-    # }
+    # step3 = partial(step3, save_name="a_result")
+    step3.__name__ = "step3"
+    print(f"{Sig(step3)=}")
+
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            "result": {
+            "step1": {
                 "execution": {
                     "inputs": {
                         "audio_source": {
@@ -247,18 +216,62 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            "step2": {
+                "execution": {
+                    "inputs": {
+                        "wf": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["wf_store"],
+                        },
+                    },
+                },
+            },
+            "step3": {
+                # NAME_KEY: "Apply model",
+                "execution": {
+                    # "inputs": {
+                    #     "wf": {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         "options": mall["wf_store"],
+                    #     },
+                    #     # "model": {
+                    #     #     ELEMENT_KEY: SelectBox,
+                    #     #     "options": mall["model_store"],
+                    #     # },
+                    # },
+                    # "output": {
+                    #     ELEMENT_KEY: ArrayPlotter,
+                    # },
+                },
+            },
         },
     }
-    # funcs = [
-    #     step1,
-    #     step2a,
-    #     step3,
-    #     debug_check_mall,
-    # ]
+    # config = {
+    #     APP_KEY: {"title": "Data Preparation"},
+    #     RENDERING_KEY: {
+    #         "result": {
+    #             "execution": {
+    #                 "inputs": {
+    #                     "audio_source": {
+    #                         ELEMENT_KEY: FileUploader,
+    #                         "type": "wav",
+    #                         "accept_multiple_files": True,
+    #                     },
+    #                 },
+    #             },
+    #         },
+    #     },
+    # }
     funcs = [
-        result,
+        step1,
+        step2,
+        step3,
         debug_check_mall,
     ]
+    # funcs = [
+    #     result,
+    #     debug_check_mall,
+    # ]
     # print(f"after config : {Sig(step2a)}")
 
     app = mk_app(funcs, config=config)
@@ -270,7 +283,7 @@ if __name__ == "__main__":
     import streamlit as st
 
     mall = dict(
-        wf_store=dict(),
+        # wf_store=dict(),
         # pipelines=dict(),
         # models_scores=dict(),
     )

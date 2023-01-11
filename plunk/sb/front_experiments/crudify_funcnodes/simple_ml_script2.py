@@ -63,7 +63,7 @@ class MyClass:
 
 
 def fake_auto_spectral_anomaly_learner(wf, learner=MyClass(), chk_size=2048):
-    return lambda wf: wf
+    return wf
 
 
 func_mapping = dict(
@@ -85,12 +85,24 @@ audio_anomalies = ch_funcs(
 )
 
 if __name__ == "__main__":
+    from i2 import Sig
+
     source = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
     print(Sig(func_mapping["train"]))
     mall = dict()
-    audio_anomalies(source)
-    result = crudify_func_nodes(
-        var_nodes="wf model results", dag=audio_anomalies, mall=mall
-    )
+    # audio_anomalies(source)
+    _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    # result = crudify_func_nodes(
+    #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
+    # )
 
-    result(source)
+    # result(source)
+    step1, step2, step3 = _funcs
+    print(f"{Sig(step1)}=")
+    print(f"{Sig(step2)}=")
+    print(f"{Sig(step3)}=")
+
+    # wf = step1(source)
+    # model = step2(wf)
+    # print(Sig(model))
+    # result = model(wf)
