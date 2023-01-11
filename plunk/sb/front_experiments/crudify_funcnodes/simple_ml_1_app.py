@@ -44,6 +44,7 @@ def audio_anomalies():
     model = train(wf)
 
     results = apply(model, wf)
+    # vis = display_results(results)
 
 
 # filepath = /Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/train/noise.AirConditioner_2.9.1440000-1600000.wav.23q8e34o.ingestion-6bc8b65f8c-vrv59.wav
@@ -61,8 +62,20 @@ wav_file_to_array = Pipe(
 from i2 import rm_params
 
 
+# def get_sound(audio_source):
+#     return upload_sound(audio_source, "")[0]
+
+
 def get_sound(audio_source):
-    return upload_sound(audio_source, "")[0]
+    return wav_file_to_array(audio_source)
+
+
+def visualize_results(results):
+    return results
+
+
+def view_array(arr_str):
+    return np.array(arr_str)
 
 
 # learner = OutlierModel()
@@ -117,7 +130,7 @@ func_mapping = dict(
     # ),
     train=rm_params(
         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-        FuncFactory(sml.auto_spectral_anomaly_learner),
+        sml.auto_spectral_anomaly_learner,
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
             "learner",
@@ -175,6 +188,10 @@ def mk_pipeline_maker_app_with_mall(
         st.write(mall)
         return None
 
+    def result_viewer(key):
+        results = mall["results_store"][key]
+        return results
+
     step1, step2, step3 = _funcs  # remove list
     # name becomes actually "get_sound"
     # print(f"{step1.__name__ =}")
@@ -192,7 +209,9 @@ def mk_pipeline_maker_app_with_mall(
     # step2a.__name__ = "step2a"
     # from functools import partial
 
-    step1 = partial(step1, save_name="a_wf")
+    step1 = partial(
+        step1, save_name="a_wf"
+    )  # TODO: is __name__ necessary, should crudify_funcs do it?
     step1.__name__ = "step1"
     # #
     step2 = partial(step2, save_name="a_model")
@@ -205,43 +224,57 @@ def mk_pipeline_maker_app_with_mall(
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            "step1": {
-                "execution": {
-                    "inputs": {
-                        "audio_source": {
-                            ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
-                        },
-                    },
-                },
-            },
-            "step2": {
-                "execution": {
-                    "inputs": {
-                        "wf": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": mall["wf_store"],
-                        },
-                    },
-                },
-            },
-            "step3": {
+            # "step1": {
+            #     "execution": {
+            #         "inputs": {
+            #             "audio_source": {
+            #                 ELEMENT_KEY: FileUploader,
+            #                 "type": "wav",
+            #                 "accept_multiple_files": True,
+            #             },
+            #         },
+            #     },
+            # },
+            # "step2": {
+            #     "execution": {
+            #         "inputs": {
+            #             "wf": {
+            #                 ELEMENT_KEY: SelectBox,
+            #                 "options": mall["wf_store"],
+            #             },
+            #         },
+            #     },
+            # },
+            # "step3": {
+            #     # NAME_KEY: "Apply model",
+            #     "execution": {
+            #         # "inputs": {
+            #         #     "wf": {
+            #         #         ELEMENT_KEY: SelectBox,
+            #         #         "options": mall["wf_store"],
+            #         #     },
+            #         #     "model": {
+            #         #         ELEMENT_KEY: SelectBox,
+            #         #         "options": mall["model_store"],
+            #         #     },
+            #         # },
+            #         "output": {
+            #             ELEMENT_KEY: ArrayPlotter,
+            #         },
+            #     },
+            # },
+            "result_viewer": {
                 # NAME_KEY: "Apply model",
                 "execution": {
-                    # "inputs": {
-                    #     "wf": {
-                    #         ELEMENT_KEY: SelectBox,
-                    #         "options": mall["wf_store"],
-                    #     },
-                    #     # "model": {
-                    #     #     ELEMENT_KEY: SelectBox,
-                    #     #     "options": mall["model_store"],
-                    #     # },
-                    # },
-                    # "output": {
-                    #     ELEMENT_KEY: ArrayPlotter,
-                    # },
+                    "inputs": {
+                        "key": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": list(mall["results_store"].keys()),
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
                 },
             },
         },
@@ -266,6 +299,7 @@ def mk_pipeline_maker_app_with_mall(
         step1,
         step2,
         step3,
+        result_viewer,
         debug_check_mall,
     ]
     # funcs = [

@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     else:  # sylvain's
         source = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
-
+        # source = "/Users/sylvain/Dropbox/_odata/sound/extra/1563212051653.wav"    #TODO: check the format for that one!
     print(Sig(func_mapping["train"]))
     mall = dict()
     audio_anomalies(source)
