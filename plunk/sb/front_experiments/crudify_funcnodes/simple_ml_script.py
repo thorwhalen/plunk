@@ -1,15 +1,15 @@
 from streamlitfront.examples import simple_ml_1 as sml
 from know.boxes import *
-from streamlitfront.elements import FileUploader
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
-from streamlitfront import mk_app, binder as b
-from typing import Mapping
-from dol import Pipe
-from operator import methodcaller
+# from streamlitfront.elements import FileUploader
+# from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+# from streamlitfront import mk_app, binder as b
+# from typing import Mapping
+# from dol import Pipe
+# from operator import methodcaller
 from pathlib import Path
-import numpy as np
-from recode import decode_wav_bytes
-from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
+# import numpy as np
+# from recode import decode_wav_bytes
+# from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
 from i2 import Sig
 from front.dag import crudify_funcs, crudify_func_nodes, _crudified_func_nodes
 from meshed import code_to_dag
@@ -60,18 +60,45 @@ def apply_func(model, wf):
 #     itemgetter(0),
 # )
 
-from i2 import include_exclude, rm_params
+from i2 import include_exclude, rm_params, Pipe
+from recode import decode_wav_bytes
 
 
 def get_sound(audio_source):
-    return upload_sound(audio_source, '')[0]
+    return decode_wav_bytes(Path(audio_source).read_bytes())[0]
+
+
+# from operator import methodcaller
+# import numpy as np
+#
+#
+# file_to_bytes = Pipe(Path, methodcaller("read_bytes"))
+#
+# wav_file_to_array = Pipe(
+#     file_to_bytes,
+#     decode_wav_bytes,
+#     itemgetter(0),
+#     np.array,
+#     # np.transpose,
+#     # itemgetter(0),
+# )
+#
+#
+# def get_sound(audio_source):
+#     return wav_file_to_array(audio_source)
+
+
+# def get_sound(audio_source):
+#     import soundfile as sf
+#     return sf.read(audio_source)[0]
+
+
 
 
 func_mapping = dict(
     get_audio=get_sound,
     train=rm_params(
-        # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-        FuncFactory(sml.auto_spectral_anomaly_learner),
+        sml.auto_spectral_anomaly_learner,
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
             'learner',
@@ -90,7 +117,17 @@ audio_anomalies = ch_funcs(
 )
 
 if __name__ == '__main__':
-    source = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
+    import platform
+
+    computer_name = platform.node()
+
+    if computer_name == 'TWHALEN-M03':
+        # source = '/Users/thorwhalen/Dropbox/_odata/oto/proj/Guns/Pistol/Unsupressed/Single Shot/Glock 17 9mm/Glock 17 9mm_Xxsv00000_1.wav'
+        source = '/Users/thorwhalen/Dropbox/_odata/oto/proj/OD/data/sample_wavs/1563212051653.wav'
+
+    else:  # sylvain's
+        source = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
+
     print(Sig(func_mapping['train']))
     mall = dict()
     audio_anomalies(source)
