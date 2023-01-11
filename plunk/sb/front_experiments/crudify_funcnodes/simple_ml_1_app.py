@@ -48,7 +48,7 @@ def audio_anomalies():
 
 # filepath = /Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/train/noise.AirConditioner_2.9.1440000-1600000.wav.23q8e34o.ingestion-6bc8b65f8c-vrv59.wav
 
-file_to_bytes = Pipe(Path, methodcaller('read_bytes'))
+file_to_bytes = Pipe(Path, methodcaller("read_bytes"))
 wav_file_to_array = Pipe(
     file_to_bytes,
     decode_wav_bytes,
@@ -62,7 +62,7 @@ from i2 import include_exclude, rm_params
 
 
 def get_sound(audio_source):
-    return upload_sound(audio_source, '')[0]
+    return upload_sound(audio_source, "")[0]
 
 
 # learner = OutlierModel()
@@ -120,12 +120,12 @@ func_mapping = dict(
         FuncFactory(sml.auto_spectral_anomaly_learner),
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
-            'learner',
-            'chk_size',
-            'chk_step',
-            'n_features',
-            'n_centroids',
-            'log_factor',
+            "learner",
+            "chk_size",
+            "chk_step",
+            "n_features",
+            "n_centroids",
+            "log_factor",
         ],
     ),
     # train=FuncFactory(
@@ -142,7 +142,7 @@ audio_anomalies = ch_funcs(
 
 print(f'{Sig(func_mapping["train"])=}')
 # filepath = '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
-filepath = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
+filepath = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -160,22 +160,22 @@ def mk_pipeline_maker_app_with_mall(
     # mall["wf_store"] = store
     # audio_anomalies = sml.audio_anomalies
 
-    # _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
     # _funcs = _crudified_func_nodes(
     #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
     # )
-    result = crudify_func_nodes(
-        var_nodes='wf model results', dag=audio_anomalies, mall=mall
-    )
+    # result = crudify_func_nodes(
+    #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
+    # )
     # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
-    print(audio_anomalies.synopsis_string())
-    print(mall)
+    # print(audio_anomalies.synopsis_string())
+    # print(mall)
 
     def debug_check_mall():
         st.write(mall)
         return None
 
-    # step1, step2, step3 = _funcs  # remove list
+    step1, step2, step3 = _funcs  # remove list
     # name becomes actually "get_sound"
     # print(f"{step1.__name__ =}")
     # print(f"{step2.__name__ =}")
@@ -192,17 +192,64 @@ def mk_pipeline_maker_app_with_mall(
     # step2a.__name__ = "step2a"
     # from functools import partial
 
-    # step1 = partial(step1, save_name="a_wf")
-    # step1.__name__ = "step1"
+    step1 = partial(step1, save_name="a_wf")
+    step1.__name__ = "step1"
     # #
-    # # step2 = partial(step2, save_name="a_model")
-    # step3.__name__ = "step3"
-    # print(f"{Sig(step2a)=}")
+    step2 = partial(step2, save_name="a_model")
+    step2.__name__ = "step2"
 
+    # step3 = partial(step3, save_name="a_result")
+    step3.__name__ = "step3"
+    print(f"{Sig(step3)=}")
+
+    config = {
+        APP_KEY: {"title": "Data Preparation"},
+        RENDERING_KEY: {
+            "step1": {
+                "execution": {
+                    "inputs": {
+                        "audio_source": {
+                            ELEMENT_KEY: FileUploader,
+                            "type": "wav",
+                            "accept_multiple_files": True,
+                        },
+                    },
+                },
+            },
+            "step2": {
+                "execution": {
+                    "inputs": {
+                        "wf": {
+                            ELEMENT_KEY: SelectBox,
+                            "options": mall["wf_store"],
+                        },
+                    },
+                },
+            },
+            "step3": {
+                # NAME_KEY: "Apply model",
+                "execution": {
+                    # "inputs": {
+                    #     "wf": {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         "options": mall["wf_store"],
+                    #     },
+                    #     # "model": {
+                    #     #     ELEMENT_KEY: SelectBox,
+                    #     #     "options": mall["model_store"],
+                    #     # },
+                    # },
+                    # "output": {
+                    #     ELEMENT_KEY: ArrayPlotter,
+                    # },
+                },
+            },
+        },
+    }
     # config = {
     #     APP_KEY: {"title": "Data Preparation"},
     #     RENDERING_KEY: {
-    #         "step1": {
+    #         "result": {
     #             "execution": {
     #                 "inputs": {
     #                     "audio_source": {
@@ -213,52 +260,18 @@ def mk_pipeline_maker_app_with_mall(
     #                 },
     #             },
     #         },
-    #         "step2a": {
-    #             "execution": {
-    #                 "inputs": {
-    #                     "wf": {
-    #                         ELEMENT_KEY: SelectBox,
-    #                         "options": mall["wf_store"],
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #         "step3": {
-    #             NAME_KEY: "Apply model",
-    #             "execution": {
-    #                 "output": {
-    #                     ELEMENT_KEY: ArrayPlotter,
-    #                 },
-    #             },
-    #         },
     #     },
     # }
-    config = {
-        APP_KEY: {'title': 'Data Preparation'},
-        RENDERING_KEY: {
-            'result': {
-                'execution': {
-                    'inputs': {
-                        'audio_source': {
-                            ELEMENT_KEY: FileUploader,
-                            'type': 'wav',
-                            'accept_multiple_files': True,
-                        },
-                    },
-                },
-            },
-        },
-    }
-    # funcs = [
-    #     step1,
-    #     step2a,
-    #     step3,
-    #     debug_check_mall,
-    # ]
     funcs = [
-        result,
+        step1,
+        step2,
+        step3,
         debug_check_mall,
     ]
+    # funcs = [
+    #     result,
+    #     debug_check_mall,
+    # ]
     # print(f"after config : {Sig(step2a)}")
 
     app = mk_app(funcs, config=config)
@@ -266,11 +279,11 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import streamlit as st
 
     mall = dict(
-        wf_store=dict(),
+        # wf_store=dict(),
         # pipelines=dict(),
         # models_scores=dict(),
     )
