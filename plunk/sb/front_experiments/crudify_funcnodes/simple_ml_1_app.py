@@ -58,7 +58,7 @@ wav_file_to_array = Pipe(
     itemgetter(0),
 )
 
-from i2 import include_exclude, rm_params
+from i2 import rm_params
 
 
 def get_sound(audio_source):
