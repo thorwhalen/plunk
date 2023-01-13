@@ -1,7 +1,6 @@
 from streamlitfront.examples import simple_ml_1 as sml
 from know.boxes import *
-from streamlitfront.elements import FileUploader
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
 from streamlitfront import mk_app, binder as b
 from typing import Mapping
 from dol import Pipe
@@ -10,15 +9,12 @@ from pathlib import Path
 import numpy as np
 from recode import decode_wav_bytes
 from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
-from i2 import Sig
-from front.dag import crudify_funcs, crudify_func_nodes, _crudified_func_nodes
+from i2 import Sig, rm_params
+
+from front.dag import crudify_funcs
 from meshed import code_to_dag
 
-from plunk.sb.front_demo.user_story1.utils.funcs import (
-    learn_apply_model,
-    upload_sound,
-)
-from streamlitfront.elements import SelectBox
+
 from meshed.dag import ch_funcs, ch_func_node_func
 from i2.signatures import _fill_defaults_and_annotations
 
@@ -36,7 +32,7 @@ ch_func_node_func2 = partial(
     ch_func_node_func, compare_func=compare_signatures_by_inserting_defaults
 )
 
-
+# Create a dag
 @code_to_dag
 def audio_anomalies():
     wf = get_audio(audio_source)
@@ -59,12 +55,6 @@ wav_file_to_array = Pipe(
     itemgetter(0),
 )
 
-from i2 import rm_params
-
-
-# def get_sound(audio_source):
-#     return upload_sound(audio_source, "")[0]
-
 
 def get_sound(audio_source):
     return wav_file_to_array(audio_source)
@@ -78,58 +68,9 @@ def view_array(arr_str):
     return np.array(arr_str)
 
 
-# learner = OutlierModel()
-# how to make that field appear correctly?
-# convention: if value is an object, do crudification automatically: make a dict
-# and give a name to it.
-# TODO: names of funcs in the config should be actual names, not strings
-# TODO: at least get some warnings when doing a config (like check args names)
-# name-based routing: if func has this name, do this
-
-# audio_anomalies = audio_anomalies.ch_funcs(
-#     # get_audio=lambda audio_source: wav_file_to_array(audio_source),
-#     get_audio=get_sound,
-#     #     train=lambda wf, learner: auto_spectral_anomaly_learner(wf, learner=learner),
-#     #     train=auto_spectral_anomaly_learner,
-#     # train=include_exclude(
-#     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-#     #     sml.auto_spectral_anomaly_learner,
-#     #     include="wf learner",
-#     #     exclude="learner",
-#     # ),
-#     train=rm_params(
-#         # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-#         FuncFactory(sml.auto_spectral_anomaly_learner),
-#         allow_removal_of_non_defaulted_params=True,
-#         params_to_remove=[
-#             "learner",
-#             "chk_size",
-#             "chk_step",
-#             "n_features",
-#             "n_centroids",
-#             "log_factor",
-#         ],
-#     ),
-#     # train=FuncFactory(
-#     #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-#     #     sml.auto_spectral_anomaly_learner,
-#     #     # include="wf",
-#     #     exclude=("learner",),
-#     # ),
-#     apply=lambda model, wf: model(wf),
-# )
 func_mapping = dict(
     get_audio=get_sound,
-    #     train=lambda wf, learner: auto_spectral_anomaly_learner(wf, learner=learner),
-    #     train=auto_spectral_anomaly_learner,
-    # train=include_exclude(
-    #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-    #     sml.auto_spectral_anomaly_learner,
-    #     include="wf learner",
-    #     exclude="learner",
-    # ),
     train=rm_params(
-        # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
         sml.auto_spectral_anomaly_learner,
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
@@ -141,12 +82,6 @@ func_mapping = dict(
             "log_factor",
         ],
     ),
-    # train=FuncFactory(
-    #     # sml.auto_spectral_anomaly_learner, include="wf learner", exclude=""
-    #     sml.auto_spectral_anomaly_learner,
-    #     # include="wf",
-    #     exclude=("learner",),
-    # ),
     apply=lambda model, wf: model(wf),
     display_results=visualize_results,
 )
@@ -170,20 +105,8 @@ def mk_pipeline_maker_app_with_mall(
     if not b.mall():
         b.mall = mall
     mall = b.mall()
-    store = dict()
-    # mall["wf_store"] = store
-    # audio_anomalies = sml.audio_anomalies
 
     _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
-    # _funcs = _crudified_func_nodes(
-    #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
-    # )
-    # result = crudify_func_nodes(
-    #     var_nodes="wf model results", dag=audio_anomalies, mall=mall
-    # )
-    # it = crudify_funcs(var_nodes="wf", dag=audio_anomalies, mall=mall)
-    # print(audio_anomalies.synopsis_string())
-    # print(mall)
 
     def debug_check_mall():
         st.write(mall)
@@ -194,89 +117,17 @@ def mk_pipeline_maker_app_with_mall(
         return results
 
     step1, step2, step3, step4 = _funcs  # remove list
-    # name becomes actually "get_sound"
-    # print(f"{step1.__name__ =}")
-    # print(f"{step2.__name__ =}")
-    # print(f"{step3.__name__ =}")
-
-    # step2 = FuncFactory(
-    #     step2, exclude=("learner",)
-    # )  # when you want to not display some arg
-    # step2a = rm_params(step2, params_to_remove=("learner",))
-    # # print(f"name after param removal: {step2a.__name__}")
-    # print(Sig(step2))
-    # # step2 = include_exclude(step2, exclude=("learner",))
-
-    # step2a.__name__ = "step2a"
-    # from functools import partial
-    print(f"{_funcs}=")
-
-    # step1 = partial(
-    #     step1, save_name="a_wf"
-    # )  # TODO: is __name__ necessary, should crudify_funcs do it?
-    # step1.__name__ = "step1"
-    #
-    # step2 = partial(step2, save_name="a_model")
-    # step2.__name__ = "step2"
 
     step3 = partial(step3, save_name="a_result")
     step3.__name__ = "step3"
     print(f"{Sig(step3)=}")
 
-    # step4.__name__ = "step4"
-    # print(f"{Sig(step4)=}")
-
     config = {
         APP_KEY: {"title": "Data Preparation"},
         RENDERING_KEY: {
-            # "step1": {
-            #     "execution": {
-            #         "inputs": {
-            #             "audio_source": {
-            #                 ELEMENT_KEY: FileUploader,
-            #                 "type": "wav",
-            #                 "accept_multiple_files": True,
-            #             },
-            #         },
-            #     },
-            # },
-            # "step2": {
-            #     "execution": {
-            #         "inputs": {
-            #             "wf": {
-            #                 ELEMENT_KEY: SelectBox,
-            #                 "options": mall["wf_store"],
-            #             },
-            #         },
-            #     },
-            # },
-            # "step3": {
-            #     # NAME_KEY: "Apply model",
-            #     "execution": {
-            #         # "inputs": {
-            #         #     "wf": {
-            #         #         ELEMENT_KEY: SelectBox,
-            #         #         "options": mall["wf_store"],
-            #         #     },
-            #         #     "model": {
-            #         #         ELEMENT_KEY: SelectBox,
-            #         #         "options": mall["model_store"],
-            #         #     },
-            #         # },
-            #         "output": {
-            #             ELEMENT_KEY: ArrayPlotter,
-            #         },
-            #     },
-            # },
             "visualize_results": {
                 # NAME_KEY: "Apply model",
                 "execution": {
-                    # "inputs": {
-                    #     "key": {
-                    #         ELEMENT_KEY: SelectBox,
-                    #         "options": list(mall["results_store"].keys()),
-                    #     },
-                    # },
                     "output": {
                         ELEMENT_KEY: ArrayPlotter,
                     },
@@ -284,22 +135,7 @@ def mk_pipeline_maker_app_with_mall(
             },
         },
     }
-    # config = {
-    #     APP_KEY: {"title": "Data Preparation"},
-    #     RENDERING_KEY: {
-    #         "result": {
-    #             "execution": {
-    #                 "inputs": {
-    #                     "audio_source": {
-    #                         ELEMENT_KEY: FileUploader,
-    #                         "type": "wav",
-    #                         "accept_multiple_files": True,
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #     },
-    # }
+
     funcs = [
         step1,
         step2,
@@ -308,11 +144,6 @@ def mk_pipeline_maker_app_with_mall(
         # result_viewer,
         debug_check_mall,
     ]
-    # funcs = [
-    #     result,
-    #     debug_check_mall,
-    # ]
-    # print(f"after config : {Sig(step2a)}")
 
     app = mk_app(funcs, config=config)
 
@@ -322,11 +153,7 @@ def mk_pipeline_maker_app_with_mall(
 if __name__ == "__main__":
     import streamlit as st
 
-    mall = dict(
-        # wf_store=dict(),
-        # pipelines=dict(),
-        # models_scores=dict(),
-    )
+    mall = dict()
 
     app = mk_pipeline_maker_app_with_mall(mall)
 
