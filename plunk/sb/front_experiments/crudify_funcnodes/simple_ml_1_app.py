@@ -44,7 +44,7 @@ def audio_anomalies():
     model = train(wf)
 
     results = apply(model, wf)
-    # vis = display_results(results)
+    view = display_results(results)
 
 
 # filepath = /Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/train/noise.AirConditioner_2.9.1440000-1600000.wav.23q8e34o.ingestion-6bc8b65f8c-vrv59.wav
@@ -148,6 +148,7 @@ func_mapping = dict(
     #     exclude=("learner",),
     # ),
     apply=lambda model, wf: model(wf),
+    display_results=visualize_results,
 )
 audio_anomalies = ch_funcs(
     audio_anomalies, func_mapping=func_mapping, ch_func_node_func=ch_func_node_func2
@@ -192,7 +193,7 @@ def mk_pipeline_maker_app_with_mall(
         results = mall["results_store"][key]
         return results
 
-    step1, step2, step3 = _funcs  # remove list
+    step1, step2, step3, step4 = _funcs  # remove list
     # name becomes actually "get_sound"
     # print(f"{step1.__name__ =}")
     # print(f"{step2.__name__ =}")
@@ -208,18 +209,22 @@ def mk_pipeline_maker_app_with_mall(
 
     # step2a.__name__ = "step2a"
     # from functools import partial
+    print(f"{_funcs}=")
 
-    step1 = partial(
-        step1, save_name="a_wf"
-    )  # TODO: is __name__ necessary, should crudify_funcs do it?
-    step1.__name__ = "step1"
-    # #
-    step2 = partial(step2, save_name="a_model")
-    step2.__name__ = "step2"
+    # step1 = partial(
+    #     step1, save_name="a_wf"
+    # )  # TODO: is __name__ necessary, should crudify_funcs do it?
+    # step1.__name__ = "step1"
+    #
+    # step2 = partial(step2, save_name="a_model")
+    # step2.__name__ = "step2"
 
-    # step3 = partial(step3, save_name="a_result")
+    step3 = partial(step3, save_name="a_result")
     step3.__name__ = "step3"
     print(f"{Sig(step3)=}")
+
+    # step4.__name__ = "step4"
+    # print(f"{Sig(step4)=}")
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -263,15 +268,15 @@ def mk_pipeline_maker_app_with_mall(
             #         },
             #     },
             # },
-            "result_viewer": {
+            "visualize_results": {
                 # NAME_KEY: "Apply model",
                 "execution": {
-                    "inputs": {
-                        "key": {
-                            ELEMENT_KEY: SelectBox,
-                            "options": list(mall["results_store"].keys()),
-                        },
-                    },
+                    # "inputs": {
+                    #     "key": {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         "options": list(mall["results_store"].keys()),
+                    #     },
+                    # },
                     "output": {
                         ELEMENT_KEY: ArrayPlotter,
                     },
@@ -299,7 +304,8 @@ def mk_pipeline_maker_app_with_mall(
         step1,
         step2,
         step3,
-        result_viewer,
+        step4,
+        # result_viewer,
         debug_check_mall,
     ]
     # funcs = [
