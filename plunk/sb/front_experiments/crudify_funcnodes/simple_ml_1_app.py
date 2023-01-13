@@ -10,6 +10,7 @@ import numpy as np
 from recode import decode_wav_bytes
 from plunk.sb.front_demo.user_story1.components.components import ArrayPlotter
 from i2 import Sig, rm_params
+from i2.util import PicklableLambda
 
 from front.dag import crudify_funcs
 from meshed import code_to_dag
@@ -82,7 +83,7 @@ func_mapping = dict(
             "log_factor",
         ],
     ),
-    apply=lambda model, wf: model(wf),
+    apply=PicklableLambda(lambda model, wf: model(wf), name="step3"),
     display_results=visualize_results,
 )
 audio_anomalies = ch_funcs(
@@ -118,9 +119,9 @@ def mk_pipeline_maker_app_with_mall(
 
     step1, step2, step3, step4 = _funcs  # remove list
 
-    step3 = partial(step3, save_name="a_result")
-    step3.__name__ = "step3"
-    print(f"{Sig(step3)=}")
+    # step3 = partial(step3, save_name="a_result")
+    # step3.__name__ = "step3"
+    # print(f"{Sig(step3)=}")
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
