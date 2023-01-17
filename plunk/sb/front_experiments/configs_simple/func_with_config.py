@@ -82,12 +82,20 @@ dflt_template["execution.output"] = {
 #             print(func.__name__)
 
 
-@dataclass
 class FuncWithConfigs:
-    func: Callable = None
-    label: str = None
-    _configs = dflt_template
-    overwrites = ()
+    def __init__(
+        self,
+        func: Callable = None,
+        label: str = None,
+        overwrite=(),
+        extra_configs=dflt_template,
+        # extra_configs={},
+    ):
+        self.func = func
+        self.label = label
+        self.overwrite = overwrite
+        self._configs = extra_configs
+
     # param_to_mall_map: Dict[str, str] = ()
     # output_store_name: str = None
 
@@ -98,19 +106,23 @@ class FuncWithConfigs:
         return s
 
     def mk_configs(self):  # list of KV or
-        overwrites = dict(self.overwrites)
+        overwrites = dict(self.overwrite)
         self._configs.update(overwrites)
-        return self.configs
+        return {str(self.func.__name__): todict(self.configs)}
 
-    def to_dict(self):
-        return todict(self.configs)
+    # def to_dict(self):
+    #     return todict(self.configs)
 
     __call__ = mk_configs
 
 
-def process_func(func):
-    if isinstance(func, FuncWithConfigs):
-        pass
+def process_func(obj):
+    additional_config = {}
+    func = obj
+    if isinstance(obj, FuncWithConfigs):
+        additional_config = obj()
+        func = obj.func
+    return func, additional_config
 
 
 if __name__ == "__main__":  # put in a module in plunk and make it a test
@@ -119,21 +131,22 @@ if __name__ == "__main__":  # put in a module in plunk and make it a test
 
     upload_component = FuncWithConfigs(
         func=upload_sound,
-        overwrites=(
-            {
-                "execution.inputs.train_audio": {
-                    ELEMENT_KEY: FileUploader,
-                    "type": "wav",
-                    "accept_multiple_files": True,
-                },
+        overwrite={
+            "execution.inputs.train_audio": {
+                ELEMENT_KEY: FileUploader,
+                "type": "wav",
+                "accept_multiple_files": True,
             },
-        ),
+        },
     )  # change the name, don't use component FuncWithConfig
-    pprint(upload_component.to_dict())
+    # pprint(upload_component.to_dict())
     result = upload_component()
-    pprint(upload_component.to_dict())
+    # pprint(result)
+    pprint(result)
     # config
     # upload_sound (avec FileUploader)
     # upload_sound (avec Recorder)
     # config:
     # mk_config() #gather all configs for all components , le faire ds AppMaker
+    _, config = process_func(upload_component)
+    pprint(config)
