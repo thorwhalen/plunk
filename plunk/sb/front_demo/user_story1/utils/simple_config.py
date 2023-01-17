@@ -4,11 +4,13 @@ from front import ELEMENT_KEY
 from streamlitfront.elements import SuccessNotification
 from i2 import Sig
 from streamlitfront.elements import FileUploader
-
+from meshed import DAG
 from collections import defaultdict, ChainMap
 import collections.abc
 from dol.paths import KeyPath
 from dol import Store
+from front.elements import FrontComponentBase
+import streamlit as st
 
 # recursive defaultdict
 from collections import defaultdict
@@ -52,7 +54,7 @@ recursivedict = lambda: defaultdict(recursivedict)
 
 def mk_dotted_recursive_dict():
     d = recursivedict()
-    d = KeyPath('.')(d)
+    d = KeyPath(".")(d)
     return d
 
 
@@ -65,16 +67,27 @@ def todict(d):
 
 
 dflt_template = mk_dotted_recursive_dict()
-dflt_template['execution.output'] = {
+dflt_template["execution.output"] = {
     ELEMENT_KEY: SuccessNotification,
 }
 
 
 @dataclass
-class Component:
+class ViewFuncWithConfigs(FrontComponentBase):
+    use_container_width: bool = False
+
+    def render(self):
+        with st.expander(self.name, True):
+            func: FuncWithConfigs = self.obj
+            print(func.__name__)
+
+
+@dataclass
+class FuncWithConfigs:
     func: Callable = None
     label: str = None
     _configs = dflt_template
+    overwrites = ()
     # param_to_mall_map: Dict[str, str] = ()
     # output_store_name: str = None
 
@@ -84,8 +97,8 @@ class Component:
 
         return s
 
-    def mk_configs(self, overwrites=()):  # list of KV or
-        overwrites = dict(overwrites)
+    def mk_configs(self):  # list of KV or
+        overwrites = dict(self.overwrites)
         self._configs.update(overwrites)
         return self.configs
 
@@ -95,19 +108,32 @@ class Component:
     __call__ = mk_configs
 
 
-if __name__ == '__main__':  # put in a module in plunk and make it a test
+def process_func(func):
+    if isinstance(func, FuncWithConfigs):
+        pass
+
+
+if __name__ == "__main__":  # put in a module in plunk and make it a test
     from plunk.sb.front_demo.user_story1.utils.funcs import upload_sound
     from pprint import pprint
 
-    upload_component = Component(func=upload_sound)
-    pprint(upload_component.to_dict())
-    result = upload_component.mk_configs(
-        {
-            'execution.inputs.train_audio': {
-                ELEMENT_KEY: FileUploader,
-                'type': 'wav',
-                'accept_multiple_files': True,
+    upload_component = FuncWithConfigs(
+        func=upload_sound,
+        overwrites=(
+            {
+                "execution.inputs.train_audio": {
+                    ELEMENT_KEY: FileUploader,
+                    "type": "wav",
+                    "accept_multiple_files": True,
+                },
             },
-        }
-    )
+        ),
+    )  # change the name, don't use component FuncWithConfig
     pprint(upload_component.to_dict())
+    result = upload_component()
+    pprint(upload_component.to_dict())
+    # config
+    # upload_sound (avec FileUploader)
+    # upload_sound (avec Recorder)
+    # config:
+    # mk_config() #gather all configs for all components , le faire ds AppMaker
