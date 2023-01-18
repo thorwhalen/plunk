@@ -41,9 +41,15 @@ def zero_crossing_ratio(wf):
     return sum(np.diff(np.array(wf) > 0).astype(int)) / (len(wf) - 1)
 
 
+@if_not_none
+def mean_score(scores):
+    return np.mean(scores)
+
+
 GRAPH_TYPES = {
     'volume': {'function': volume, 'plot': 'line'},
     'zero_crossing_ratio': {'function': zero_crossing_ratio, 'plot': 'line'},
+    'mean_score': {'function': mean_score, 'plot': 'line'},
 }
 
 
@@ -63,6 +69,7 @@ def audio_it(
     seconds_to_keep_in_stream_buffer=60,
     graph_types=(*GRAPH_TYPES,),
     audio_store: BulkStore = None,
+    **additional_components,
 ):
     input_device_index = get_input_device_index(input_device=input_device)
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
@@ -108,6 +115,7 @@ def audio_it(
         _audio_stop=stop_if_audio_not_running,
         **store_components,
         **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
+        **additional_components,
     )
 
 
@@ -144,10 +152,16 @@ DATA_KEYS = (
 
 
 @if_not_none
-def post_read_data(data) -> Optional[dict]:
+def post_read_data(data, data_keys=DATA_KEYS) -> Optional[dict]:
+    """Used by stream2py to filter data
+
+    :param data: SourceReader read data
+    :param data_keys: list of keys to keep from SlabsIter data dict
+    :return:
+    """
     if data.get('timestamp') is None:
         return None
-    formatted_data = {k: data.get(k) for k in DATA_KEYS}
+    formatted_data = {k: data.get(k) for k in data_keys}
     return formatted_data
 
 
@@ -159,6 +173,7 @@ def mk_live_graph_data_buffer(
     frames_per_buffer=44100,
     seconds_to_keep_in_stream_buffer=60,
     graph_types=(*GRAPH_TYPES,),
+    **additional_components,
 ) -> StreamBuffer:
     maxlen = PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
         buffer_size_seconds=seconds_to_keep_in_stream_buffer,
@@ -174,19 +189,28 @@ def mk_live_graph_data_buffer(
             frames_per_buffer,
             seconds_to_keep_in_stream_buffer,
             graph_types,
+            **additional_components,
         ),
         key='timestamp',
         post_read=post_read_data,
     ).stream_buffer(maxlen)
 
 
-def _test_audio_it(input_device=None, graph_types=(*GRAPH_TYPES,), test_length=22):
+def _test_audio_it(
+    input_device=None,
+    graph_types=(*GRAPH_TYPES,),
+    test_length=22,
+    **additional_components,
+):
     with TemporaryDirectory() as tmpdirname:
         audio_store = WavFileStore(rootdir=tmpdirname)
 
         i = 0
         with audio_it(
-            input_device=input_device, graph_types=graph_types, audio_store=audio_store
+            input_device=input_device,
+            graph_types=graph_types,
+            audio_store=audio_store,
+            **additional_components,
         ) as a_it:
             for a in a_it:
                 if a.get('audio'):
