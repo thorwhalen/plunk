@@ -150,3 +150,7 @@ if __name__ == "__main__":  # put in a module in plunk and make it a test
     # mk_config() #gather all configs for all components , le faire ds AppMaker
     _, config = process_func(upload_component)
     pprint(config)
+
+
+# Notes:
+# 1) how to "intercept" the final config
