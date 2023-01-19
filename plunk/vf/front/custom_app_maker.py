@@ -119,14 +119,11 @@ Rule = Tuple[Cond, Then]
 Rules = Iterable[Rule]
 
 # Note: We could iterate over objs or over rules. Context tells what's best.
-"""
-typical use is to define rules and apply to objs like so
-```
-from functools import partial
-singular_find_render_keys = partial(mk_find_render_keys, rules=rules)  # fix rules
-find_render_keys = partial(map, singular_find_render_keys)  # apply to iterable
-```
-"""
+# typical use is to define rules and apply to objs like so
+
+# >>> from functools import partial
+# >>> singular_find_render_keys = partial(mk_find_render_keys, rules=rules)  # fix rules
+# >>> find_render_keys = partial(map, singular_find_render_keys)  # apply to iterable
 
 
 def mk_find_render_keys(obj: Obj, rules: Rules) -> Iterable[Output]:
