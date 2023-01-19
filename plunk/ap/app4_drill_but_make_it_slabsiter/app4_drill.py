@@ -163,7 +163,9 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         param_to_mall_map=dict(
-            preprocess_pipeline='pipelines', fitted_model='learned_models',
+            tagged_data='sound_output',
+            preprocess_pipeline='pipelines',
+            fitted_model='learned_models',
         ),
         output_store='models_scores',
     )
