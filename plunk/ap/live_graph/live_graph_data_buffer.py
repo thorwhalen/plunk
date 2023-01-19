@@ -13,35 +13,28 @@ from typing import Any, Callable, Union, Optional
 import numpy as np
 from audiostream2py import PyAudioSourceReader, get_input_device_index
 from know.base import SlabsIter, IteratorExit
-from know.examples.keyboard_and_audio import only_if
 from know.util import ContextualFunc
 from recode import mk_codec
 from stream2py import SourceReader, StreamBuffer
 from stream2py.utility.typing_hints import ComparableType
 
 from plunk.ap.live_graph.audio_store import BulkStore, WavFileStore, N_TO_BULK
+from plunk.ap.snippets import if_no_none
 
 codec = mk_codec('h')
 
 
-def if_not_none(func, sentinel=None):
-    def _is_none_dict(**kw):
-        return not all(v is None for k, v in kw.items())
-
-    return only_if(_is_none_dict, sentinel=sentinel)(func)
-
-
-@if_not_none
+@if_no_none
 def volume(wf):
     return np.std(wf)
 
 
-@if_not_none
+@if_no_none
 def zero_crossing_ratio(wf):
     return sum(np.diff(np.array(wf) > 0).astype(int)) / (len(wf) - 1)
 
 
-@if_not_none
+@if_no_none
 def mean_score(scores):
     return np.mean(scores)
 
@@ -53,7 +46,7 @@ GRAPH_TYPES = {
 }
 
 
-@if_not_none
+@if_no_none
 def audio_to_wf(audio):
     _, wf_bytes, *_ = audio
     wf = codec.decode(wf_bytes)
@@ -90,7 +83,7 @@ def audio_it(
     store_components = {}
     if audio_store is not None:
 
-        @if_not_none
+        @if_no_none
         def _append(timestamp, wf):
             return audio_store.append({'timestamp': timestamp, 'wf': wf})
 
@@ -103,7 +96,7 @@ def audio_it(
         if audio_reader_instance is not None and not audio_reader_instance.is_running:
             raise IteratorExit("audio isn't running anymore!")
 
-    @if_not_none
+    @if_no_none
     def get_timestamp(audio):
         return audio[0]
 
@@ -114,8 +107,8 @@ def audio_it(
         audio_reader_instance=lambda: audio_buffer,
         _audio_stop=stop_if_audio_not_running,
         **store_components,
-        **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
         **additional_components,
+        **{k: v.get('function') for k, v in GRAPH_TYPES.items() if k in graph_types},
     )
 
 
@@ -151,7 +144,7 @@ DATA_KEYS = (
 )
 
 
-@if_not_none
+@if_no_none
 def post_read_data(data, data_keys=DATA_KEYS) -> Optional[dict]:
     """Used by stream2py to filter data
 

@@ -7,15 +7,15 @@ from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY
 
 from front.crude import Crudifier
 
-from streamlitfront import mk_app
-from streamlitfront.elements import SuccessNotification
+from streamlitfront import mk_app, binder as b
+from streamlitfront.elements import SuccessNotification, SelectBox
 from streamlitfront.elements import FileUploader
 
 from plunk.ap.store_explorer.store_explorer_element import (
-    get_mall,
     StoreExplorerOutput,
     StoreExplorerInput,
 )
+from plunk.ap.snippets import get_mall
 
 
 def tuple_wrap(f):
@@ -29,14 +29,22 @@ def tuple_wrap(f):
 def mk_pipeline_maker_app_with_mall(mall: dict):
     mall = get_mall(mall)
 
+    def on_select_mall_name():
+        print(f'{b.selected_mall_name()=}')
+        b.selected_mall.set(mall[b.selected_mall_name()])
+
+    if not b.mall_names():
+        b.mall_names = lambda: list(mall)
+        b.selected_mall_name.set(next(iter(b.mall_names()())))
+        on_select_mall_name()
     crudifier = partial(Crudifier, mall=mall)
 
     @crudifier(output_store='sound_output')
     def upload_sound(train_audio: list, tag: str):
         return train_audio, tag
 
-    def explore_mall(depth_keys: Iterable = ()):
-        return depth_keys, reduce(lambda o, k: o[k], depth_keys, mall)
+    def explore_mall(mall_name, depth_keys: Iterable = ()):
+        return depth_keys, reduce(lambda o, k: o[k], depth_keys, mall[mall_name])
 
     @tuple_wrap
     def search_mall(
@@ -106,7 +114,16 @@ def mk_pipeline_maker_app_with_mall(mall: dict):
             'explore_mall': {
                 'execution': {
                     'inputs': {
-                        'depth_keys': {ELEMENT_KEY: StoreExplorerInput, 'mall': mall},
+                        'mall_name': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': b.mall_names(),
+                            'value': b.selected_mall_name,
+                            'on_value_change': on_select_mall_name,
+                        },
+                        'depth_keys': {
+                            ELEMENT_KEY: StoreExplorerInput,
+                            'mall': b.selected_mall,
+                        },
                     },
                     'output': {
                         ELEMENT_KEY: StoreExplorerOutput,
