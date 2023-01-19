@@ -12,7 +12,7 @@ import streamlit as st
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, Crudifier, NAME_KEY
 from front.elements import OutputBase
 import matplotlib.pyplot as plt
-from plunk.ap.snippets import prefill_deque_with_value
+from plunk.ap.snippets import prefill_deque_with_value, get_mall
 from stream2py import StreamBuffer, BufferReader
 
 from streamlitfront import mk_app, binder as b
@@ -23,10 +23,8 @@ from plunk.ap.live_graph.live_graph_data_buffer import (
     GRAPH_TYPES,
 )
 
-if not b.mall():
-    b.mall = dict(source=None,)
+mall = get_mall(dict(source=None,))
 
-mall = b.mall()
 if not b.input_devices():
     b.input_devices = PyAudioSourceReader.list_recording_devices()
 crudifier = partial(Crudifier, mall=mall)

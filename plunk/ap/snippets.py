@@ -2,6 +2,17 @@ import timeit
 from functools import partial
 from collections import deque
 
+from streamlitfront import binder as b
+
+
+def get_mall(defaults: dict):
+    if not b.mall():
+        b.mall = defaults
+    m = b.mall()
+    if not all(k in m for k in defaults):
+        m.update(defaults)
+    return m
+
 
 def only_if(locals_condition, sentinel=None):
     """Taken from: from know.examples.keyboard_and_audio import only_if

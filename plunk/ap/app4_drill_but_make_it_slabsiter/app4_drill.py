@@ -28,7 +28,16 @@ import streamlit as st
 import soundfile as sf
 from io import BytesIO
 
-from plunk.ap.app4_drill_but_make_it_slabsiter.si_model import dill_files
+from plunk.ap.app4_drill_but_make_it_slabsiter.si_model import (
+    dill_files,
+    si_apply_fitted_model,
+)
+from plunk.ap.live_graph.live_graph_data_buffer import (
+    mk_live_graph_data_buffer,
+    GRAPH_TYPES,
+)
+from plunk.ap.live_graph.live_graph_streamlitfront import stop_stream, DataGraph
+from plunk.ap.snippets import get_mall
 from plunk.sb.front_demo.user_story1.components.components import (
     AudioArrayDisplay,
     GraphOutput,
@@ -96,10 +105,7 @@ def mk_pipeline_maker_app_with_mall(
     learned_models=None,
     models_scores=None,
 ):
-
-    if not b.mall():
-        b.mall = mall
-    mall = b.mall()
+    mall = get_mall(mall)
     if not b.selected_step_factory():
         b.selected_step_factory = 'chunker'  # TODO make this dynamic
 
@@ -157,9 +163,7 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         param_to_mall_map=dict(
-            tagged_data='sound_output',
-            preprocess_pipeline='pipelines',
-            fitted_model='learned_models',
+            preprocess_pipeline='pipelines', fitted_model='learned_models',
         ),
         output_store='models_scores',
     )
@@ -219,6 +223,37 @@ def mk_pipeline_maker_app_with_mall(
         )
         if selected_step_factory:
             return Sig(selected_step_factory)
+
+    @crudifier(
+        param_to_mall_map=dict(
+            preprocess_pipeline='pipelines', fitted_model='learned_models',
+        ),
+        output_store='source',
+    )
+    def live_apply_fitted_model(
+        preprocess_pipeline,
+        fitted_model,
+        input_device=None,
+        rate=44100,
+        width=2,
+        channels=1,
+        frames_per_buffer=44100,
+        seconds_to_keep_in_stream_buffer=60,
+        graph_types='volume',
+    ):
+        stop_stream()
+        source = mk_live_graph_data_buffer(
+            input_device,
+            rate,
+            width,
+            channels,
+            frames_per_buffer,
+            seconds_to_keep_in_stream_buffer,
+            graph_types,
+            **si_apply_fitted_model(preprocess_pipeline, fitted_model),
+        )
+        source.start()
+        return source
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -306,6 +341,23 @@ def mk_pipeline_maker_app_with_mall(
                 NAME_KEY: 'Apply model',
                 'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
+            'live_apply_fitted_model': {
+                NAME_KEY: 'Apply model with Live Data',
+                'description': {'content': 'Configure soundcard for data stream'},
+                'execution': {
+                    'inputs': {
+                        'input_device': {
+                            ELEMENT_KEY: SelectBox,
+                            'options': b.input_devices(),
+                        },
+                        'graph_types': {  # TODO option to select more than one graph type
+                            ELEMENT_KEY: SelectBox,
+                            'options': list(GRAPH_TYPES),
+                        },
+                    },
+                    'output': {ELEMENT_KEY: DataGraph},
+                },
+            },
         },
     }
 
@@ -319,6 +371,7 @@ def mk_pipeline_maker_app_with_mall(
         # exec_pipeline,
         visualize_pipeline,
         visualize_scores,
+        live_apply_fitted_model,
     ]
     app = mk_app(funcs, config=config)
 
@@ -340,6 +393,7 @@ mall = dict(
     exec_outputs=dict(),
     learned_models=dict(),
     models_scores=dict(),
+    source=None,
 )
 
 # crudifier = partial(prepare_for_crude_dispatch, mall=mall)
