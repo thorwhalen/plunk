@@ -28,6 +28,10 @@ import streamlit as st
 import soundfile as sf
 from io import BytesIO
 
+from plunk.ap.app4_drill_but_make_it_slabsiter.audio_store import (
+    upload_files_store,
+    STORE,
+)
 from plunk.ap.app4_drill_but_make_it_slabsiter.si_model import (
     dill_files,
     si_apply_fitted_model,
@@ -202,6 +206,7 @@ def mk_pipeline_maker_app_with_mall(
 
         return scores, intervals
 
+    @upload_files_store
     @crudifier(output_store='sound_output')
     def upload_sound(train_audio: List[WaveForm], tag: str):
         # sound, tag = train_audio, tag
@@ -382,7 +387,7 @@ def mk_pipeline_maker_app_with_mall(
 
 mall = dict(
     # Factory Input Stores
-    sound_output=dict(),
+    sound_output=dict(**STORE),
     step_factories=dict(
         # ML
         chunker=FuncFactory(simple_chunker),
