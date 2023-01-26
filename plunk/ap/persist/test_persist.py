@@ -43,21 +43,23 @@ def test_ctor():
 
 
 def test_serialize_function_call():
-    _functions = [
-        (add, (1, 2), {}),
-        (add, (), {'a': 1.3, 'b': 2.6}),
-        (add, (), {'a': list(range(10)), 'b': list(range(10, 20))}),
-        (add, (), {'a': 'hello ', 'b': 'world'}),
-        (add, (), {'a': TestClass(1), 'b': TestClass(2)}),
-        (add, (), {'a': TestClass([TestClass(1)]), 'b': TestClass([TestClass(2)])}),
+    _args_kwargs = [
+        ((1, 2), {}),
+        ((), {'a': 1.3, 'b': 2.6}),
+        ((), {'a': list(range(10)), 'b': list(range(10, 20))}),
+        ((), {'a': 'hello', 'b': 'world'}),
+        ((), {'a': TestClass(1), 'b': TestClass(2)}),
+        ((), {'a': TestClass([TestClass(1)]), 'b': TestClass([TestClass(2)])}),
     ]
 
     print('\nTest Persist.serialize_function_call()')
 
-    for f, a, k in _functions:
-        serialized = Persist.serialize_function_call(a, k, f)
+    for a, k in _args_kwargs:
+        serialized = Persist.serialize_function_call(
+            a, k, function=add, validate_conversion=True
+        )
         print('\nactual      : ', end='')
-        actual = f(*a, **k)
+        actual = add(*a, **k)
         print('deserialized: ', end='')
         deserialized = Persist.deserialize(serialized)
 
@@ -71,8 +73,10 @@ def test_serialize_function_call():
 
     counter.count = 0
 
-    persisted_add = Persist.function_call(add, key_getter=counter, store=dict_store)
-    for i, (f, a, k) in enumerate(_functions):
+    persisted_add = Persist.function_call(
+        add, key_getter=counter, store=dict_store, validate_conversion=True
+    )
+    for i, (a, k) in enumerate(_args_kwargs):
         print('\nactual      : ', end='')
         actual = persisted_add(*a, **k)
         serialized = dict_store[i]
