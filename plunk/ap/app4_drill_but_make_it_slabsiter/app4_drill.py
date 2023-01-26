@@ -2,6 +2,7 @@
 An app that loads either a wav file from local folder or records a sound
 and visualizes the resulting numpy array
 """
+from pathlib import Path
 from typing import Mapping
 from know.boxes import *
 from functools import partial
@@ -28,14 +29,16 @@ import streamlit as st
 import soundfile as sf
 from io import BytesIO
 
-from plunk.ap.app4_drill_but_make_it_slabsiter.audio_store import (
+from plunk.ap.app4_drill_but_make_it_slabsiter.file_store import (
     upload_files_store,
     STORE,
+    UploadFilesStore,
 )
 from plunk.ap.app4_drill_but_make_it_slabsiter.si_model import (
     dill_files,
     si_apply_fitted_model,
 )
+from plunk.ap.live_graph.audio_store import WavFileStore
 from plunk.ap.live_graph.live_graph_data_buffer import (
     mk_live_graph_data_buffer,
     GRAPH_TYPES,
@@ -152,6 +155,7 @@ def mk_pipeline_maker_app_with_mall(
         ),
         output_store='learned_models',
     )
+    @UploadFilesStore.resolve_item_getter_args
     def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=5):
 
         sound, tag = tagged_sounds_to_single_array(*tagged_data)
@@ -249,6 +253,10 @@ def mk_pipeline_maker_app_with_mall(
         graph_types='volume',
     ):
         stop_stream()
+        audio_store_rootdir = Path.cwd() / 'audio_store'
+        audio_store_rootdir.mkdir(parents=True, exist_ok=True)
+        audio_store = WavFileStore(rootdir=str(audio_store_rootdir))
+
         source = mk_live_graph_data_buffer(
             input_device,
             rate,
@@ -257,6 +265,7 @@ def mk_pipeline_maker_app_with_mall(
             frames_per_buffer,
             seconds_to_keep_in_stream_buffer,
             graph_types,
+            audio_store=audio_store,
             **si_apply_fitted_model(preprocess_pipeline, fitted_model),
         )
         source.start()
@@ -387,7 +396,7 @@ def mk_pipeline_maker_app_with_mall(
 
 mall = dict(
     # Factory Input Stores
-    sound_output=dict(**STORE),
+    sound_output={k: v for k, v in STORE.getter_items()},
     step_factories=dict(
         # ML
         chunker=FuncFactory(simple_chunker),
