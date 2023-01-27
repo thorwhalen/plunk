@@ -1,12 +1,13 @@
 import json
-from dataclasses import dataclass
 from functools import wraps
 from typing import Protocol, runtime_checkable, Hashable, Any, Union
 
+from boltons.typeutils import make_sentinel
 from py2json import Ctor
-from py2json.ctor import classproperty
 
 Serialized = Union[bytes, str]
+
+NOT_SET = make_sentinel('Not Set', 'Not Set')
 
 
 @runtime_checkable
@@ -100,7 +101,12 @@ class Persist:
 
     @classmethod
     def serialize_function_call(
-        cls, args, kwargs, function, return_value=None, validate_conversion=False
+        cls,
+        args,
+        kwargs,
+        function=NOT_SET,
+        return_value=None,
+        validate_conversion=False,
     ) -> Serialized:
         """Serializer method
 
@@ -111,6 +117,10 @@ class Persist:
         :param validate_conversion:
         :return:
         """
+        if function is NOT_SET:
+            raise ValueError(
+                'Persist.serialize_function_call requires function to be set'
+            )
         _a = cls.ctor.deconstruct(args, validate_conversion)
         _kw = cls.ctor.deconstruct(kwargs, validate_conversion)
         ctor_dict = cls.ctor.to_ctor_dict(constructor=function, args=_a, kwargs=_kw)
@@ -138,7 +148,7 @@ class Persist:
         return cls.any(
             func,
             key_getter=key_getter,
-            serializer=cls.serialize_function_call,
+            serializer=cls.serialize_return_value,
             store=store,
             validate_conversion=validate_conversion,
         )
@@ -149,7 +159,7 @@ class Persist:
         args=None,
         kwargs=None,
         function=None,
-        return_value=None,
+        return_value=NOT_SET,
         validate_conversion=False,
     ) -> Serialized:
         """Serializer method
@@ -161,6 +171,10 @@ class Persist:
         :param validate_conversion:
         :return:
         """
+        if return_value is NOT_SET:
+            raise ValueError(
+                'Persist.serialize_return_value requires return_value to be set'
+            )
         ctor_jdict = cls.ctor.deconstruct(return_value, validate_conversion)
         return json.dumps(ctor_jdict)
 
@@ -168,6 +182,3 @@ class Persist:
     def deserialize(cls, serialized: Serialized):
         jdict = json.loads(serialized)
         return cls.ctor.construct(jdict)
-
-    def _default_key_getter(self):
-        pass
