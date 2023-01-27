@@ -23,6 +23,15 @@ from tabled.html import (
 DFLT_EXT_SPECS = {}
 
 
+def set_of_concatenated_col_names(store):
+    col_names = []
+    for key in store:
+        col_name = "-".join(list(store[key].columns))
+        col_names.append(col_name)
+
+    return set(col_names)
+
+
 def df_from_json(data, ext_specs={"orient": "index"}, **kwargs):
     """Get a dataframe from a (data, ext) pair"""
 
