@@ -1,4 +1,5 @@
-# copy from tabled
+# TODO : refactor tabled to include the changes below
+# the class below is a copy from tabled
 # the json access is not very convenient the way it is
 
 """
@@ -10,8 +11,10 @@ import os
 import pickle
 
 import pandas as pd
-
+from functools import partial
 from py2store.stores.local_store import LocalBinaryStore
+from dol import wrap_kvs
+from lined import Pipe
 
 
 DFLT_EXT_SPECS = {}
@@ -49,6 +52,8 @@ def df_from_data_given_ext(data, ext, ext_specs=None, **kwargs):
         return pd.read_csv(data, **kwargs)
     elif ext in {"json"}:
         kwargs = dict({"orient": "index"}, **kwargs)
+        # kwargs = dict({"orient": "split"}, **kwargs)
+
         return pd.read_json(data, **kwargs).T
     elif ext in {"html"}:
         kwargs = dict({"index_col": False}, **kwargs)
@@ -92,6 +97,42 @@ class DfLocalFileReader(LocalBinaryStore):
 
 
 DfReader = DfLocalFileReader  # alias for back-compatibility: TODO: Issue warning on use
+DFLT_METADATA_COLS = [
+    "dataType",
+    "deviceId",
+    "motorId",
+    "tempe",
+    "tempm",
+    "tenantId",
+    "timestamp",
+    "ts",
+    "tsr",
+    "vbat",
+]
+DFLT_DATA_COLS = ["flux", "vibx", "vibz"]
+
+
+def filter_store_by_outer_keys(store, outer_keys=DFLT_METADATA_COLS):
+    nstore = wrap_kvs(store, obj_of_data=lambda data: data[outer_keys])
+    return nstore
+
+
+metadata_store = partial(filter_store_by_outer_keys, outer_keys=DFLT_METADATA_COLS)
+
+
+def process_dict(d):
+    return {k: v[0] for k, v in d.items()}
+
+
+def data_store(store):
+    filt = lambda data: data[DFLT_DATA_COLS]
+    dict_transform = lambda data: process_dict(data.to_dict())
+    to_df = pd.DataFrame
+    pipe = Pipe(filt, dict_transform, to_df)
+    nstore = wrap_kvs(store, obj_of_data=pipe)
+
+    return nstore
+
 
 if __name__ == "__main__":
     import os.path
