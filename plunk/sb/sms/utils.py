@@ -13,12 +13,6 @@ import pandas as pd
 
 from py2store.stores.local_store import LocalBinaryStore
 
-from tabled.html import (
-    url_to_html_func,
-    get_tables_from_url,
-    dfs_to_html_pretty,
-    dfs_to_pdf_bytes,
-)
 
 DFLT_EXT_SPECS = {}
 
