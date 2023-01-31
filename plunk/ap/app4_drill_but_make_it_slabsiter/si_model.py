@@ -4,7 +4,8 @@ import numpy as np
 from front.crude import DillFiles
 from lined import LineParametrized
 
-from plunk.ap.live_graph.live_graph_data_buffer import _test_audio_it, if_not_none
+from plunk.ap.live_graph.live_graph_data_buffer import _test_audio_it
+from plunk.ap.snippets import if_no_none
 from plunk.sb.front_demo.user_story1.apps.app4_drill import (
     simple_chunker,
     simple_featurizer,
@@ -34,20 +35,20 @@ def sb_apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
     return scores
 
 
-@if_not_none
+@if_no_none
 def wf_to_fvs(wf, preprocess_pipeline):
     fvs = preprocess_pipeline(wf)
     return fvs
 
 
-@if_not_none
+@if_no_none
 def fvs_to_scores(fvs, fitted_model):
     scores = fitted_model.score_samples(X=fvs)
     return scores
 
 
 def si_apply_fitted_model(preprocess_pipeline, fitted_model):
-    """SlabsIter"""
+    """SlabsIter kwargs"""
 
     si_kwargs = dict(
         preprocess_pipeline=lambda: preprocess_pipeline,
@@ -66,10 +67,3 @@ if __name__ == '__main__':
         input_device=input_device,
         **si_apply_fitted_model(preprocess_pipeline_steps, normal_fitted_model)
     )
-
-# print(normal_tagged_data, preprocess_pipeline_steps, normal_fitted_model)
-# print(
-#     sb_apply_fitted_model(
-#         normal_tagged_data, preprocess_pipeline_steps, normal_fitted_model
-#     )
-# )

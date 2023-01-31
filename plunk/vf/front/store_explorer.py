@@ -9,7 +9,7 @@ from streamlitfront.elements import FileUploader, SuccessNotification
 import re
 import uuid
 
-from plunk.ap.store_explorer.store_explorer_element import get_mall
+from plunk.ap.snippets import get_mall
 
 SEARCH_MODE_KEYS = 1
 SEARCH_MODE_VALUES = 2

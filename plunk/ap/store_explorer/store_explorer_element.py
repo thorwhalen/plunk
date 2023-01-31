@@ -16,16 +16,7 @@ import streamlit as st
 from boltons.typeutils import make_sentinel
 from front.elements import OutputBase, InputBase
 
-from streamlitfront import binder as b
-
-
-def get_mall(defaults: dict):
-    if not b.mall():
-        b.mall = defaults
-    m = b.mall()
-    if not all(k in m for k in defaults):
-        m.update(defaults)
-    return m
+from plunk.ap.snippets import get_mall
 
 
 class _RenderInput(Protocol):
@@ -49,12 +40,14 @@ _mall = get_mall({STORE_EXPLORER_STATE: {'depth_keys': []}})
 
 @dataclass
 class StoreExplorerInput(InputBase):
-    mall: Mapping = NOT_SELECTED
+    mall: Mapping = dict
 
     def __post_init__(self):
         super().__post_init__()
-        if self.mall is NOT_SELECTED:
-            self.mall = _mall
+        print(f'0-{self.mall=}')
+        if isinstance(self.mall, Callable):
+            self.mall = self.mall()
+        print(f'1-{self.mall=}')
 
     @cached_property
     def stores(self) -> Mapping:

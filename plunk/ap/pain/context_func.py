@@ -15,7 +15,8 @@ from plunk.ap.live_graph.audio_store import (
     CountMergeExecute,
     track_n_calls_of_method_then_execute,
 )
-from plunk.ap.live_graph.live_graph_data_buffer import if_not_none, audio_to_wf
+from plunk.ap.live_graph.live_graph_data_buffer import audio_to_wf
+from plunk.ap.snippets import if_not_none
 
 
 def the_way_that_works():

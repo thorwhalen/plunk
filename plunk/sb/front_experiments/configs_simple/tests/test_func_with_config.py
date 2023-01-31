@@ -59,3 +59,10 @@ def test_func(sample_func, sample_config_dict):
 def test_process_func(sample_func, sample_config_dict):
     _, config = process_func(sample_func)
     assert config == sample_config_dict
+
+
+# at least 2 such funcs
+# gather their configs into a single config
+# pass it to mk_app([funcs], config)
+# ([component], config, convention)--> mk_specs--> (new_funcs, config_updated, convention) --> mk_app
+# assume 1-1 correspondance between new_funcs and configs (given that: ask make app to verify it)
