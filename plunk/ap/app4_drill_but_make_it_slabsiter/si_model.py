@@ -48,7 +48,7 @@ def fvs_to_scores(fvs, fitted_model):
 
 
 def si_apply_fitted_model(preprocess_pipeline, fitted_model):
-    """SlabsIter kwargs"""
+    """Slabs kwargs"""
 
     si_kwargs = dict(
         preprocess_pipeline=lambda: preprocess_pipeline,

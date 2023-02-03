@@ -1,5 +1,5 @@
 """StreamViz LiveGraph
-[x] SlabsIter signal source and process chunks for graphs; initially volume and zero crossing ratio.
+[x] Slabs signal source and process chunks for graphs; initially volume and zero crossing ratio.
 [ ] Add graph data to a buffer that can be queried by time or index.
 [ ] Add to webservice.
 [ ] Visualize graph.
@@ -149,7 +149,7 @@ def post_read_data(data, data_keys=DATA_KEYS) -> Optional[dict]:
     """Used by stream2py to filter data
 
     :param data: SourceReader read data
-    :param data_keys: list of keys to keep from SlabsIter data dict
+    :param data_keys: list of keys to keep from Slabs data dict
     :return:
     """
     if data.get('timestamp') is None:
