@@ -1,5 +1,5 @@
 from py2json import Ctor
-from plunk.ap.persist.persist import Persist
+from plunk.ap.persist.persist import Persist, PersistArgsError
 
 
 def add(a, b):
@@ -53,6 +53,34 @@ def test_ctor():
     deserialized = Ctor.construct(serialized)
     print(f'deserialized: {deserialized}')
     assert original == deserialized
+
+
+def test_key_getter_error_handling():
+
+    Persist.any(key_getter=counter, serializer=lambda x: x, store={})
+    thrown = False
+    try:
+        Persist.any(key_getter=counter, serializer=lambda x: x, store=1)
+    except PersistArgsError:
+        pass
+    else:
+        raise Exception('Expected PersistArgsError to be raised')
+
+    Persist.serialize_function_call([], {}, counter)
+    try:
+        Persist.serialize_function_call([], {})
+    except PersistArgsError:
+        pass
+    else:
+        raise Exception('Expected PersistArgsError to be raised')
+
+    Persist.serialize_return_value([], {}, return_value=1)
+    try:
+        Persist.serialize_return_value([], {})
+    except PersistArgsError:
+        pass
+    else:
+        raise Exception('Expected PersistArgsError to be raised')
 
 
 def test_serialize_function_call():
