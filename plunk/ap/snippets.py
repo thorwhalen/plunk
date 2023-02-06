@@ -2,15 +2,15 @@ import timeit
 from functools import partial
 from collections import deque
 
-from streamlitfront import binder as b
 
+def get_mall(defaults: dict = None):
+    from streamlitfront import binder as b
 
-def get_mall(defaults: dict):
     if not b.mall():
         b.mall = defaults
     m = b.mall()
     try:
-        if not all(k in m for k in defaults):
+        if isinstance(defaults, dict) and not all(k in m for k in defaults):
             m.update(defaults)
     except Exception as e:
         raise ValueError(f'get_mall({defaults=})') from e

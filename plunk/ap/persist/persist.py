@@ -10,13 +10,15 @@ Serialized = Union[bytes, str]
 NOT_SET = make_sentinel('Not Set', 'Not Set')
 
 
-@runtime_checkable
+class PersistArgsError(Exception):
+    pass
+
+
 class KeyGetter(Protocol):
     def __call__(self, args, kwargs, function=None, return_value=None) -> Hashable:
         ...
 
 
-@runtime_checkable
 class Serializer(Protocol):
     def __call__(
         self,
@@ -29,7 +31,6 @@ class Serializer(Protocol):
         ...
 
 
-@runtime_checkable
 class Deserializer(Protocol):
     def __call__(self, serialized: Serialized) -> Any:
         ...
@@ -54,6 +55,11 @@ class Persist:
         store: Store,
         validate_conversion=False,
     ) -> Any:
+        if not isinstance(store, Store):
+            raise PersistArgsError(
+                'Persist decorator store arg must have __setitem__ implemented'
+            )
+
         def _decorator(f):
             @wraps(f)
             def wrapped(*args, **kwargs):
@@ -118,7 +124,7 @@ class Persist:
         :return:
         """
         if function is NOT_SET:
-            raise ValueError(
+            raise PersistArgsError(
                 'Persist.serialize_function_call requires function to be set'
             )
         _a = cls.ctor.deconstruct(args, validate_conversion)
@@ -172,7 +178,7 @@ class Persist:
         :return:
         """
         if return_value is NOT_SET:
-            raise ValueError(
+            raise PersistArgsError(
                 'Persist.serialize_return_value requires return_value to be set'
             )
         ctor_jdict = cls.ctor.deconstruct(return_value, validate_conversion)
@@ -180,5 +186,7 @@ class Persist:
 
     @classmethod
     def deserialize(cls, serialized: Serialized):
+        if isinstance(serialized, bytes):
+            serialized = serialized.decode('utf-8')
         jdict = json.loads(serialized)
         return cls.ctor.construct(jdict)
