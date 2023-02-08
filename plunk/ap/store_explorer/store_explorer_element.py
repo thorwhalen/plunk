@@ -20,22 +20,22 @@ from plunk.ap.snippets import get_mall
 
 
 class _RenderInput(Protocol):
-    def __call__(_self, self: 'StoreExplorerInput', depth: 'Depth', obj: Any) -> None:
+    def __call__(_self, self: "StoreExplorerInput", depth: "Depth", obj: Any) -> None:
         ...
 
 
 class _RenderOutput(Protocol):
-    def __call__(_self, self: 'StoreExplorerOutput', obj: Any) -> None:
+    def __call__(_self, self: "StoreExplorerOutput", obj: Any) -> None:
         ...
 
 
-RenderInput = TypeVar('RenderInput', bound=_RenderInput)
-RenderOutput = TypeVar('RenderOutput', bound=_RenderOutput)
-Depth = TypeVar('Depth', bound=int)
-DepthKey = TypeVar('DepthKey', bound=Union[Hashable, int])
-NOT_SELECTED = make_sentinel('Not Selected', 'Not Selected')
-STORE_EXPLORER_STATE = '__STORE_EXPLORER_STATE__'
-_mall = get_mall({STORE_EXPLORER_STATE: {'depth_keys': []}})
+RenderInput = TypeVar("RenderInput", bound=_RenderInput)
+RenderOutput = TypeVar("RenderOutput", bound=_RenderOutput)
+Depth = TypeVar("Depth", bound=int)
+DepthKey = TypeVar("DepthKey", bound=Union[Hashable, int])
+NOT_SELECTED = make_sentinel("Not Selected", "Not Selected")
+STORE_EXPLORER_STATE = "__STORE_EXPLORER_STATE__"
+_mall = get_mall({STORE_EXPLORER_STATE: {"depth_keys": []}})
 
 
 @dataclass
@@ -44,10 +44,10 @@ class StoreExplorerInput(InputBase):
 
     def __post_init__(self):
         super().__post_init__()
-        print(f'0-{self.mall=}')
+        print(f"0-{self.mall=}")
         if isinstance(self.mall, Callable):
             self.mall = self.mall()
-        print(f'1-{self.mall=}')
+        print(f"1-{self.mall=}")
 
     @cached_property
     def stores(self) -> Mapping:
@@ -56,15 +56,15 @@ class StoreExplorerInput(InputBase):
 
     @property
     def depth_keys(self) -> List[DepthKey]:
-        return _mall[STORE_EXPLORER_STATE]['depth_keys']
+        return _mall[STORE_EXPLORER_STATE]["depth_keys"]
 
     @depth_keys.setter
     def depth_keys(self, value: List[DepthKey]):
-        _mall[STORE_EXPLORER_STATE]['depth_keys'] = value
+        _mall[STORE_EXPLORER_STATE]["depth_keys"] = value
 
     @staticmethod
     def st_key(depth) -> str:
-        return f'depth {depth}'
+        return f"depth {depth}"
 
     @staticmethod
     def get_item(obj: Mapping, key: Union[Hashable, int]) -> Any:
@@ -101,6 +101,7 @@ class StoreExplorerInput(InputBase):
         depth += 1
         action: RenderInput = getattr(self, type(obj).__name__, self.default)
         action(depth, obj)
+        # to_delete = st.button()
         return self.depth_keys
 
     def dict(self, depth: Depth, obj: dict):
