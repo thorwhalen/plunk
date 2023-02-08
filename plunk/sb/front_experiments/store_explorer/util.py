@@ -1,4 +1,4 @@
-from functools import reduce  # forward compatibility for Python 3
+from functools import reduce
 import operator
 
 
@@ -18,13 +18,21 @@ def del_by_path(root, items):
 
 
 def get_all_path_keys(d):
-    res = []
-
     for key, value in d.items():
-        res.append([str(key)])
+        yield [key]
         if isinstance(value, dict):
-            res += [[str(key)] + item for item in get_all_path_keys(value)]
-    return res
+            yield from [[key] + item for item in get_all_path_keys(value)]
+
+
+# from boltons.iterutils import remap
+
+# def get_all_keys(d):
+#     res = []
+#     def append_keys(path, key, value):
+#         res.append(list(path)+[key])
+#         return key, value
+#     remap(d, visit=append_keys)
+#     return res
 
 
 if __name__ == "__main__":
@@ -38,5 +46,5 @@ if __name__ == "__main__":
     assert get_by_path(dataDict, ["b", "v", "y"]) == 2
 
     d = {"dict1": {"foo": 1, "bar": 2}, "dict2": {"dict3": {"baz": 3, "quux": 4}}}
-    for x in get_all_path_keys(d):
-        print(x)
+
+    print(list(get_all_path_keys(d)))
