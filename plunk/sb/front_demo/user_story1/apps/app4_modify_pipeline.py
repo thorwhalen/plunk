@@ -17,7 +17,6 @@ from streamlitfront.elements import (
     SelectBox,
     SuccessNotification,
     PipelineMaker,
-    KwargsInput,
 )
 from streamlitfront.elements import (
     AudioRecorder,
@@ -55,45 +54,10 @@ def simple_featurizer(chks):
     return fvs
 
 
-# @dataclass
-# class KwargsInput(KwargsInputBase):
-#     def render(self):
-#         exec_section = ExecSection(
-#             obj=self.get_kwargs,
-#             inputs=self.inputs,
-#             output={ELEMENT_KEY: HiddenOutput},
-#             auto_submit=True,
-#             on_submit=self._return_kwargs,
-#             use_expander=False,
-#         )
-#         exec_section()
-#         return self.value()
-
-
-# @dataclass
-# class PipelineMaker(InputBase):
-#     items: Iterable = None
-#     steps: Iterable = None
-#     serializer: Callable = None
-
-#     def render(self):
-#         return pipeline_maker(
-#             items=self.items, steps=self.steps, serializer=self.serializer,
-#         )
-
-
 @dataclass
 class Step:
     step_factory: Callable
     step: Callable
-
-
-def on_select_pipeline(pipeline):
-    b.steps_of_selected_pipeline.set(pipeline.named_funcs)
-
-
-def get_steps_from_selected_pipeline(pipeline):
-    return pipeline.named_funcs
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -149,10 +113,9 @@ def mk_pipeline_maker_app_with_mall(
         return LineParametrized(*named_funcs)
 
     @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store),
         output_store=pipelines_store,
     )
-    def modify_pipeline(pipeline, steps):
+    def modify_pipeline(steps: Iterable[Callable]):
         named_funcs = [(get_step_name(step), step) for step in steps]
         return LineParametrized(*named_funcs)
 
@@ -233,29 +196,6 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "modify_pipeline": {
-                NAME_KEY: "Pipeline Modify",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                            "on_value_change": on_select_pipeline,
-                        },
-                        steps: {
-                            ELEMENT_KEY: KwargsInput,
-                            # "func_sig": get_steps_from_selected_pipeline(
-                            #     mall[pipelines][b.selected_pipeline()]
-                            # ),
-                            "func_sig": Sig("a b"),
-                            # "options": b.steps_of_selected_pipeline,
-                        },
-                    },
-                    "output": {
-                        ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
-                    },
-                },
-            },
             "visualize_pipeline": {
                 NAME_KEY: "Pipeline Visualization",
                 "execution": {
@@ -279,7 +219,6 @@ def mk_pipeline_maker_app_with_mall(
         modify_step,
         mk_pipeline,
         visualize_pipeline,
-        modify_pipeline,
         view_state,
     ]
     app = mk_app(funcs, config=config)
