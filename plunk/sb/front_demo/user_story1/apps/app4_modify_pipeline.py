@@ -176,7 +176,7 @@ def mk_pipeline_maker_app_with_mall(
                     },
                     "output": {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        "message": "The step has been modified successfully.",
                     },
                 },
             },
