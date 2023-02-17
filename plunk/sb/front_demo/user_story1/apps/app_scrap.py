@@ -89,7 +89,8 @@ class Step:
 
 
 def on_select_pipeline(pipeline):
-    b.steps_of_selected_pipeline.set(pipeline.named_funcs)
+    # b.steps_of_selected_pipeline.set(pipeline.named_funcs)
+    st.write(f"{pipeline=} selected")
 
 
 def get_steps_from_selected_pipeline(pipeline):
@@ -153,6 +154,7 @@ def mk_pipeline_maker_app_with_mall(
         output_store=pipelines_store,
     )
     def modify_pipeline(pipeline, steps):
+        st.write(f"current pipeline={pipeline}")
         named_funcs = [(get_step_name(step), step) for step in steps]
         return LineParametrized(*named_funcs)
 
@@ -183,6 +185,9 @@ def mk_pipeline_maker_app_with_mall(
 
     def view_state():
         st.write(mall["pipelines"]["pipe1"].funcs)
+
+    def dummy(input: List[int]):
+        return input
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -242,17 +247,18 @@ def mk_pipeline_maker_app_with_mall(
                             "on_value_change": on_select_pipeline,
                         },
                         steps: {
-                            ELEMENT_KEY: KwargsInput,
-                            # "func_sig": get_steps_from_selected_pipeline(
-                            #     mall[pipelines][b.selected_pipeline()]
-                            # ),
-                            "func_sig": Sig("a b"),
-                            # "options": b.steps_of_selected_pipeline,
+                            ELEMENT_KEY: PipelineMaker,
+                            "items": [v.step for v in mall[steps].values()],
+                            "steps": mall["pipelines"][
+                                b.selected_pipeline()
+                            ].named_funcs,
+                            # "steps": ["c", "f"],
+                            "serializer": get_step_name,
                         },
                     },
                     "output": {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        "message": "The pipeline has been modified successfully.",
                     },
                 },
             },
@@ -281,6 +287,7 @@ def mk_pipeline_maker_app_with_mall(
         visualize_pipeline,
         modify_pipeline,
         view_state,
+        dummy,
     ]
     app = mk_app(funcs, config=config)
 
