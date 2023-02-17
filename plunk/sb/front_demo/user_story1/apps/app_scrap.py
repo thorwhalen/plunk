@@ -45,6 +45,10 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
 )
 from typing import List
 
+from front.elements import (
+    SelectBoxBase,
+)
+
 
 def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
     return list(chunker(wfs, chk_size=chk_size))
@@ -88,13 +92,35 @@ class Step:
     step: Callable
 
 
-def on_select_pipeline(pipeline):
-    # b.steps_of_selected_pipeline.set(pipeline.named_funcs)
-    st.write(f"{pipeline=} selected")
+@dataclass
+class Pipeline:
+    steps: List[Step]
+    pipe: Callable
+
+    def dot_digraph(self):
+        return self.pipe.dot_digraph()
+
+
+@dataclass
+class SelectBoxWithSubmit(SelectBoxBase):
+    call_back: Callable = lambda: None
+
+    def render(self):
+        with st.form("my_form"):
+            st.write("Inside the form")
+            selected = st.selectbox(
+                label=self.name,
+                options=self._options,
+                index=self._preselected_index,
+            )
+            # Every form must have a submit button.
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                self.call_back(selected)
 
 
 def get_steps_from_selected_pipeline(pipeline):
-    return pipeline.named_funcs
+    return pipeline.steps
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -147,7 +173,8 @@ def mk_pipeline_maker_app_with_mall(
     )
     def mk_pipeline(steps: Iterable[Callable]):
         named_funcs = [(get_step_name(step), step) for step in steps]
-        return LineParametrized(*named_funcs)
+        pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
+        return pipeline
 
     @crudifier(
         param_to_mall_map=dict(pipeline=pipelines_store),
@@ -156,12 +183,13 @@ def mk_pipeline_maker_app_with_mall(
     def modify_pipeline(pipeline, steps):
         st.write(f"current pipeline={pipeline}")
         named_funcs = [(get_step_name(step), step) for step in steps]
-        return LineParametrized(*named_funcs)
+        pipe = LineParametrized(*named_funcs)
+        return Pipeline(steps=named_funcs, pipe=pipe)
 
     @crudifier(
         param_to_mall_map=dict(pipeline=pipelines_store),
     )
-    def visualize_pipeline(pipeline: LineParametrized):
+    def visualize_pipeline(pipeline: Pipeline):
 
         return pipeline
 
@@ -184,10 +212,14 @@ def mk_pipeline_maker_app_with_mall(
             return Sig(selected_step_factory)
 
     def view_state():
-        st.write(mall["pipelines"]["pipe1"].funcs)
+        st.write(mall)
 
     def dummy(input: List[int]):
         return input
+
+    def on_select_pipeline(pipeline):
+        b.steps_of_selected_pipeline.set(mall["pipelines"][pipeline].steps)
+        st.write(f"{pipeline=} selected")
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -243,16 +275,23 @@ def mk_pipeline_maker_app_with_mall(
                 "execution": {
                     "inputs": {
                         "pipeline": {
+                            ELEMENT_KEY: SelectBoxWithSubmit,
+                            "call_back": on_select_pipeline,
                             "value": b.selected_pipeline,
                             "on_value_change": on_select_pipeline,
                         },
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
                             "items": [v.step for v in mall[steps].values()],
-                            "steps": mall["pipelines"][
-                                b.selected_pipeline()
-                            ].named_funcs,
-                            # "steps": ["c", "f"],
+                            # "steps": [
+                            #     # get_step_name(step)
+                            #     step
+                            #     # for step in mall["pipelines"][b.selected_pipeline()]
+                            #     for step in [v.step for v in mall[steps].values()]
+                            # ],
+                            # "steps": mall["pipelines"][b.selected_pipeline.get()].steps,
+                            # or [],
+                            "steps": b.steps_of_selected_pipeline(),
                             "serializer": get_step_name,
                         },
                     },
