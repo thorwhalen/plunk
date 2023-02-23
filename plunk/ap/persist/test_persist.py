@@ -1,3 +1,4 @@
+from plunk.ap.persist.testing_utilities import mk_step, step_factories
 from py2json import Ctor
 from plunk.ap.persist.persist import Persist, PersistArgsError
 
@@ -168,3 +169,22 @@ def test_serialize_return_value():
 
         assert actual == deserialized
         assert add.count == 1, 'add should be called only once for actual'
+
+
+def test_serialize_chunker():
+    from plunk.sb.front_demo.user_story1.apps.app_scrap import Step
+
+    def save_name_getter(args, kwargs, function=None, return_value=None):
+        return kwargs['save_name']
+
+    persisted_mk_step = Persist.function_call(
+        mk_step, key_getter=save_name_getter, store=dict_store, validate_conversion=True
+    )
+    chkr = persisted_mk_step(
+        step_factory=step_factories['chunker'], kwargs={}, save_name='chkr'
+    )
+    assert isinstance(chkr, Step), 'Invalid test: Unexpected mk_step output type'
+
+    persisted_chkr = Persist.deserialize(dict_store['chkr'])
+    assert isinstance(dict_store['chkr'], str), 'chunker was not serialized'
+    assert isinstance(persisted_chkr, Step), 'chunker was not deserialized'
