@@ -188,3 +188,22 @@ def test_serialize_chunker():
     persisted_chkr = Persist.deserialize(dict_store['chkr'])
     assert isinstance(dict_store['chkr'], str), 'chunker was not serialized'
     assert isinstance(persisted_chkr, Step), 'chunker was not deserialized'
+
+
+def test_serialize_featurizer():
+    from plunk.sb.front_demo.user_story1.apps.app_scrap import Step
+
+    def save_name_getter(args, kwargs, function=None, return_value=None):
+        return kwargs['save_name']
+
+    persisted_mk_step = Persist.function_call(
+        mk_step, key_getter=save_name_getter, store=dict_store, validate_conversion=True
+    )
+    feat = persisted_mk_step(
+        step_factory=step_factories['featurizer'], kwargs={}, save_name='feat'
+    )
+    assert isinstance(feat, Step), 'Invalid test: Unexpected mk_step output type'
+
+    persisted_feat = Persist.deserialize(dict_store['feat'])
+    assert isinstance(dict_store['feat'], str), 'featurizer was not serialized'
+    assert isinstance(persisted_feat, Step), 'featurizer was not deserialized'
