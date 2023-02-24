@@ -1,4 +1,11 @@
-from plunk.ap.persist.testing_utilities import mk_step, step_factories
+from plunk.ap.persist.testing_utilities import (
+    mk_step,
+    step_factories,
+    Step,
+    mall,
+    mk_pipeline,
+)
+from plunk.sb.front_demo.user_story1.apps.app_scrap import Pipeline
 from py2json import Ctor
 from plunk.ap.persist.persist import Persist, PersistArgsError
 
@@ -172,8 +179,6 @@ def test_serialize_return_value():
 
 
 def test_serialize_chunker():
-    from plunk.sb.front_demo.user_story1.apps.app_scrap import Step
-
     def save_name_getter(args, kwargs, function=None, return_value=None):
         return kwargs['save_name']
 
@@ -191,8 +196,6 @@ def test_serialize_chunker():
 
 
 def test_serialize_featurizer():
-    from plunk.sb.front_demo.user_story1.apps.app_scrap import Step
-
     def save_name_getter(args, kwargs, function=None, return_value=None):
         return kwargs['save_name']
 
@@ -207,3 +210,25 @@ def test_serialize_featurizer():
     persisted_feat = Persist.deserialize(dict_store['feat'])
     assert isinstance(dict_store['feat'], str), 'featurizer was not serialized'
     assert isinstance(persisted_feat, Step), 'featurizer was not deserialized'
+
+
+def test_serialize_pipeline():
+    def save_name_getter(args, kwargs, function=None, return_value=None):
+        return kwargs['save_name']
+
+    feat = mk_step(
+        step_factory=step_factories['featurizer'], kwargs={}, save_name='feat'
+    )
+    chkr = mk_step(step_factory=step_factories['chunker'], kwargs={}, save_name='chkr')
+    persisted_mk_pipeline = Persist.function_call(
+        mk_pipeline,
+        key_getter=save_name_getter,
+        store=dict_store,
+        validate_conversion=True,
+    )
+    ppp = persisted_mk_pipeline([chkr, feat], save_name='pipeline')
+    assert isinstance(ppp, Pipeline), 'Invalid test: Unexpected mk_step output type'
+
+    persisted_ppp = Persist.deserialize(dict_store['pipeline'])
+    assert isinstance(dict_store['pipeline'], str), 'pipeline was not serialized'
+    assert isinstance(persisted_ppp, Pipeline), 'pipeline was not deserialized'
