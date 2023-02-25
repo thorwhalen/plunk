@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Callable, Iterable, List
 
+from py2json.ctor import Ctor
 from front import Crudifier
 from i2 import FuncFactory
 from lined import LineParametrized
@@ -29,12 +30,25 @@ def mk_step(step_factory: Callable, kwargs: dict):
     return result
 
 
-def get_step_name(step: Step) -> str:
-    return [k for k, v in mall['steps'].items() if v.step == step][0]
+def get_step_name(step: partial) -> str:
+    """Note:
+    Originally [k for k, v in mall[steps].items() if v.step == step][0]
+
+    `v.step == step` is not a valid check with reconstructed objects
+
+
+    :param step:
+    :return:
+    """
+
+    def is_equal(a, b):
+        return Ctor.deconstruct(a) == Ctor.deconstruct(b)
+
+    return next(k for k, v in mall['steps'].items() if is_equal(v.step, step))
 
 
 @crudifier(output_store='pipelines')
-def mk_pipeline(steps: List[Step]):
+def mk_pipeline(steps: List[Callable]):
     named_funcs = [(get_step_name(step), step) for step in steps]
     pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
     return pipeline

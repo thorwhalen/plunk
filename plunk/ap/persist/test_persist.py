@@ -179,6 +179,8 @@ def test_serialize_return_value():
 
 
 def test_serialize_chunker():
+    """Test based on plunk/sb/front_demo/user_story1/apps/app_scrap.py"""
+
     def save_name_getter(args, kwargs, function=None, return_value=None):
         return kwargs['save_name']
 
@@ -196,6 +198,8 @@ def test_serialize_chunker():
 
 
 def test_serialize_featurizer():
+    """Test based on plunk/sb/front_demo/user_story1/apps/app_scrap.py"""
+
     def save_name_getter(args, kwargs, function=None, return_value=None):
         return kwargs['save_name']
 
@@ -213,20 +217,29 @@ def test_serialize_featurizer():
 
 
 def test_serialize_pipeline():
-    def save_name_getter(args, kwargs, function=None, return_value=None):
-        return kwargs['save_name']
+    """Test based on plunk/sb/front_demo/user_story1/apps/app_scrap.py
+
+    NOTE: get_step_name (used in mk_pipeline) was modified from the original to work with
+    persist serialization.
+    The equality check in the original does not work with newly constructed objects.
+    """
 
     feat = mk_step(
         step_factory=step_factories['featurizer'], kwargs={}, save_name='feat'
     )
     chkr = mk_step(step_factory=step_factories['chunker'], kwargs={}, save_name='chkr')
+    steps = [chkr.step, feat.step]
+
+    def save_name_getter(args, kwargs, function=None, return_value=None):
+        return kwargs['save_name']
+
     persisted_mk_pipeline = Persist.function_call(
         mk_pipeline,
         key_getter=save_name_getter,
         store=dict_store,
         validate_conversion=True,
     )
-    ppp = persisted_mk_pipeline([chkr, feat], save_name='pipeline')
+    ppp = persisted_mk_pipeline(steps, save_name='pipeline')
     assert isinstance(ppp, Pipeline), 'Invalid test: Unexpected mk_step output type'
 
     persisted_ppp = Persist.deserialize(dict_store['pipeline'])
