@@ -1,9 +1,9 @@
 from itertools import count
 
 import pytest
-from audiostream2py import AudioData, PaStatusFlags, PyAudioSourceReader
+from audiostream2py import AudioSegment, PaStatusFlags, PyAudioSourceReader
 
-from plunk.ap.stream2py_creek.infinite_sequence import AudioDataGetter
+from plunk.ap.stream2py_creek.infinite_sequence import InfiniteAudioSequence
 
 
 def audio_data_gen(rate: int, width: int, channels: int, frames_per_buffer: int):
@@ -14,7 +14,7 @@ def audio_data_gen(rate: int, width: int, channels: int, frames_per_buffer: int)
         return fill_value.to_bytes(width, 'little') * channels * frames_per_buffer
 
     for i in count():
-        yield AudioData(
+        yield AudioSegment(
             start_date=timestamp(i),
             end_date=timestamp(i + 1),
             waveform=mock_pcm_bytes(fill_value=i),
@@ -37,7 +37,7 @@ def test_audio_data_getter(
 ):
     ad_it = audio_data_gen(rate, width, channels, frames_per_buffer)
 
-    getter = AudioDataGetter(
+    getter = InfiniteAudioSequence(
         ad_it,
         buffer_len=PyAudioSourceReader.audio_buffer_size_seconds_to_maxlen(
             buffer_size_seconds=(tt - bt) * 2 / 1e6,
