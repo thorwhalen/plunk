@@ -1,35 +1,35 @@
 
 # --------------------------------------------------------------------------------
 
-from collections import UserString
-
-
 # Note: I meant to use this to enable url values of mappings to carry more information.
 #  For now I am solving the need differently.
-class StrWithAttributes(UserString, str):
-    """Adds the ability to have strings with attributes.
+class StringWhereYouCanAddAttrs(str):
+    """A ``str``, but with the ability to add attributes to it.
 
-    >>> s = StrWithAttributes('hello', foo='bar')
+    >>> s = StringWhereYouCanAddAttrs('hello')
     >>> s
     'hello'
-    >>> s.foo
-    'bar'
+    >>> isinstance(s, str)
+    True
+
+    Okay, just like a string, but we couldn't do the following with a str:
+
     >>> s.foo = 'baz'
     >>> s.foo
     'baz'
     >>> s.new_attr = 42
     >>> s.new_attr
     42
-    >>> isinstance(s, str)
-    True
 
     """
-    def __init__(self, string, **attributes):
-        super().__init__(string)
-        clashing_attrs = attributes.keys() & dir(str)
-        assert not clashing_attrs, f"These names clash with str attributes: {clashing_attrs}"
-        for attr_name, attr_val in attributes.items():
-            setattr(self, attr_name, attr_val)
+
+    def __setattr__(self, key, value):
+        if key in dir(str):
+            raise AttributeError(
+                f"Can't set attribute {key} on a a StrWithAttributes instance since "
+                f"it is already an attribute of builtin str."
+            )
+        super().__setattr__(key, value)
 
 
 # --------------------------------------------------------------------------------
