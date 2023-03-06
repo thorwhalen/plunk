@@ -35,7 +35,7 @@ from olab.util import (
     clean_dict,
 )
 
-from olab.base import mk_step, learn_outlier_model, apply_fitted_model
+from olab.base import learn_outlier_model, apply_fitted_model
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -64,11 +64,20 @@ def mk_pipeline_maker_app_with_mall(
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
 
-    mk_step_crudified = crudifier(
-        param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
-    )(mk_step)
+    # mk_step_crudified = crudifier(
+    #     param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
+    # )(mk_step)
 
     #
+    @crudifier(
+        param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
+    )
+    def mk_step(step_factory: Callable, kwargs: dict):
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step = partial(step_factory, **kwargs)()
+        result = Step(step=step, step_factory=step_factory)
+        return result
+
     @crudifier(
         param_to_mall_map=dict(step_to_modify=steps_store), output_store=steps_store
     )
@@ -178,7 +187,7 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "mk_step_crudified": {
+            "mk_step": {
                 NAME_KEY: "Pipeline Step Maker",
                 "execution": {
                     "inputs": {
@@ -290,7 +299,7 @@ def mk_pipeline_maker_app_with_mall(
 
     funcs = [
         upload_sound,
-        mk_step_crudified,
+        mk_step,
         modify_step,
         mk_pipeline,
         modify_pipeline,
