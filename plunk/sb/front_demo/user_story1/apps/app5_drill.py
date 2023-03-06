@@ -3,7 +3,7 @@ An app that loads either a wav file from local folder or records a sound
 and visualizes the resulting numpy array 
 """
 from functools import partial
-from typing import List, Mapping
+from typing import List, Mapping, Iterable, Callable
 from i2 import FuncFactory, Sig
 from lined import LineParametrized
 
@@ -32,9 +32,10 @@ from olab.util import (
     scores_to_intervals,
     simple_featurizer,
     ArrayWithIntervalsPlotter,
+    clean_dict,
 )
 
-from olab.base import mk_step, mk_pipeline, learn_outlier_model, apply_fitted_model
+from olab.base import mk_step, learn_outlier_model, apply_fitted_model
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -68,9 +69,32 @@ def mk_pipeline_maker_app_with_mall(
     )(mk_step)
 
     #
-    mk_pipeline_crudified = crudifier(
+    @crudifier(
+        param_to_mall_map=dict(step_to_modify=steps_store), output_store=steps_store
+    )
+    def modify_step(step_to_modify: Step, kwargs: dict):
+
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step_factory = step_to_modify.step_factory
+        step = partial(step_factory, **kwargs)()
+        return Step(step=step, step_factory=step_factory)
+
+    @crudifier(
         output_store=pipelines_store,
-    )(mk_pipeline)
+    )
+    def mk_pipeline(steps: Iterable[Callable]):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
+        return pipeline
+
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store),
+        output_store=pipelines_store,
+    )
+    def modify_pipeline(pipeline, steps):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipe = LineParametrized(*named_funcs)
+        return Pipeline(steps=named_funcs, pipe=pipe)
 
     learn_outlier_model_crudified = crudifier(
         param_to_mall_map=dict(
@@ -91,7 +115,7 @@ def mk_pipeline_maker_app_with_mall(
     @crudifier(
         param_to_mall_map=dict(pipeline=pipelines_store),
     )
-    def visualize_pipeline(pipeline: LineParametrized):
+    def visualize_pipeline(pipeline: Pipeline):
 
         return pipeline
 
@@ -117,6 +141,16 @@ def mk_pipeline_maker_app_with_mall(
         )
         if selected_step_factory:
             return Sig(selected_step_factory)
+
+    def get_step_to_modify_factory_sig():
+        selected_step_factory = (
+            mall["steps"].get(b.selected_step_to_modify.get()).step_factory
+        )
+        if selected_step_factory:
+            return Sig(selected_step_factory)
+
+    def on_select_pipeline(pipeline):
+        b.steps_of_selected_pipeline.set(mall["pipelines"][pipeline].steps)
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -159,7 +193,22 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "mk_pipeline_crudified": {
+            "modify_step": {
+                NAME_KEY: "Modify Step",
+                "execution": {
+                    "inputs": {
+                        "step_to_modify": {
+                            "value": b.selected_step_to_modify,
+                        },
+                        "kwargs": {"func_sig": get_step_to_modify_factory_sig},
+                    },
+                    "output": {
+                        ELEMENT_KEY: SuccessNotification,
+                        "message": "The step has been created successfully.",
+                    },
+                },
+            },
+            "mk_pipeline": {
                 NAME_KEY: "Pipeline Maker",
                 "execution": {
                     "inputs": {
@@ -175,18 +224,26 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
+            "modify_pipeline": {
+                NAME_KEY: "Pipeline Modify",
                 "execution": {
                     "inputs": {
                         "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                        "data": {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            "value": b.selected_pipeline,
+                            "on_value_change": on_select_pipeline,
                         },
-                    }
+                        steps: {
+                            ELEMENT_KEY: PipelineMaker,
+                            "items": [v.step for v in mall[steps].values()],
+                            "steps": b.steps_of_selected_pipeline(),
+                            "serializer": get_step_name,
+                        },
+                    },
+                    "output": {
+                        ELEMENT_KEY: SuccessNotification,
+                        "message": "The pipeline has been modified successfully.",
+                    },
                 },
             },
             "visualize_pipeline": {
@@ -234,7 +291,9 @@ def mk_pipeline_maker_app_with_mall(
     funcs = [
         upload_sound,
         mk_step_crudified,
-        mk_pipeline_crudified,
+        modify_step,
+        mk_pipeline,
+        modify_pipeline,
         learn_outlier_model_crudified,
         apply_fitted_model_crudified,
         visualize_pipeline,
