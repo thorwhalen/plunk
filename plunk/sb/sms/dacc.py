@@ -5,7 +5,7 @@ from dol import lazyprop
 import os
 
 
-path = "~/Dropbox/_odata/sound/induction_motor_data/Healthy/Healthy_750rpm/"
+path = '~/Dropbox/_odata/sound/induction_motor_data/Healthy/Healthy_750rpm/'
 DFLT_LOCAL_SOURCE_DIR = os.path.expanduser(path)
 
 

@@ -28,9 +28,9 @@ func_list = [add, multiply, divider_from_ten.divide]
 run_app(
     func_list,
     publish_openapi=True,
-    host="localhost",
+    host='localhost',
     port=3030,
-    ssl_certfile="/Users/sylvain/cert.pem",
-    ssl_keyfile="/Users/sylvain/key.pem",
+    ssl_certfile='/Users/sylvain/cert.pem',
+    ssl_keyfile='/Users/sylvain/key.pem',
     # verify=False,
 )

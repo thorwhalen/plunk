@@ -22,9 +22,7 @@ from streamlitfront.elements import (
     SuccessNotification,
     PipelineMaker,
 )
-from streamlitfront.elements import (
-    FileUploader,
-)
+from streamlitfront.elements import FileUploader
 import streamlit as st
 
 from omodel.gen_utils.chunker import fixed_step_chunker
@@ -59,7 +57,7 @@ def arg_top_max(arr, num_elements):
 
 
 def clean_dict(kwargs):
-    result = {k: v for k, v in kwargs.items() if v != ""}
+    result = {k: v for k, v in kwargs.items() if v != ''}
     return result
 
 
@@ -72,10 +70,7 @@ def consecutive_indices(arr):
 
 
 def get_groups_extremities_all(
-    arr,
-    groups_indices,
-    func=np.mean,
-    num_outliers=DFLT_NUM_OUTLIERS,
+    arr, groups_indices, func=np.mean, num_outliers=DFLT_NUM_OUTLIERS,
 ):
 
     means = apply_func_to_index_groups(func, arr, groups_indices)
@@ -94,10 +89,7 @@ def scores_to_intervals(scores, high_percentile=90, num_selected=3):
     arr_selected = np.nonzero(scores >= high)[0]
     groups_indices = consecutive_indices(arr_selected)
     intervals_all = get_groups_extremities_all(
-        scores,
-        groups_indices,
-        func=np.mean,
-        num_outliers=num_selected,
+        scores, groups_indices, func=np.mean, num_outliers=num_selected,
     )
     result = [(a, b) for a, b in intervals_all if b > a]
 
@@ -114,7 +106,7 @@ def tagged_sound_to_array(train_audio: WaveForm, tag: str):
     if not isinstance(sound, bytes):
         sound = sound.getvalue()
 
-    arr = sf.read(BytesIO(sound), dtype="int16")[0]
+    arr = sf.read(BytesIO(sound), dtype='int16')[0]
     return arr, tag
 
 
@@ -124,7 +116,7 @@ def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
     for sound in sounds:
         # if not isinstance(sound, bytes):
         sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         result.append(arr)
     # print(np.hstack(result))
     return np.hstack(result).reshape(-1, 1), tag
@@ -145,19 +137,19 @@ class AudioArrayDisplay(OutputBase):
 
             sound = sound.getvalue()
 
-        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        arr = sf.read(BytesIO(sound), dtype='int16')[0]
         # st.write(type(arr))
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
         with tab1:
             # if not isinstance(sound, bytes):
             #     sound = sound.getvalue()
             # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-            st.write(f"type of data={type(sound)}")
+            st.write(f'type of data={type(sound)}')
 
             st.audio(sound)
         with tab2:
             fig, ax = plt.subplots(figsize=(15, 5))
-            ax.plot(arr, label=f"Tag={tag}")
+            ax.plot(arr, label=f'Tag={tag}')
             ax.legend()
             st.pyplot(fig)
             # st.write(arr[:10])
@@ -204,21 +196,21 @@ def pyplot_with_intervals(X, intervals=None):
     if intervals:
         for i, interval in enumerate(intervals):
             start, end = interval
-            plt.axvspan(start, end, facecolor="g", alpha=0.5)
+            plt.axvspan(start, end, facecolor='g', alpha=0.5)
 
-            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
+            ax.annotate(f'{i}', xy=(start, min_x), ha='left', va='top')
     return fig
 
 
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    step_factories: str = "step_factories",
-    steps: str = "steps",
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
     steps_store=None,
-    pipelines: str = "pipelines",
+    pipelines: str = 'pipelines',
     pipelines_store=None,
-    data: str = "data",
+    data: str = 'data',
     data_store=None,
     learned_models=None,
     models_scores=None,
@@ -227,7 +219,7 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
     if not b.selected_step_factory():
-        b.selected_step_factory = "chunker"  # TODO make this dynamic
+        b.selected_step_factory = 'chunker'  # TODO make this dynamic
 
     crudifier = partial(Crudifier, mall=mall)
 
@@ -245,15 +237,13 @@ def mk_pipeline_maker_app_with_mall(
         return step
 
     #
-    @crudifier(
-        output_store=pipelines_store,
-    )
+    @crudifier(output_store=pipelines_store,)
     def mk_pipeline(steps: Iterable[Callable]):
         return LineParametrized(*steps)
 
     @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
-        output_store="exec_outputs",
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data='sound_output'),
+        output_store='exec_outputs',
     )
     def exec_pipeline(pipeline: Callable, tagged_data):
 
@@ -266,9 +256,9 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         param_to_mall_map=dict(
-            tagged_data="sound_output", preprocess_pipeline="pipelines"
+            tagged_data='sound_output', preprocess_pipeline='pipelines'
         ),
-        output_store="learned_models",
+        output_store='learned_models',
     )
     def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=5):
         sound, tag = tagged_sounds_to_single_array(*tagged_data)
@@ -284,11 +274,11 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(
         param_to_mall_map=dict(
-            tagged_data="sound_output",
-            preprocess_pipeline="pipelines",
-            fitted_model="learned_models",
+            tagged_data='sound_output',
+            preprocess_pipeline='pipelines',
+            fitted_model='learned_models',
         ),
-        output_store="models_scores",
+        output_store='models_scores',
     )
     def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
         sound, tag = tagged_sounds_to_single_array(*tagged_data)
@@ -299,23 +289,19 @@ def mk_pipeline_maker_app_with_mall(
         scores = fitted_model.score_samples(X=fvs)
         return scores
 
-    @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store),
-    )
+    @crudifier(param_to_mall_map=dict(pipeline=pipelines_store),)
     def visualize_pipeline(pipeline: LineParametrized):
 
         return pipeline
 
-    @crudifier(
-        param_to_mall_map=dict(scores="models_scores"),
-    )
+    @crudifier(param_to_mall_map=dict(scores='models_scores'),)
     def visualize_scores(scores, threshold=80, num_segs=3):
 
         intervals = scores_to_intervals(scores, threshold, num_segs)
 
         return scores, intervals
 
-    @crudifier(output_store="sound_output")
+    @crudifier(output_store='sound_output')
     def upload_sound(train_audio: List[WaveForm], tag: str):
         # sound, tag = train_audio, tag
         # if not isinstance(sound, bytes):
@@ -325,7 +311,7 @@ def mk_pipeline_maker_app_with_mall(
         # return arr, tag
         return train_audio, tag
 
-    @crudifier(param_to_mall_map={"result": "sound_output"})
+    @crudifier(param_to_mall_map={'result': 'sound_output'})
     def display_tag_sound(result):
         return result
 
@@ -333,121 +319,97 @@ def mk_pipeline_maker_app_with_mall(
         return [k for k, v in mall[steps].items() if v == step][0]
 
     def get_selected_step_factory_sig():
-        selected_step_factory = mall["step_factories"].get(
+        selected_step_factory = mall['step_factories'].get(
             b.selected_step_factory.get()
         )
         if selected_step_factory:
             return Sig(selected_step_factory)
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "upload_sound": {
+            'upload_sound': {
                 # NAME_KEY: "Data Loader",
-                "execution": {
-                    "inputs": {
-                        "train_audio": {
+                'execution': {
+                    'inputs': {
+                        'train_audio': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav files loaded successfully.",
+                        'message': 'Wav files loaded successfully.',
                     },
                 },
             },
-            "display_tag_sound": {
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: AudioArrayDisplay,
-                    },
-                },
+            'display_tag_sound': {
+                'execution': {'output': {ELEMENT_KEY: AudioArrayDisplay,},},
             },
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                        },
-                        "kwargs": {"func_sig": get_selected_step_factory_sig},
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {'value': b.selected_step_factory,},
+                        'kwargs': {'func_sig': get_selected_step_factory_sig},
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
-                            "serializer": get_step_name,
+                            'items': list(mall[steps].values()),
+                            'serializer': get_step_name,
                         },
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        'message': 'The pipeline has been created successfully.',
                     },
                 },
             },
-            "exec_pipeline": {
-                NAME_KEY: "Pipeline Executor",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                        "data": {
+            'exec_pipeline': {
+                NAME_KEY: 'Pipeline Executor',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {'value': b.selected_pipeline,},
+                        'data': {
                             ELEMENT_KEY: SelectBox,
-                            "options": mall["sound_output"],
+                            'options': mall['sound_output'],
                         },
                     }
                 },
             },
-            "visualize_pipeline": {
-                NAME_KEY: "Pipeline Visualization",
-                "execution": {
-                    "inputs": {
-                        "pipeline": {
-                            "value": b.selected_pipeline,
-                        },
-                    },
-                    "output": {
+            'visualize_pipeline': {
+                NAME_KEY: 'Pipeline Visualization',
+                'execution': {
+                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
+                    'output': {
                         ELEMENT_KEY: GraphOutput,
-                        NAME_KEY: "Flow",
-                        "use_container_width": True,
+                        NAME_KEY: 'Flow',
+                        'use_container_width': True,
                     },
                 },
             },
-            "visualize_scores": {
-                NAME_KEY: "Scores Visualization",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayWithIntervalsPlotter,
-                    },
-                },
+            'visualize_scores': {
+                NAME_KEY: 'Scores Visualization',
+                'execution': {'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},},
             },
-            "simple_model": {
-                NAME_KEY: "Learn model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
+            'simple_model': {
+                NAME_KEY: 'Learn model',
+                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
-            "apply_fitted_model": {
-                NAME_KEY: "Apply model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
+            'apply_fitted_model': {
+                NAME_KEY: 'Apply model',
+                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
         },
     }
@@ -496,10 +458,10 @@ mall = dict(
 # mall['step_factories'] = step_factories
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     app = mk_pipeline_maker_app_with_mall(
-        mall, step_factories="step_factories", steps="steps", pipelines="pipelines"
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
     )
 
     app()

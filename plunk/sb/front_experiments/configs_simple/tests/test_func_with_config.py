@@ -23,10 +23,10 @@ def sample_func():
     upload_component = FuncWithConfigs(
         func=foo,
         overwrite={
-            "execution.inputs.train_audio": {
+            'execution.inputs.train_audio': {
                 ELEMENT_KEY: FileUploader,
-                "type": "wav",
-                "accept_multiple_files": True,
+                'type': 'wav',
+                'accept_multiple_files': True,
             },
         },
     )
@@ -36,16 +36,16 @@ def sample_func():
 @fixture
 def sample_config_dict():
     return {
-        "foo": {
-            "execution": {
-                "inputs": {
-                    "train_audio": {
-                        "_front_element": FileUploader,
-                        "accept_multiple_files": True,
-                        "type": "wav",
+        'foo': {
+            'execution': {
+                'inputs': {
+                    'train_audio': {
+                        '_front_element': FileUploader,
+                        'accept_multiple_files': True,
+                        'type': 'wav',
                     }
                 },
-                "output": {"_front_element": SuccessNotification},
+                'output': {'_front_element': SuccessNotification},
             }
         }
     }
