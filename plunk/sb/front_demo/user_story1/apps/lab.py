@@ -45,10 +45,6 @@ from plunk.sb.front_demo.user_story1.utils.tools import (
 )
 from typing import List
 
-from front.elements import (
-    SelectBoxBase,
-)
-
 
 def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
     return list(chunker(wfs, chk_size=chk_size))
@@ -57,33 +53,6 @@ def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
 def simple_featurizer(chks):
     fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
     return fvs
-
-
-# @dataclass
-# class KwargsInput(KwargsInputBase):
-#     def render(self):
-#         exec_section = ExecSection(
-#             obj=self.get_kwargs,
-#             inputs=self.inputs,
-#             output={ELEMENT_KEY: HiddenOutput},
-#             auto_submit=True,
-#             on_submit=self._return_kwargs,
-#             use_expander=False,
-#         )
-#         exec_section()
-#         return self.value()
-
-
-# @dataclass
-# class PipelineMaker(InputBase):
-#     items: Iterable = None
-#     steps: Iterable = None
-#     serializer: Callable = None
-
-#     def render(self):
-#         return pipeline_maker(
-#             items=self.items, steps=self.steps, serializer=self.serializer,
-#         )
 
 
 @dataclass
@@ -99,24 +68,6 @@ class Pipeline:
 
     def dot_digraph(self):
         return self.pipe.dot_digraph()
-
-
-@dataclass
-class SelectBoxWithSubmit(SelectBoxBase):
-    call_back: Callable = lambda: None
-
-    def render(self):
-        with st.form("my_form"):
-            st.write("Inside the form")
-            selected = st.selectbox(
-                label=self.name,
-                options=self._options,
-                index=self._preselected_index,
-            )
-            # Every form must have a submit button.
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                self.call_back(selected)
 
 
 def get_steps_from_selected_pipeline(pipeline):
@@ -147,12 +98,6 @@ def mk_pipeline_maker_app_with_mall(
     steps_store = steps_store or steps
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
-
-    if "steps" not in st.session_state:
-        st.session_state.steps = []
-
-    if "pipeline" not in st.session_state:
-        st.session_state.pipeline = Pipeline(steps=[], pipe=Pipe())
 
     @crudifier(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
@@ -224,10 +169,7 @@ def mk_pipeline_maker_app_with_mall(
         return input
 
     def on_select_pipeline(pipeline):
-        # b.steps_of_selected_pipeline.set(mall["pipelines"][pipeline].steps)
-        # st.write(f"{pipeline=} selected")
-        # st.session_state.steps = mall["pipelines"][pipeline].steps
-        st.session_state.steps = st.session_state.pipeline.steps
+        b.steps_of_selected_pipeline.set(mall["pipelines"][pipeline].steps)
 
     config = {
         APP_KEY: {"title": "Data Preparation"},
@@ -286,8 +228,6 @@ def mk_pipeline_maker_app_with_mall(
                             ELEMENT_KEY: SelectBox,
                             # "call_back": on_select_pipeline,
                             "value": b.selected_pipeline,
-                            "value": st.session_state.pipeline,
-                            # "options": mall["pipelines"],
                             "on_value_change": on_select_pipeline,
                         },
                         steps: {
@@ -301,9 +241,7 @@ def mk_pipeline_maker_app_with_mall(
                             # ],
                             # "steps": mall["pipelines"][b.selected_pipeline.get()].steps,
                             # or [],
-                            # "steps": mall["pipelines"][b.selected_pipeline()].steps,
-                            # "steps": b.steps_of_selected_pipeline.get(),
-                            "steps": st.session_state.steps,
+                            "steps": b.steps_of_selected_pipeline(),
                             "serializer": get_step_name,
                         },
                     },

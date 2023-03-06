@@ -2,15 +2,20 @@
 An app that loads either a wav file from local folder or records a sound
 and visualizes the resulting numpy array 
 """
+from dataclasses import dataclass
 from functools import partial
 from typing import Callable, Iterable, List, Mapping
 from i2 import FuncFactory, Sig
 from lined import LineParametrized
 import numpy as np
-
+import matplotlib.pyplot as plt
+import soundfile as sf
+from io import BytesIO
+from more_itertools import consecutive_groups
 
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from front.crude import Crudifier
+from front.elements import OutputBase
 from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import (
     SelectBox,
@@ -20,39 +25,189 @@ from streamlitfront.elements import (
 from streamlitfront.elements import (
     FileUploader,
 )
+import streamlit as st
 
-from olab.types import (
-    Step,
-    Pipeline,
-    WaveForm,
-    AudioArrayDisplay,
-    GraphOutput,
-    ArrayPlotter,
-)
-from olab.util import (
-    simple_chunker,
-    apply_func_to_index_groups,
-    arg_top_max,
-    clean_dict,
-    indices_for_percentile,
-    consecutive_indices,
-    get_groups_extremities_all,
-    scores_to_intervals,
-    simple_featurizer,
-    tagged_sounds_to_single_array,
-    assert_dims,
-    ArrayWithIntervalsPlotter,
-)
-
-from olab.base import mk_step
-
-
+from omodel.gen_utils.chunker import fixed_step_chunker
 from omodel.outliers.pystroll import OutlierModel as Stroll
 
 
 DFLT_CHK_SIZE = 2048
 DFLT_FEATURIZER = lambda chk: np.abs(np.fft.rfft(chk))
 DFLT_NUM_OUTLIERS = 3
+WaveForm = Iterable[int]
+
+
+def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
+    return list(fixed_step_chunker(wfs, chk_size=chk_size))
+
+
+def apply_func_to_index_groups(func, arr, idx_groups):
+    """
+    Applies func to the slices of array arr specified by the groups
+    """
+    result = [func(arr[gp]) for gp in idx_groups]
+
+    return result
+
+
+def arg_top_max(arr, num_elements):
+    """
+    returns the largest num_elements from the array arr
+    """
+    result = [arr.index(i) for i in sorted(arr, reverse=True)][:num_elements]
+    return result
+
+
+def clean_dict(kwargs):
+    result = {k: v for k, v in kwargs.items() if v != ""}
+    return result
+
+
+def indices_for_percentile(arr, low=0, high=100):
+    return np.percentile(arr, [low, high])
+
+
+def consecutive_indices(arr):
+    return list(map(list, consecutive_groups(arr)))
+
+
+def get_groups_extremities_all(
+    arr,
+    groups_indices,
+    func=np.mean,
+    num_outliers=DFLT_NUM_OUTLIERS,
+):
+
+    means = apply_func_to_index_groups(func, arr, groups_indices)
+    arg = arg_top_max(means, num_outliers)
+    result = [
+        (groups_indices[idx][0], groups_indices[idx][-1])
+        for idx, _ in enumerate(means)
+        if idx in arg
+    ]
+
+    return result
+
+
+def scores_to_intervals(scores, high_percentile=90, num_selected=3):
+    [low, high] = list(indices_for_percentile(scores, low=0, high=high_percentile))
+    arr_selected = np.nonzero(scores >= high)[0]
+    groups_indices = consecutive_indices(arr_selected)
+    intervals_all = get_groups_extremities_all(
+        scores,
+        groups_indices,
+        func=np.mean,
+        num_outliers=num_selected,
+    )
+    result = [(a, b) for a, b in intervals_all if b > a]
+
+    return result
+
+
+def simple_featurizer(chks):
+    fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
+    return fvs
+
+
+def tagged_sound_to_array(train_audio: WaveForm, tag: str):
+    sound, tag = train_audio, tag
+    if not isinstance(sound, bytes):
+        sound = sound.getvalue()
+
+    arr = sf.read(BytesIO(sound), dtype="int16")[0]
+    return arr, tag
+
+
+def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
+    sounds, tag = train_audio, tag
+    result = []
+    for sound in sounds:
+        # if not isinstance(sound, bytes):
+        sound = sound.getvalue()
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        result.append(arr)
+    # print(np.hstack(result))
+    return np.hstack(result).reshape(-1, 1), tag
+
+
+def assert_dims(wfs):
+    if wfs.ndim >= 2:
+        wfs = wfs[:, 0]
+    return wfs
+
+
+@dataclass
+class AudioArrayDisplay(OutputBase):
+    def render(self):
+        sound, tag = self.output
+        # if not isinstance(sound, str):
+        if not isinstance(sound, bytes):
+
+            sound = sound.getvalue()
+
+        arr = sf.read(BytesIO(sound), dtype="int16")[0]
+        # st.write(type(arr))
+        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        with tab1:
+            # if not isinstance(sound, bytes):
+            #     sound = sound.getvalue()
+            # arr = sf.read(BytesIO(sound), dtype="int16")[0]
+            st.write(f"type of data={type(sound)}")
+
+            st.audio(sound)
+        with tab2:
+            fig, ax = plt.subplots(figsize=(15, 5))
+            ax.plot(arr, label=f"Tag={tag}")
+            ax.legend()
+            st.pyplot(fig)
+            # st.write(arr[:10])
+
+
+@dataclass
+class GraphOutput(OutputBase):
+    use_container_width: bool = False
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        dag = self.output
+        st.graphviz_chart(
+            figure_or_dot=dag.dot_digraph(),
+            use_container_width=self.use_container_width,
+        )
+
+
+@dataclass
+class ArrayPlotter(OutputBase):
+    def render(self):
+        X = self.output
+        # st.write(f"Average score of session= {np.mean(X)}")
+        fig, ax = plt.subplots(figsize=(15, 5))
+        ax.plot(X)
+        ax.legend()
+        st.pyplot(fig)
+
+
+@dataclass
+class ArrayWithIntervalsPlotter(OutputBase):
+    def render(self):
+        X, intervals = self.output
+        fig = pyplot_with_intervals(X, intervals)
+        st.pyplot(fig)
+
+
+def pyplot_with_intervals(X, intervals=None):
+    min_x = np.mean(X)
+    xs = list(range(len(X)))
+    ys = X
+    fig, ax = plt.subplots(figsize=(7, 2))
+    ax.plot(xs, ys, linewidth=1)
+    if intervals:
+        for i, interval in enumerate(intervals):
+            start, end = interval
+            plt.axvspan(start, end, facecolor="g", alpha=0.5)
+
+            ax.annotate(f"{i}", xy=(start, min_x), ha="left", va="top")
+    return fig
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -68,7 +223,6 @@ def mk_pipeline_maker_app_with_mall(
     learned_models=None,
     models_scores=None,
 ):
-
     if not b.mall():
         b.mall = mall
     mall = b.mall()
@@ -81,9 +235,14 @@ def mk_pipeline_maker_app_with_mall(
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
 
-    mk_step = crudifier(
+    @crudifier(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
-    )(mk_step)
+    )
+    def mk_step(step_factory: Callable, kwargs: dict):
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step = partial(step_factory, **kwargs)()
+
+        return step
 
     #
     @crudifier(
@@ -93,13 +252,26 @@ def mk_pipeline_maker_app_with_mall(
         return LineParametrized(*steps)
 
     @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store, tagged_data="sound_output"),
+        output_store="exec_outputs",
+    )
+    def exec_pipeline(pipeline: Callable, tagged_data):
+
+        sound, _ = tagged_sound_to_array(*tagged_data)
+        wfs = np.array(sound)
+        wfs = assert_dims(wfs)
+
+        result = pipeline(wfs)
+        return result
+
+    @crudifier(
         param_to_mall_map=dict(
             tagged_data="sound_output", preprocess_pipeline="pipelines"
         ),
         output_store="learned_models",
     )
     def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=5):
-        sound, _ = tagged_sounds_to_single_array(*tagged_data)
+        sound, tag = tagged_sounds_to_single_array(*tagged_data)
         wfs = np.array(sound)
 
         wfs = assert_dims(wfs)
@@ -119,7 +291,7 @@ def mk_pipeline_maker_app_with_mall(
         output_store="models_scores",
     )
     def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
-        sound, _ = tagged_sounds_to_single_array(*tagged_data)
+        sound, tag = tagged_sounds_to_single_array(*tagged_data)
         wfs = np.array(sound)
         wfs = assert_dims(wfs)
 
