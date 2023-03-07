@@ -16,7 +16,7 @@ tf.random.set_seed(seed)
 np.random.seed(seed)
 
 
-DFLT_DATASET_PATH = "data/mini_speech_commands"
+DFLT_DATASET_PATH = 'data/mini_speech_commands'
 DFLT_EPOCHS = 2
 
 
@@ -24,11 +24,11 @@ def load_dataset(path=DFLT_DATASET_PATH):
     data_dir = pathlib.Path(path)
     if not data_dir.exists():
         tf.keras.utils.get_file(
-            "mini_speech_commands.zip",
-            origin="http://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip",
+            'mini_speech_commands.zip',
+            origin='http://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip',
             extract=True,
-            cache_dir=".",
-            cache_subdir="data",
+            cache_dir='.',
+            cache_subdir='data',
         )
     return data_dir
 
@@ -43,7 +43,7 @@ DFLT_CONFIG = dict(
     validation_split=0.2,
     seed=0,
     output_sequence_length=16000,
-    subset="both",
+    subset='both',
 )
 
 
@@ -70,22 +70,22 @@ def plot_results(history):
     metrics = history.history
     plt.figure(figsize=(16, 6))
     plt.subplot(1, 2, 1)
-    plt.plot(history.epoch, metrics["loss"], metrics["val_loss"])
-    plt.legend(["loss", "val_loss"])
+    plt.plot(history.epoch, metrics['loss'], metrics['val_loss'])
+    plt.legend(['loss', 'val_loss'])
     plt.ylim([0, max(plt.ylim())])
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss [CrossEntropy]")
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss [CrossEntropy]')
 
     plt.subplot(1, 2, 2)
     plt.plot(
         history.epoch,
-        100 * np.array(metrics["accuracy"]),
-        100 * np.array(metrics["val_accuracy"]),
+        100 * np.array(metrics['accuracy']),
+        100 * np.array(metrics['val_accuracy']),
     )
-    plt.legend(["accuracy", "val_accuracy"])
+    plt.legend(['accuracy', 'val_accuracy'])
     plt.ylim([0, 100])
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy [%]")
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy [%]')
 
 
 def simple_cnn_model(input_shape, num_labels, norm_layer):
@@ -96,12 +96,12 @@ def simple_cnn_model(input_shape, num_labels, norm_layer):
             layers.Resizing(32, 32),
             # Normalize.
             norm_layer,
-            layers.Conv2D(32, 3, activation="relu"),
-            layers.Conv2D(64, 3, activation="relu"),
+            layers.Conv2D(32, 3, activation='relu'),
+            layers.Conv2D(64, 3, activation='relu'),
             layers.MaxPooling2D(),
             layers.Dropout(0.25),
             layers.Flatten(),
-            layers.Dense(128, activation="relu"),
+            layers.Dense(128, activation='relu'),
             layers.Dropout(0.5),
             layers.Dense(num_labels),
         ]
@@ -110,11 +110,7 @@ def simple_cnn_model(input_shape, num_labels, norm_layer):
 
 def string_to_audio(x):
     x = tf.io.read_file(x)
-    x, _ = tf.audio.decode_wav(
-        x,
-        desired_channels=1,
-        desired_samples=16000,
-    )
+    x, _ = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
     x = tf.squeeze(x, axis=-1)
     x = x[tf.newaxis, :]
 
@@ -171,7 +167,7 @@ class Dacc:
 
     def mk_model(self):
         input_shape = self.input_shape
-        print("Input shape:", input_shape)
+        print('Input shape:', input_shape)
         num_labels = len(self.label_names)
 
         # Instantiate the `tf.keras.layers.Normalization` layer.
@@ -186,7 +182,7 @@ class Dacc:
         model.compile(
             optimizer=tf.keras.optimizers.Adam(),
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=["accuracy"],
+            metrics=['accuracy'],
         )
         return model
 
@@ -220,13 +216,13 @@ class Dacc:
         class_ids = tf.argmax(result, axis=-1)
         class_names = tf.gather(self.label_names, class_ids)
         return {
-            "predictions": result,
-            "class_ids": class_ids,
-            "class_names": class_names,
+            'predictions': result,
+            'class_ids': class_ids,
+            'class_names': class_names,
         }
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     data_dir = load_dataset()
     dacc = Dacc()
 
@@ -237,4 +233,4 @@ if __name__ == "__main__":
     dacc.model.evaluate(dacc.test_spectrogram_ds, return_dict=True)
 
     # test on one item
-    dacc.apply_model(tf.constant(str(data_dir / "no/01bb6a2a_nohash_0.wav")))
+    dacc.apply_model(tf.constant(str(data_dir / 'no/01bb6a2a_nohash_0.wav')))

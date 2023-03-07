@@ -26,16 +26,23 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_5drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_6learner
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_7_funcnodes_exclude
+   module_docs/plunk/sb/front_demo/user_story1/apps/app4_configure_ppp
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_drill_Andie
+   module_docs/plunk/sb/front_demo/user_story1/apps/app4_extrude_vf
+   module_docs/plunk/sb/front_demo/user_story1/apps/app4_modify_pipeline
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_s3dol
    module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
    module_docs/plunk/sb/front_demo/user_story1/apps/app_choosing_model
    module_docs/plunk/sb/front_demo/user_story1/apps/app_dummy
    module_docs/plunk/sb/front_demo/user_story1/apps/app_scrap
+   module_docs/plunk/sb/front_demo/user_story1/apps/binder_no_update_app
+   module_docs/plunk/sb/front_demo/user_story1/apps/lab
+   module_docs/plunk/sb/front_demo/user_story1/apps/lab2
    module_docs/plunk/sb/front_demo/user_story1/components/components
    module_docs/plunk/sb/front_demo/user_story1/utils/funcs
+   module_docs/plunk/sb/front_demo/user_story1/utils/scratch_pickle
    module_docs/plunk/sb/front_demo/user_story1/utils/simple_config
    module_docs/plunk/sb/front_demo/user_story1/utils/tools
    module_docs/plunk/sb/front_experiments/audio_app
@@ -122,6 +129,7 @@
    module_docs/plunk/sb/pydantic_for_front/pydantic_streamlit_front
    module_docs/plunk/sb/pydantic_for_front/pydantic_streamlit_input
    module_docs/plunk/sb/pydantic_for_front/tooltips_app
+   module_docs/plunk/sb/sig_compatibility/comparator
    module_docs/plunk/sb/sig_compatibility/sig_builtins
    module_docs/plunk/sb/sig_compatibility/sig_code_to_dag
    module_docs/plunk/sb/sig_compatibility/sig_comp
@@ -155,9 +163,12 @@
    module_docs/plunk/tw/front_examples/data_binding_1
    module_docs/plunk/tw/front_examples/make_pipelines
    module_docs/plunk/tw/ipython_magic
+   module_docs/plunk/tw/mov_to_transcription
+   module_docs/plunk/tw/potentially_useful_utils
    module_docs/plunk/tw/py2py_front_example/simple_front
    module_docs/plunk/tw/py2py_front_example/simple_py2http_service
    module_docs/plunk/tw/py2py_front_example/simple_pycode
+   module_docs/plunk/tw/routing
    module_docs/plunk/tw/scrap
    module_docs/plunk/tw/things_decorators_break
    module_docs/plunk/tw/user_story_to_poc_demo
@@ -168,4 +179,5 @@
    module_docs/plunk/vf/extrude/edge_impulse_like
    module_docs/plunk/vf/extrude/edge_impulse_like/api
    module_docs/plunk/vf/extrude/edge_impulse_like/web_app
+   module_docs/plunk/vf/front/custom_app_maker
    module_docs/plunk/vf/front/store_explorer

@@ -22,18 +22,10 @@ def foo(x: int = 100, p: float = 0.5):
 
 
 def bar(x: int):
-    return x**2
+    return x ** 2
 
 
-foo.front_spec = {
-    "execution": {
-        "inputs": {
-            "p": {
-                ELEMENT_KEY: FloatSliderInput,
-            }
-        },
-    }
-}
+foo.front_spec = {'execution': {'inputs': {'p': {ELEMENT_KEY: FloatSliderInput,}},}}
 
 from front.elements import ElementTreeMaker
 from itertools import chain
@@ -74,7 +66,7 @@ class OriginalMyAppMaker(AppMaker):
     def mk_app(self, objs, config=None, convention=None):
         config = config or {}
         for obj in objs:
-            if hasattr(obj, "front_spec"):
+            if hasattr(obj, 'front_spec'):
                 obj_config = {
                     RENDERING_KEY: {name_of_obj(obj): obj.front_spec},
                 }
@@ -111,8 +103,8 @@ def _find_render_keys(objs, render_keys: dict):
 
 from typing import TypeVar, Tuple, Iterable, Callable
 
-Obj = TypeVar("Obj")
-Output = TypeVar("Output")
+Obj = TypeVar('Obj')
+Output = TypeVar('Output')
 Cond = Callable[[Obj], bool]
 Then = Callable[[Obj], Output]
 Rule = Tuple[Cond, Then]
@@ -138,12 +130,12 @@ def alt_mk_find_render_keys(obj: Obj, rules: Rules) -> Iterable[Output]:
             yield rule.then(obj)
 
 
-def has_metadata(obj: Obj, data="front_spec") -> bool:
+def has_metadata(obj: Obj, data='front_spec') -> bool:
     return hasattr(obj, data)
 
 
-DFLT_COND = partial(has_metadata, data="front_spec")
-DFLT_RETRIEVE_SPEC = attrgetter("front_spec")
+DFLT_COND = partial(has_metadata, data='front_spec')
+DFLT_RETRIEVE_SPEC = attrgetter('front_spec')
 
 
 def config_from_attribute(obj: Obj, retrieve_spec: Callable = DFLT_RETRIEVE_SPEC):
@@ -155,9 +147,9 @@ def config_from_attribute(obj: Obj, retrieve_spec: Callable = DFLT_RETRIEVE_SPEC
     return obj_config
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     rules = [(DFLT_COND, config_from_attribute)]
 
     app_maker = MyAppMaker(spec_maker_factory=SpecMaker, rules=rules)
-    app = app_maker.mk_app([foo, bar], config={APP_KEY: {"title": "Custom App Maker"}})
+    app = app_maker.mk_app([foo, bar], config={APP_KEY: {'title': 'Custom App Maker'}})
     app()

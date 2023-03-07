@@ -35,16 +35,16 @@ def get_all_path_keys(d):
 #     return res
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     dataDict = {
-        "a": {"r": 1, "s": 2, "t": 3},
-        "b": {"u": 1, "v": {"x": 1, "y": 2, "z": 3}, "w": 3},
+        'a': {'r': 1, 's': 2, 't': 3},
+        'b': {'u': 1, 'v': {'x': 1, 'y': 2, 'z': 3}, 'w': 3},
     }
 
-    assert get_by_path(dataDict, ["a", "r"]) == 1
+    assert get_by_path(dataDict, ['a', 'r']) == 1
 
-    assert get_by_path(dataDict, ["b", "v", "y"]) == 2
+    assert get_by_path(dataDict, ['b', 'v', 'y']) == 2
 
-    d = {"dict1": {"foo": 1, "bar": 2}, "dict2": {"dict3": {"baz": 3, "quux": 4}}}
+    d = {'dict1': {'foo': 1, 'bar': 2}, 'dict2': {'dict3': {'baz': 3, 'quux': 4}}}
 
     print(list(get_all_path_keys(d)))

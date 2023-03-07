@@ -25,34 +25,34 @@ DFLT_EXT_SPECS = {}
 def set_of_concatenated_col_names(store):
     col_names = []
     for key in store:
-        col_name = "-".join(list(store[key].columns))
+        col_name = '-'.join(list(store[key].columns))
         col_names.append(col_name)
 
     return set(col_names)
 
 
-def df_from_json(data, ext_specs={"orient": "index"}, **kwargs):
+def df_from_json(data, ext_specs={'orient': 'index'}, **kwargs):
     """Get a dataframe from a (data, ext) pair"""
 
     kwargs = dict(ext_specs, **kwargs)
     return pd.read_json(data, **kwargs).T  # modified from tabled
 
 
-dflt_ext_mapping["json"] = df_from_json
+dflt_ext_mapping['json'] = df_from_json
 
 DFLT_METADATA_COLS = [
-    "dataType",
-    "deviceId",
-    "motorId",
-    "tempe",
-    "tempm",
-    "tenantId",
-    "timestamp",
-    "ts",
-    "tsr",
-    "vbat",
+    'dataType',
+    'deviceId',
+    'motorId',
+    'tempe',
+    'tempm',
+    'tenantId',
+    'timestamp',
+    'ts',
+    'tsr',
+    'vbat',
 ]
-DFLT_DATA_COLS = ["flux", "vibx", "vibz"]
+DFLT_DATA_COLS = ['flux', 'vibx', 'vibz']
 
 
 def filter_store_by_outer_keys(store, outer_keys=DFLT_METADATA_COLS):
@@ -77,14 +77,14 @@ def data_store(store):
     return nstore
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os.path
 
     # Path
-    path = "~/Dropbox/_odata/sound/induction_motor_data/"
+    path = '~/Dropbox/_odata/sound/induction_motor_data/'
     full_path = os.path.expanduser(path)
 
-    dflt_ext_mapping["json"] = df_from_json
+    dflt_ext_mapping['json'] = df_from_json
 
     # store
     store = DfLocalFileReader(full_path)

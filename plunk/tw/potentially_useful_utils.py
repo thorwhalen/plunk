@@ -1,4 +1,3 @@
-
 # --------------------------------------------------------------------------------
 
 # Note: I meant to use this to enable url values of mappings to carry more information.
@@ -27,7 +26,7 @@ class StringWhereYouCanAddAttrs(str):
         if key in dir(str):
             raise AttributeError(
                 f"Can't set attribute {key} on a a StrWithAttributes instance since "
-                f"it is already an attribute of builtin str."
+                f'it is already an attribute of builtin str.'
             )
         super().__setattr__(key, value)
 
