@@ -142,7 +142,7 @@ def mk_pipeline_maker_app_with_mall(
         return train_audio, tag
 
     def get_step_name(step):
-        return [k for k, v in mall[steps].items() if v == step][0]
+        return [k for k, v in mall[steps].items() if v.step == step][0]
 
     def get_selected_step_factory_sig():
         selected_step_factory = mall["step_factories"].get(
@@ -223,7 +223,7 @@ def mk_pipeline_maker_app_with_mall(
                     "inputs": {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            "items": list(mall[steps].values()),
+                            "items": [v.step for v in mall[steps].values()],
                             "serializer": get_step_name,
                         },
                     },

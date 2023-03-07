@@ -63,6 +63,8 @@ class Step:
 
 @dataclass
 class Pipeline:
+    """make a pipeline from a list of steps and a pipe"""
+
     steps: List[Step]
     pipe: Callable
 
