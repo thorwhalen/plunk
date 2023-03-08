@@ -62,11 +62,6 @@ def mk_pipeline_maker_app_with_mall(
     data_store = data_store or data
     pipelines_store = pipelines_store or pipelines
 
-    # mk_step_crudified = crudifier(
-    #     param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
-    # )(mk_step)
-
-    #
     @crudifier(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
     )
