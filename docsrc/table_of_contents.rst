@@ -33,6 +33,7 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app4_modify_pipeline
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_s3dol
+   module_docs/plunk/sb/front_demo/user_story1/apps/app6_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
    module_docs/plunk/sb/front_demo/user_story1/apps/app_choosing_model
    module_docs/plunk/sb/front_demo/user_story1/apps/app_dummy
