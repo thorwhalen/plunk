@@ -324,52 +324,52 @@ class MaxMinNode(Node):
 ########################################################################################################################
 # Functions
 ########################################################################################################################
-class DataShifterNode(Node):
-    @staticmethod
-    def factory(name, data):
-        node = DataShifterNode(name, data)
-        return node
+# class DataShifterNode(Node):
+#     @staticmethod
+#     def factory(name, data):
+#         node = DataShifterNode(name, data)
+#         return node
 
-    def __init__(self, label: str, data):
-        super().__init__(label, data)
+#     def __init__(self, label: str, data):
+#         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
-        self.add_input_attribute(InputNodeAttribute("y"))
-        self.add_output_attribute(OutputNodeAttribute("x mod"))
-        self.add_output_attribute(OutputNodeAttribute("y mod"))
+#         self.add_input_attribute(InputNodeAttribute("x"))
+#         self.add_input_attribute(InputNodeAttribute("y"))
+#         self.add_output_attribute(OutputNodeAttribute("x mod"))
+#         self.add_output_attribute(OutputNodeAttribute("y mod"))
 
-        self.x_shift = dpg.generate_uuid()
-        self.y_shift = dpg.generate_uuid()
+#         self.x_shift = dpg.generate_uuid()
+#         self.y_shift = dpg.generate_uuid()
 
-    def custom(self):
+#     def custom(self):
 
-        dpg.add_input_float(label="x", tag=self.x_shift, step=0, width=150)
-        dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
+#         dpg.add_input_float(label="x", tag=self.x_shift, step=0, width=150)
+#         dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
-    def execute(self):
+#     def execute(self):
 
-        # get values from static attributes
-        x_shift = dpg.get_value(self.x_shift)
-        y_shift = dpg.get_value(self.y_shift)
+#         # get values from static attributes
+#         x_shift = dpg.get_value(self.x_shift)
+#         y_shift = dpg.get_value(self.y_shift)
 
-        # get input attribute data
-        x_orig_data = self._input_attributes[0].get_data()
-        y_orig_data = self._input_attributes[1].get_data()
+#         # get input attribute data
+#         x_orig_data = self._input_attributes[0].get_data()
+#         y_orig_data = self._input_attributes[1].get_data()
 
-        # perform actual operations
-        x_data = []
-        for i in range(0, len(x_orig_data)):
-            x_data.append(x_orig_data[i] + x_shift)
+#         # perform actual operations
+#         x_data = []
+#         for i in range(0, len(x_orig_data)):
+#             x_data.append(x_orig_data[i] + x_shift)
 
-        y_data = []
-        for i in range(0, len(y_orig_data)):
-            y_data.append(y_orig_data[i] + y_shift)
+#         y_data = []
+#         for i in range(0, len(y_orig_data)):
+#             y_data.append(y_orig_data[i] + y_shift)
 
-        # execute output attributes
-        self._output_attributes[0].execute(x_data)
-        self._output_attributes[1].execute(y_data)
+#         # execute output attributes
+#         self._output_attributes[0].execute(x_data)
+#         self._output_attributes[1].execute(y_data)
 
-        self.finish()
+#         self.finish()
 
 
 class ChunkerNode(Node):
@@ -381,8 +381,8 @@ class ChunkerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
-        self.add_output_attribute(OutputNodeAttribute("chunks(x)"))
+        self.add_input_attribute(InputNodeAttribute("wf"))
+        self.add_output_attribute(OutputNodeAttribute("chks"))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
         self.x_shift = dpg.generate_uuid()
@@ -390,7 +390,7 @@ class ChunkerNode(Node):
 
     def custom(self):
 
-        dpg.add_input_float(label="x", tag=self.x_shift, step=0, width=150)
+        dpg.add_input_int(label="chk_size", tag=self.x_shift, step=0, width=150)
         # dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
     def execute(self):
@@ -423,6 +423,7 @@ class FeaturizerNode(Node):
         super().__init__(label, data)
 
         self.add_input_attribute(InputNodeAttribute("chks"))
+
         self.add_output_attribute(OutputNodeAttribute("fvs"))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
@@ -466,7 +467,7 @@ class ViewNode_1D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute())
+        self.add_input_attribute(InputNodeAttribute("x"))
         self.simple_plot = dpg.generate_uuid()
 
     def custom(self):
@@ -479,8 +480,7 @@ class ViewNode_1D(Node):
 
         # plot_id = self._static_attributes[0].simple_plot
         # plot_id = self._input_attributes[0].simple_plot
-        plot_id = 42
-        dpg.set_value(plot_id, self._input_attributes[0].get_data())
+        dpg.set_value(self.simple_plot, self._input_attributes[0].get_data())
         self.finish()
 
 
@@ -512,6 +512,45 @@ class ViewNode_2D(Node):
 
         x_orig_data = self._input_attributes[0].get_data()
         y_orig_data = self._input_attributes[1].get_data()
+
+        dpg.add_line_series(x_orig_data, y_orig_data, parent=y_axis_id)
+        dpg.fit_axis_data(x_axis_id)
+        dpg.fit_axis_data(y_axis_id)
+
+        self.finish()
+
+
+class PlotNode_1D(Node):
+    @staticmethod
+    def factory(name, data):
+        node = PlotNode_1D(name, data)
+        return node
+
+    def __init__(self, label: str, data):
+        super().__init__(label, data)
+
+        self.add_input_attribute(InputNodeAttribute("y"))
+        # self.add_input_attribute(InputNodeAttribute("y"))
+
+        self.x_axis = dpg.generate_uuid()
+        self.y_axis = dpg.generate_uuid()
+
+    def custom(self):
+
+        with dpg.plot(height=400, width=400, no_title=True):
+            dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
+            dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
+
+    def execute(self):
+
+        x_axis_id = self.x_axis
+        y_axis_id = self.y_axis
+
+        # x_orig_data = self._input_attributes[0].get_data()
+        y_orig_data = self._input_attributes[0].get_data()
+        print(y_orig_data)
+        # x_orig_data = range(len(y_orig_data))
+        x_orig_data = range(10)
 
         dpg.add_line_series(x_orig_data, y_orig_data, parent=y_axis_id)
         dpg.fit_axis_data(x_axis_id)
@@ -655,9 +694,11 @@ class App:
         self.add_tool("Checker Tool", CheckerNode.factory)
         self.add_tool("Value Tool", ValueNode.factory)
         self.add_inspector("MinMax", MaxMinNode.factory)
-        self.add_modifier("Data Shifter", DataShifterNode.factory)
+        # self.add_modifier("Data Shifter", DataShifterNode.factory)
         self.add_modifier("Chunker", ChunkerNode.factory)
         self.add_modifier("Featurizer", FeaturizerNode.factory)
+        self.add_modifier("Plotter", PlotNode_1D.factory)
+        # PlotNode_1D
 
     def update(self):
 
