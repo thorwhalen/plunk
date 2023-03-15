@@ -30,22 +30,31 @@ def spectrogram_plot(
 ):
     ax.specgram(graph_data, Fs=sr)
     ax.title.set_text(title)
+    ax.xaxis.set_label_text('Time (sec)')
+    ax.yaxis.set_label_text('Frequency (Hz)')
+    ax.set_yscale('linear')
 
 
-def line_plot(ax: Axes, graph_data: Sequence[Union[int, float]], sr, title='Waveform'):
+def waveform_plot(
+    ax: Axes, graph_data: Sequence[float], sr, title='Waveform',
+):
     time = np.arange(len(graph_data)) / sr
     ax.plot(time, graph_data)
     ax.title.set_text(title)
     ax.margins(x=0)  # remove white space from line plot
+    ax.xaxis.set_label_text('Time (sec)')
+    ax.yaxis.set_label_text('Magnitude')
+    ax.set_ylim(ymin=-1, ymax=1)
+    ax.set_yticklabels([])
 
 
 def plot_data(
     wf: Sequence[Union[int, float]], sr: int, figsize=FIG_SIZE,
 ):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
-    line_plot(ax1, wf, sr)
+    waveform_plot(ax1, wf, sr)
     spectrogram_plot(ax2, wf, sr)
-    fig.subplots_adjust(hspace=0.3)  # increase spacing between subplots
+    fig.subplots_adjust(hspace=0.5)  # increase spacing between subplots
     st.pyplot(fig)
     plt.close(fig)
 
@@ -76,6 +85,13 @@ class WfVisualizePlayer(OutputBase):
 
     @only_if_output
     def render(self):
+        if np.any((self.wf > 1) | (self.wf < -1)):
+            st.error(
+                'Waveform signal should be bounded between [-1; 1]. '
+                'If incoming signal x is encoded in int16, then apply x = x / 2**15'
+            )
+            return
+
         if self.wf.ndim > 1:
             for i, ch_wf in enumerate(self.wf):
                 render_channel(i, ch_wf, self.sr)
