@@ -22,29 +22,30 @@ def only_if_output(f):
     return wrapper
 
 
-FIG_SIZE = (15, 2)
+FIG_SIZE = (15, 5)
 
 
-def spectrum_plot(ax: Axes, graph_data: Sequence[Union[int, float]], sr=None):
+def spectrum_plot(
+    ax: Axes, graph_data: Sequence[Union[int, float]], sr=None, title='Spectrum'
+):
     ax.specgram(graph_data, Fs=sr)
+    ax.title.set_text(title)
 
 
-def line_plot(ax: Axes, graph_data: Sequence[Union[int, float]], sr=None):
+def line_plot(ax: Axes, graph_data: Sequence[Union[int, float]], sr, title='Waveform'):
     time = np.arange(len(graph_data)) / sr
     ax.plot(time, graph_data)
+    ax.title.set_text(title)
+    ax.margins(x=0)  # remove white space from line plot
 
 
 def plot_data(
-    title: str,
-    graph_data: Sequence[Union[int, float]],
-    sr: int,
-    plot_ax: Callable[[Axes, Sequence[Union[int, float]], int], None],
-    figsize=FIG_SIZE,
+    wf: Sequence[Union[int, float]], sr: int, figsize=FIG_SIZE,
 ):
-    fig, ax = plt.subplots(figsize=figsize)
-    st.markdown(f'##### {title}')
-    plot_ax(ax, graph_data, sr)
-    ax.margins(x=0)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    line_plot(ax1, wf, sr)
+    spectrum_plot(ax2, wf, sr)
+    fig.subplots_adjust(hspace=0.3)  # increase spacing between subplots
     st.pyplot(fig)
     plt.close(fig)
 
@@ -53,12 +54,11 @@ def audio_player(wf, sr):
     st.audio(wf, sample_rate=sr)
 
 
-def render_channel(channel_index, wf, sr):
+def render_channel(channel_index, wf, sr, figsize=FIG_SIZE):
     box = st.empty()
     with box.container():
         st.markdown(f'## channel-{channel_index}')
-        plot_data('Waveform', wf, sr, line_plot)
-        plot_data('Spectrum', wf, sr, spectrum_plot)
+        plot_data(wf, sr, figsize)
         audio_player(wf, sr)
 
 
