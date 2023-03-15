@@ -49,8 +49,6 @@ def plot_data(
     plt.close(fig)
 
 
-
-
 def audio_player(wf, sr):
     st.audio(wf, sample_rate=sr)
 
