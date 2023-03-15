@@ -10,9 +10,9 @@ def create_plot_node(sender, data):
     # Create a figure and plot the input value
     fig, ax = plt.subplots()
     ax.plot(input_value)
-    ax.set_xlabel("Index")
-    ax.set_ylabel("Value")
-    ax.set_title("Input List")
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Value')
+    ax.set_title('Input List')
 
     # Display the plot
     plt.show()
@@ -22,11 +22,11 @@ with dpg.window():
     with dpg.node_editor():
         # Create an input node
         input_node_id = dpg.add_input_text_node(
-            label="Input List", data_type=dpg.mvDataType_Int_Array
+            label='Input List', data_type=dpg.mvDataType_Int_Array
         )
 
         # Create a view node
-        view_node_id = dpg.add_view_node(label="View List")
+        view_node_id = dpg.add_view_node(label='View List')
         dpg.set_node_callback(view_node_id, create_plot_node)
 
         # Connect the input node to the view node
