@@ -25,8 +25,8 @@ def only_if_output(f):
 FIG_SIZE = (15, 5)
 
 
-def spectrum_plot(
-    ax: Axes, graph_data: Sequence[Union[int, float]], sr=None, title='Spectrum'
+def spectrogram_plot(
+    ax: Axes, graph_data: Sequence[Union[int, float]], sr=None, title='Spectrogram'
 ):
     ax.specgram(graph_data, Fs=sr)
     ax.title.set_text(title)
@@ -44,7 +44,7 @@ def plot_data(
 ):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
     line_plot(ax1, wf, sr)
-    spectrum_plot(ax2, wf, sr)
+    spectrogram_plot(ax2, wf, sr)
     fig.subplots_adjust(hspace=0.3)  # increase spacing between subplots
     st.pyplot(fig)
     plt.close(fig)

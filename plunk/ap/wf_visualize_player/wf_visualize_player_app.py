@@ -16,7 +16,7 @@ from plunk.ap.wf_visualize_player.wf_visualize_player_element import (
 
 def wf_sine() -> WfSr:
     return (
-        mk_sine_wf(freq=20, n_samples=DFLT_N_SAMPLES, sr=DFLT_SR, phase=0.25, gain=3),
+        mk_sine_wf(freq=20, n_samples=DFLT_N_SAMPLES, sr=DFLT_SR, phase=0.25, gain=1),
         DFLT_SR,
     )
 
@@ -25,7 +25,8 @@ def wf_bleeps() -> WfSr:
     return (
         wf_with_timed_bleeps(
             n_samples=DFLT_N_SAMPLES, bleep_loc=1024 * 4, bleep_spec=1024, sr=DFLT_SR,
-        ),
+        )
+        / 2 ** 15,
         DFLT_SR,
     )
 
@@ -41,7 +42,8 @@ def wf_mix() -> WfSr:
 
 def wf_pure_tone() -> WfSr:
     return (
-        pure_tone(chk_size=DFLT_N_SAMPLES, freq=440, sr=DFLT_SR, max_amplitude=30000),
+        pure_tone(chk_size=DFLT_N_SAMPLES, freq=440, sr=DFLT_SR, max_amplitude=2 ** 15)
+        / 2 ** 15,
         DFLT_SR,
     )
 
