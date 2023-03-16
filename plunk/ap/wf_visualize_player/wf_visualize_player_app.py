@@ -13,7 +13,8 @@ from plunk.ap.wf_visualize_player.wf_visualize_player_element import (
     WfSr,
 )
 
-DFLT_N_SAMPLES = 10*DFLT_N_SAMPLES  # 10 sec
+DFLT_N_SAMPLES = 10 * DFLT_N_SAMPLES  # 10 sec
+
 
 def wf_sine() -> WfSr:
     return (
@@ -35,7 +36,10 @@ def wf_bleeps() -> WfSr:
 def wf_mix() -> WfSr:
     return (
         freq_based_stationary_wf(
-            freqs=(200, 500, 3700, 10000), weights=None, n_samples=DFLT_N_SAMPLES, sr=DFLT_SR,
+            freqs=(200, 500, 3700, 10000),
+            weights=None,
+            n_samples=DFLT_N_SAMPLES,
+            sr=DFLT_SR,
         ),
         DFLT_SR,
     )

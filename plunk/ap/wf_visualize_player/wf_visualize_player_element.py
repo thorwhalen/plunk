@@ -24,12 +24,15 @@ def only_if_output(f):
 
 FIG_SIZE = (15, 5)
 
+
 def spectrogram_plot(
     ax: Axes, graph_data: Sequence[Union[int, float]], sr=None, title='Spectrogram'
 ):
-    NFFT = max(256, 2**(round(np.log(len(graph_data)/500)/np.log(2))))  # to limit number of spectra
+    NFFT = max(
+        256, 2 ** (round(np.log(len(graph_data) / 500) / np.log(2)))
+    )  # to limit number of spectra
     f_res = sr / NFFT
-    log10_f = np.arange(np.ceil(np.log10(f_res)), np.ceil(np.log10(sr/2)))
+    log10_f = np.arange(np.ceil(np.log10(f_res)), np.ceil(np.log10(sr / 2)))
     f_ticks = 10 ** log10_f
 
     ax.title.set_text(title)
@@ -37,7 +40,7 @@ def spectrogram_plot(
     ax.yaxis.set_label_text('Frequency (Hz)')
     ax.set_yscale('log')
     ax.specgram(graph_data, Fs=sr, NFFT=NFFT)
-    ax.set_ylim(f_res, sr/2)
+    ax.set_ylim(f_res, sr / 2)
     ax.set_yticks(f_ticks)
 
 
