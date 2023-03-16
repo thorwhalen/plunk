@@ -28,24 +28,25 @@ FIG_SIZE = (15, 5)
 def spectrogram_plot(
     ax: Axes, graph_data: Sequence[Union[int, float]], sr=None, title='Spectrogram'
 ):
-    ax.specgram(graph_data, Fs=sr)
     ax.title.set_text(title)
     ax.xaxis.set_label_text('Time (sec)')
     ax.yaxis.set_label_text('Frequency (Hz)')
-    ax.set_yscale('linear')
+    ax.set_yscale('log')
+    ax.specgram(graph_data, Fs=sr)
+    ax.set_ylim(100, sr/2)
+    ax.set_yticklabels(['0', '100', '1k', '10k'])
 
 
 def waveform_plot(
     ax: Axes, graph_data: Sequence[float], sr, title='Waveform',
 ):
     time = np.arange(len(graph_data)) / sr
-    ax.plot(time, graph_data)
     ax.title.set_text(title)
     ax.margins(x=0)  # remove white space from line plot
     ax.xaxis.set_label_text('Time (sec)')
     ax.yaxis.set_label_text('Magnitude')
-    ax.set_ylim(ymin=-1, ymax=1)
     ax.set_yticklabels([])
+    ax.plot(time, graph_data)
 
 
 def plot_data(
