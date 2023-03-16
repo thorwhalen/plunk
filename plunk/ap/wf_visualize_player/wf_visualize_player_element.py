@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Iterable, Union, Tuple, Sequence, Callable
+from typing import Union, Tuple, Sequence
 
 import streamlit as st
 import numpy as np
@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from front.elements import OutputBase
 from matplotlib.axes import Axes
 
-from plunk.ap.live_graph.live_graph_streamlitfront import line_plot
 
 WfSr = Tuple[np.ndarray, int]
 
@@ -38,10 +37,10 @@ def spectrogram_plot(
     ax.title.set_text(title)
     ax.xaxis.set_label_text('Time (sec)')
     ax.yaxis.set_label_text('Frequency (Hz)')
-    ax.set_yscale('log')
     ax.specgram(graph_data, Fs=sr, NFFT=NFFT)
     ax.set_ylim(f_res, sr / 2)
     ax.set_yticks(f_ticks)
+    ax.set_yscale('log')
 
 
 def waveform_plot(

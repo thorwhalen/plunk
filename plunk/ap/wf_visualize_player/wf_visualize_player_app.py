@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 from hum import (
     mk_sine_wf,
@@ -36,10 +38,7 @@ def wf_bleeps() -> WfSr:
 def wf_mix() -> WfSr:
     return (
         freq_based_stationary_wf(
-            freqs=(200, 500, 3700, 10000),
-            weights=None,
-            n_samples=DFLT_N_SAMPLES,
-            sr=DFLT_SR,
+            freqs=(2, 5, 37, 100), weights=None, n_samples=DFLT_N_SAMPLES, sr=DFLT_SR,
         ),
         DFLT_SR,
     )
@@ -47,7 +46,7 @@ def wf_mix() -> WfSr:
 
 def wf_pure_tone() -> WfSr:
     return (
-        pure_tone(chk_size=DFLT_N_SAMPLES, freq=440, sr=DFLT_SR, max_amplitude=2 ** 15)
+        pure_tone(chk_size=DFLT_N_SAMPLES, freq=1000, sr=DFLT_SR, max_amplitude=2 ** 15)
         / 2 ** 15,
         DFLT_SR,
     )
@@ -59,56 +58,48 @@ def wf_two_channel_sine_tone() -> WfSr:
     return np.array([s, t]), sr
 
 
+def wf_three_channel_mixed_sine_tone() -> WfSr:
+    m, _ = wf_mix()
+    s, _ = wf_sine()
+
+    t, sr = wf_pure_tone()
+    return np.array([m, s, t]), sr
+
+
 if __name__ == '__main__':
     from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
     from streamlitfront import mk_app
 
-    app = mk_app(
-        [wf_sine, wf_bleeps, wf_mix, wf_pure_tone, wf_two_channel_sine_tone],
-        config={
-            APP_KEY: {'title': 'Waveform Visualization Player'},
-            RENDERING_KEY: {
-                'wf_sine': {
-                    NAME_KEY: 'Sine',
-                    'description': {'content': 'Sine Waveform'},
-                    'execution': {
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
-                },
-                'wf_bleeps': {
-                    NAME_KEY: 'Bleeps',
-                    'description': {'content': 'Bleeps Waveform'},
-                    'execution': {
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
-                },
-                'wf_mix': {
-                    NAME_KEY: 'Mixed',
-                    'description': {'content': 'Mixed Frequency Waveform'},
-                    'execution': {
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
-                },
-                'wf_pure_tone': {
-                    NAME_KEY: 'Pure Tone',
-                    'description': {'content': 'Pure Tone Waveform'},
-                    'execution': {
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
-                },
-                'wf_two_channel_sine_tone': {
-                    NAME_KEY: '2 Channel',
-                    'description': {'content': 'Sine & Pure Tone Waveform'},
-                    'execution': {
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
+    sounds = [
+        wf_sine,
+        wf_bleeps,
+        wf_mix,
+        wf_pure_tone,
+        wf_two_channel_sine_tone,
+        wf_three_channel_mixed_sine_tone,
+    ]
+
+    def mk_rendering(wf_func: Callable):
+        key = wf_func.__name__
+        name = ' '.join(key.split('_')[1:])
+        # description = f'{name} waveform'
+        return (
+            key,
+            {
+                NAME_KEY: name,
+                # 'description': {'content': description},
+                'execution': {
+                    'output': {ELEMENT_KEY: WfVisualizePlayer},
+                    'auto_submit': True,
                 },
             },
+        )
+
+    app = mk_app(
+        sounds,
+        config={
+            APP_KEY: {'title': 'Waveform Visualization Player'},
+            RENDERING_KEY: {k: v for k, v in map(mk_rendering, sounds)},
         },
     )
     app()
