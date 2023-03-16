@@ -33,7 +33,7 @@ def spectrogram_plot(
     ax.yaxis.set_label_text('Frequency (Hz)')
     ax.set_yscale('log')
     ax.specgram(graph_data, Fs=sr)
-    ax.set_ylim(100, sr/2)
+    ax.set_ylim(100, sr / 2)
     ax.set_yticklabels(['0', '100', '1k', '10k'])
 
 
