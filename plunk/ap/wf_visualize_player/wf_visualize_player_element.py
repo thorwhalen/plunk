@@ -38,9 +38,9 @@ def spectrogram_plot(
     ax.xaxis.set_label_text('Time (sec)')
     ax.yaxis.set_label_text('Frequency (Hz)')
     ax.specgram(graph_data, Fs=sr, NFFT=NFFT)
+    ax.set_yscale('log')
     ax.set_ylim(f_res, sr / 2)
     ax.set_yticks(f_ticks)
-    ax.set_yscale('log')
 
 
 def waveform_plot(
