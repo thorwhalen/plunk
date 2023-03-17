@@ -1,6 +1,7 @@
-from streamlitfront.elements import SessionTable
-
 from typing import List, Dict, Union
+
+from plunk.ap.session_table.session_table_element import SessionTable
+
 
 # Session = Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]
 
@@ -175,7 +176,7 @@ def list_session(*a, **kw):
 
 
 def get_list_session_api():
-    return list_session
+    return None
 
 
 if __name__ == '__main__':
