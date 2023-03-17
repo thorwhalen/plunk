@@ -1,5 +1,8 @@
+"""
+Component has been moved to otosense/platform_poc repo
+https://github.com/otosense/platform_poc/blob/master/platform_poc/apps/web_client/components.py
+"""
 from dataclasses import dataclass
-from functools import wraps
 from typing import Union, Tuple, Sequence
 
 import streamlit as st
@@ -7,18 +10,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from front.elements import OutputBase
 from matplotlib.axes import Axes
-
+from plunk.ap.snippets import only_if_output
 
 WfSr = Tuple[np.ndarray, int]
-
-
-def only_if_output(f):
-    @wraps(f)
-    def wrapper(self: OutputBase, *a, **kw):
-        if self.output is not None:
-            return f(self, *a, **kw)
-
-    return wrapper
 
 
 FIG_SIZE = (15, 5)

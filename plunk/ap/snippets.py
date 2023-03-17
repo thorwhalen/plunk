@@ -1,6 +1,17 @@
 import timeit
-from functools import partial
+from functools import partial, wraps
 from collections import deque
+
+from front.elements import OutputBase
+
+
+def only_if_output(f):
+    @wraps(f)
+    def wrapper(self: OutputBase, *a, **kw):
+        if self.output is not None:
+            return f(self, *a, **kw)
+
+    return wrapper
 
 
 def get_mall(defaults: dict = None):
