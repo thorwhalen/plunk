@@ -1,9 +1,12 @@
 from typing import List, Dict, Union
 
-from plunk.ap.session_table.session_table_element import SessionTable
+from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
+from streamlitfront import mk_app, binder as b
 
-
-# Session = Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]
+from plunk.ap.session_table.session_table_element import (
+    SessionQuery,
+    OtoTableAll,
+)
 
 
 def mock_annotations(
@@ -42,157 +45,121 @@ def mock_session_gen(n: int = 10) -> List[Dict]:
                 'sr': sample_rates[i % 2],
                 'bit_depth': 8,
                 'channels': channels,
-                'annotations': mock_annotations(bt, tt, time_step / 10, i % 5 + 1),
+                'annotations': mock_annotations(bt, tt, int(time_step / 10), i % 5 + 1),
             }
         )
 
     return sessions
 
 
-#
-#
-# from typing import List, Optional, Dict
-#
-#
-# class Annotation:
-#     def __init__(self, name: str, bt: int, tt: int):
-#         self.name = name
-#         self.bt = bt
-#         self.tt = tt
-#
-#
-# class Channel:
-#     def __init__(self, name: str, description: str):
-#         self.name = name
-#         self.description = description
-#
-#
-# class Session:
-#     def __init__(
-#         self,
-#         ID: str,
-#         device_id: str,
-#         bt: int,
-#         tt: int,
-#         sr: int,
-#         bit_depth: int,
-#         channels: List[Channel],
-#         annotations: List[Annotation],
-#     ):
-#         self.ID = ID
-#         self.device_id = device_id
-#         self.bt = bt
-#         self.tt = tt
-#         self.sr = sr
-#         self.bit_depth = bit_depth
-#         self.channels = channels
-#         self.annotations = annotations
-#
-#
-# def mockAnnotations(start: int, stop: int, step: int, tag: int) -> List[Annotation]:
-#     annotations = []
-#     t = 1
-#     for i in range(start, stop, step):
-#         annotations.append(Annotation(f'tag{t}', i, i + step))
-#         t = (t % tag) + 1
-#     return annotations
-#
-#
-# def mockSessionGen(n: int = 10) -> List[Session]:
-#     sessions = []
-#     timeStep = 600000000
-#     sampleRates = [44100, 48000]
-#     for i in range(n):
-#         bt = 1677672000000000 + (i * timeStep)
-#         tt = 1677672000000000 + ((i + 1) * timeStep)
-#         channels = []
-#         for j in range(i % 4 + 1):
-#             channels.append(Channel(f'ch{j}', 'microphone'))
-#         sessions.append(
-#             Session(
-#                 f'mockSession{i}',
-#                 f'deviceId{(i % 2) + 1}',
-#                 bt,
-#                 tt,
-#                 sampleRates[i % 2],
-#                 8,
-#                 channels,
-#                 mockAnnotations(bt, tt, timeStep // 10, (i % 5) + 1),
-#             )
-#         )
-#     return sessions
-#
-#
-# def filterByNamesOperator(
-#     names: List[str], operator: str, namedList: List[Dict[str, str]]
-# ) -> bool:
-#     if operator == 'and' and not all(
-#         name in [item['name'] for item in namedList] for name in names
-#     ):
-#         return False
-#     elif operator == 'or' and not any(
-#         name in [item['name'] for item in namedList] for name in names
-#     ):
-#         return False
-#     return True
-#
-#
-# def filterSessions(
-#     f: Dict[str, Optional[int]], sessions: List[Session] = mockSessionGen(100)
-# ) -> List[Session]:
-#     _sessions = sessions[:]
-#     return list(
-#         filter(
-#             lambda s: (
-#                 (f['from_bt'] is None or s.bt >= f['from_bt'])
-#                 and (f['to_bt'] is None or s.bt <= f['to_bt'])
-#                 and (f['from_tt'] is None or s.tt >= f['from_tt'])
-#                 and (f['to_tt'] is None or s.tt <= f['to_tt'])
-#                 and (f['sr'] is None or s.sr == f['sr'])
-#                 and (
-#                     f['channels'] is None
-#                     or filterByNamesOperator(
-#                         f['channels']['names'],
-#                         f['channels']['operator'],
-#                         [vars(c) for c in s.channels],
-#                     )
-#                 )
-#                 and (
-#                     f['annotations'] is None
-#                     or filterByNamesOperator(
-#                         f['annotations']['names'],
-#                         f['annotations']['operator'],
-#                         [vars(a) for a in s.annotations],
-#                     )
-#                 )
-#             ),
-#             _sessions,
-#         )
-#     )
+def filterByNamesOperator(
+    names: List[str], operator: str, namedList: List[Dict[str, str]]
+) -> bool:
+    if operator == 'and' and not all(
+        name in [item['name'] for item in namedList] for name in names
+    ):
+        return False
+    elif operator == 'or' and not any(
+        name in [item['name'] for item in namedList] for name in names
+    ):
+        return False
+    return True
 
 
-def list_session(*a, **kw):
-    return mock_session_gen(100)
+def filterSessions(f: dict, sessions: List[dict]) -> List[dict]:
+    _sessions = sessions.copy()
+    return list(
+        filter(
+            lambda s: (
+                (f.get('from_bt') is None or s['bt'] >= f['from_bt'])
+                and (f.get('to_bt') is None or s['bt'] <= f['to_bt'])
+                and (f.get('from_tt') is None or s['tt'] >= f['from_tt'])
+                and (f.get('to_tt') is None or s['tt'] <= f['to_tt'])
+                and (f.get('sr') is None or s['sr'] == f['sr'])
+                and (
+                    f.get('channels') is None
+                    or filterByNamesOperator(
+                        f['channels']['names'],
+                        f['channels']['operator'],
+                        [c['name'] for c in s['channels']],
+                    )
+                )
+                and (
+                    f.get('annotations') is None
+                    or filterByNamesOperator(
+                        f['annotations']['names'],
+                        f['annotations']['operator'],
+                        [a['name'] for a in s['annotations']],
+                    )
+                )
+            ),
+            _sessions,
+        )
+    )
 
 
-def get_list_session_api():
-    return None
+def sort_sessions(sort, sessions: list):
+    _sessions = sessions.copy()
+    if len(_sessions) > 0:
+        _field = sort['field']
+        if sort['mode'] == 'asc':
+            _sessions = sorted(_sessions, key=lambda s: s[_field])
+        else:
+            _sessions = sorted(_sessions, key=lambda s: s[_field], reverse=True)
+    return _sessions
+
+
+MOCK_SESSIONS = mock_session_gen(1000)
+
+
+def mock_list_sessions(query: SessionQuery):
+    s = MOCK_SESSIONS.copy()
+
+    if not query:
+        return s
+    if _filter := query.get('filter'):
+        s = filterSessions(_filter, s)
+
+    if _sort := query.get('sort'):
+        s = sort_sessions(_sort, s)
+
+    if _pagination := query.get('pagination'):
+        s = s[_pagination.get('from_idx') : _pagination.get('to_idx')]
+
+    return s
 
 
 if __name__ == '__main__':
-    from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
-    from streamlitfront import mk_app
+
+    def identity(x):
+        return x
 
     app = mk_app(
-        [get_list_session_api],
+        [identity],
         config={
             APP_KEY: {'title': 'Session Table'},
             RENDERING_KEY: {
-                'get_list_session_api': {
+                # 'list_session': {
+                #     NAME_KEY: 'Session Table',
+                #     'description': {'content': 'Session Table'},
+                #     'execution': {
+                #         'inputs': {'query': {ELEMENT_KEY: OtoTableQuery,},},
+                #         'output': {ELEMENT_KEY: OtoTable},
+                #         'auto_submit': True,
+                #     },
+                # },
+                'identity': {
                     NAME_KEY: 'Session Table',
                     'description': {'content': 'Session Table'},
                     'execution': {
-                        'output': {ELEMENT_KEY: SessionTable},
+                        'inputs': {
+                            'x': {
+                                ELEMENT_KEY: OtoTableAll,
+                                'list_session': mock_list_sessions,
+                                'query': b.oto_table_query,
+                            },
+                        },
+                        # 'output': {ELEMENT_KEY: Pass},
                         'auto_submit': True,
                     },
                 },
