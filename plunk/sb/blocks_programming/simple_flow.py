@@ -86,7 +86,7 @@ with dpg.theme() as _tools_theme:
 # Node DPG Wrappings
 ########################################################################################################################
 class OutputNodeAttribute:
-    def __init__(self, label: str = "output"):
+    def __init__(self, label: str = 'output'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -116,7 +116,7 @@ class OutputNodeAttribute:
 
 
 class InputNodeAttribute:
-    def __init__(self, label: str = "input"):
+    def __init__(self, label: str = 'input'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -170,7 +170,7 @@ class Node:
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(
-                    label="Execute",
+                    label='Execute',
                     user_data=self,
                     callback=lambda s, a, u: u.execute(),
                 )
@@ -247,7 +247,7 @@ class DragSource:
         with dpg.drag_payload(
             parent=dpg.last_item(), drag_data=(self, self._generator, self._data)
         ):
-            dpg.add_text(f"Name: {self.label}")
+            dpg.add_text(f'Name: {self.label}')
 
 
 class DragSourceContainer:
@@ -291,9 +291,9 @@ class MaxMinNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("values"))
-        self.add_output_attribute(OutputNodeAttribute("min"))
-        self.add_output_attribute(OutputNodeAttribute("max"))
+        self.add_input_attribute(InputNodeAttribute('values'))
+        self.add_output_attribute(OutputNodeAttribute('min'))
+        self.add_output_attribute(OutputNodeAttribute('max'))
 
         self.min_id = dpg.generate_uuid()
         self.max_id = dpg.generate_uuid()
@@ -302,10 +302,10 @@ class MaxMinNode(Node):
 
         with dpg.group(width=150):
             dpg.add_text(
-                "Not Calculated", label="Min", show_label=True, tag=self.min_id
+                'Not Calculated', label='Min', show_label=True, tag=self.min_id
             )
             dpg.add_text(
-                "Not Calculated", label="Max", show_label=True, tag=self.max_id
+                'Not Calculated', label='Max', show_label=True, tag=self.max_id
             )
 
     def execute(self):
@@ -395,8 +395,8 @@ class ChunkerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("wf"))
-        self.add_output_attribute(OutputNodeAttribute("chks"))
+        self.add_input_attribute(InputNodeAttribute('wf'))
+        self.add_output_attribute(OutputNodeAttribute('chks'))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
         self.x_shift = dpg.generate_uuid()
@@ -404,7 +404,7 @@ class ChunkerNode(Node):
 
     def custom(self):
 
-        dpg.add_input_int(label="chk_size", tag=self.x_shift, step=0, width=150)
+        dpg.add_input_int(label='chk_size', tag=self.x_shift, step=0, width=150)
         # dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
     def execute(self):
@@ -436,9 +436,9 @@ class FeaturizerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("chks"))
+        self.add_input_attribute(InputNodeAttribute('chks'))
 
-        self.add_output_attribute(OutputNodeAttribute("fvs"))
+        self.add_output_attribute(OutputNodeAttribute('fvs'))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
         self.x_shift = dpg.generate_uuid()
@@ -446,7 +446,7 @@ class FeaturizerNode(Node):
 
     def custom(self):
 
-        dpg.add_input_float(label="x", tag=self.x_shift, step=0, width=150)
+        dpg.add_input_float(label='x', tag=self.x_shift, step=0, width=150)
         # dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
     def execute(self):
@@ -481,13 +481,13 @@ class ViewNode_1D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
+        self.add_input_attribute(InputNodeAttribute('x'))
         self.simple_plot = dpg.generate_uuid()
 
     def custom(self):
 
         dpg.add_simple_plot(
-            label="Data View", width=200, height=80, tag=self.simple_plot
+            label='Data View', width=200, height=80, tag=self.simple_plot
         )
 
     def execute(self):
@@ -507,8 +507,8 @@ class ViewNode_2D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
-        self.add_input_attribute(InputNodeAttribute("y"))
+        self.add_input_attribute(InputNodeAttribute('x'))
+        self.add_input_attribute(InputNodeAttribute('y'))
 
         self.x_axis = dpg.generate_uuid()
         self.y_axis = dpg.generate_uuid()
@@ -516,8 +516,8 @@ class ViewNode_2D(Node):
     def custom(self):
 
         with dpg.plot(height=400, width=400, no_title=True):
-            dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
-            dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
+            dpg.add_plot_axis(dpg.mvXAxis, label='', tag=self.x_axis)
+            dpg.add_plot_axis(dpg.mvYAxis, label='', tag=self.y_axis)
 
     def execute(self):
 
@@ -543,7 +543,7 @@ class PlotNode_1D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("y"))
+        self.add_input_attribute(InputNodeAttribute('y'))
         # self.add_input_attribute(InputNodeAttribute("y"))
 
         self.x_axis = dpg.generate_uuid()
@@ -552,8 +552,8 @@ class PlotNode_1D(Node):
     def custom(self):
 
         with dpg.plot(height=400, width=400, no_title=True):
-            dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
-            dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
+            dpg.add_plot_axis(dpg.mvXAxis, label='', tag=self.x_axis)
+            dpg.add_plot_axis(dpg.mvYAxis, label='', tag=self.y_axis)
 
     def execute(self):
 
@@ -582,7 +582,7 @@ class CheckerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("Value"))
+        self.add_input_attribute(InputNodeAttribute('Value'))
 
         self.expected_id = dpg.generate_uuid()
         self.min_id = dpg.generate_uuid()
@@ -617,15 +617,15 @@ class CheckerNode(Node):
 
         with dpg.group(width=150):
             dpg.add_input_float(
-                label="Expected Value", step=0.0, tag=self.expected_id, default_value=10
+                label='Expected Value', step=0.0, tag=self.expected_id, default_value=10
             )
             dpg.add_input_float(
-                label="Max Tolerance", step=0.0, tag=self.max_id, default_value=0.05
+                label='Max Tolerance', step=0.0, tag=self.max_id, default_value=0.05
             )
             dpg.add_input_float(
-                label="Min Tolerance", step=0.0, tag=self.min_id, default_value=0.05
+                label='Min Tolerance', step=0.0, tag=self.min_id, default_value=0.05
             )
-            dpg.add_radio_button(items=["Status"], tag=self.status_id)
+            dpg.add_radio_button(items=['Status'], tag=self.status_id)
             dpg.set_item_theme(self.status_id, self.neutral)
 
     def execute(self):
@@ -658,7 +658,7 @@ class ValueNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_output_attribute(OutputNodeAttribute("Value"))
+        self.add_output_attribute(OutputNodeAttribute('Value'))
 
         self.value = dpg.generate_uuid()
 
@@ -666,7 +666,7 @@ class ValueNode(Node):
 
         with dpg.group(width=150):
             dpg.add_input_float(
-                label="Input Value", step=0, tag=self.value, default_value=10
+                label='Input Value', step=0, tag=self.value, default_value=10
             )
 
     def execute(self):
@@ -705,15 +705,15 @@ class App:
     @staticmethod
     def data_node_factory(name, data):
         node = Node(name, data)
-        node.add_output_attribute(OutputNodeAttribute("data"))
+        node.add_output_attribute(OutputNodeAttribute('data'))
         return node
 
     def __init__(self):
 
-        self.data_set_container = DragSourceContainer("Data Sets", 150, -500)
-        self.tool_container = DragSourceContainer("Tools", 150, -1)
-        self.inspector_container = DragSourceContainer("Inspectors", 150, -500)
-        self.modifier_container = DragSourceContainer("Functions", 150, -1)
+        self.data_set_container = DragSourceContainer('Data Sets', 150, -500)
+        self.tool_container = DragSourceContainer('Tools', 150, -1)
+        self.inspector_container = DragSourceContainer('Inspectors', 150, -500)
+        self.modifier_container = DragSourceContainer('Functions', 150, -1)
         self.plugin_menu_id = dpg.generate_uuid()
         self.left_panel = dpg.generate_uuid()
         self.right_panel = dpg.generate_uuid()
@@ -721,17 +721,17 @@ class App:
         self.plugins = []
 
         self.add_data_set(
-            "Test Data", [-5.0, -5.0, -3.0, -3.0, 0.0, 0.0, 3.0, 3.0, 5.0, 5.0]
+            'Test Data', [-5.0, -5.0, -3.0, -3.0, 0.0, 0.0, 3.0, 3.0, 5.0, 5.0]
         )
-        self.add_tool("1D Data View", ViewNode_1D.factory)
-        self.add_tool("2D Data View", ViewNode_2D.factory)
-        self.add_tool("Checker Tool", CheckerNode.factory)
-        self.add_tool("Value Tool", ValueNode.factory)
-        self.add_inspector("MinMax", MaxMinNode.factory)
+        self.add_tool('1D Data View', ViewNode_1D.factory)
+        self.add_tool('2D Data View', ViewNode_2D.factory)
+        self.add_tool('Checker Tool', CheckerNode.factory)
+        self.add_tool('Value Tool', ValueNode.factory)
+        self.add_inspector('MinMax', MaxMinNode.factory)
         # self.add_modifier("Data Shifter", DataShifterNode.factory)
-        self.add_modifier("Chunker", ChunkerNode.factory)
-        self.add_modifier("Featurizer", FeaturizerNode.factory)
-        self.add_modifier("Plotter", PlotNode_1D.factory)
+        self.add_modifier('Chunker', ChunkerNode.factory)
+        self.add_modifier('Featurizer', FeaturizerNode.factory)
+        self.add_modifier('Plotter', PlotNode_1D.factory)
         # PlotNode_1D
 
     def update(self):
@@ -765,6 +765,7 @@ class App:
     def start(self):
 
         # dpg.setup_registries()
+<<<<<<< HEAD
         from dearpygui_ext.themes import create_theme_imgui_light
 
         dpg.create_context()
@@ -773,6 +774,9 @@ class App:
         light_theme = create_theme_imgui_light()
         dpg.bind_theme(light_theme)
         dpg.set_viewport_title("Simple Data Flow")
+=======
+        dpg.set_viewport_title('Simple Data Flow')
+>>>>>>> ead567c7c8b236b24ce0e5c83b8b5dbd9f3cef1e
         dpg.show_viewport()
         node_editor = NodeEditor()
 
@@ -780,10 +784,10 @@ class App:
 
             with dpg.menu_bar():
 
-                with dpg.menu(label="Operations"):
+                with dpg.menu(label='Operations'):
 
                     dpg.add_menu_item(
-                        label="Reset",
+                        label='Reset',
                         callback=lambda: dpg.delete_item(
                             node_editor.uuid, children_only=True
                         ),
@@ -794,7 +798,7 @@ class App:
                         callback=lambda: view_state(node_editor),
                     )
 
-                with dpg.menu(label="Plugins"):
+                with dpg.menu(label='Plugins'):
                     for plugin in self.plugins:
                         dpg.add_menu_item(label=plugin[0], callback=plugin[1])
 
@@ -817,7 +821,7 @@ class App:
         dpg.start_dearpygui()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     app = App()
     app.start()

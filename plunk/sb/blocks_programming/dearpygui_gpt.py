@@ -6,10 +6,19 @@ dpg.create_context()
 class OutputNodeAttribute:
     def __init__(self, label: str = "output"):
 
+<<<<<<< HEAD
         self._label = label
         self.uuid = dpg.generate_uuid()
         self._children = []  # output attributes
         self._data = None
+=======
+    # Create a figure and plot the input value
+    fig, ax = plt.subplots()
+    ax.plot(input_value)
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Value')
+    ax.set_title('Input List')
+>>>>>>> ead567c7c8b236b24ce0e5c83b8b5dbd9f3cef1e
 
     def add_child(self, parent, child):
 
@@ -33,6 +42,7 @@ class OutputNodeAttribute:
             dpg.add_text(self._label)
 
 
+<<<<<<< HEAD
 class InputNodeAttribute:
     def __init__(self, label: str = "input"):
 
@@ -40,6 +50,18 @@ class InputNodeAttribute:
         self.uuid = dpg.generate_uuid()
         self._parent = None  # input attribute
         self._data = None
+=======
+with dpg.window():
+    with dpg.node_editor():
+        # Create an input node
+        input_node_id = dpg.add_input_text_node(
+            label='Input List', data_type=dpg.mvDataType_Int_Array
+        )
+
+        # Create a view node
+        view_node_id = dpg.add_view_node(label='View List')
+        dpg.set_node_callback(view_node_id, create_plot_node)
+>>>>>>> ead567c7c8b236b24ce0e5c83b8b5dbd9f3cef1e
 
     def get_data(self):
         return self._data
