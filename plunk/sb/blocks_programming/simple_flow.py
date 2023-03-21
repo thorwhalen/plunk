@@ -51,7 +51,9 @@ dpg.setup_dearpygui()
 
 with dpg.theme() as _source_theme:
     with dpg.theme_component(dpg.mvButton):
-        dpg.add_theme_color(dpg.mvThemeCol_Button, [25, 119, 0])
+        # dpg.add_theme_color(dpg.mvThemeCol_Button, [25, 119, 0])
+        dpg.add_theme_color(dpg.mvThemeCol_Button, [116, 185, 255])
+
         dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, [25, 255, 0])
         dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, [25, 119, 0])
 
@@ -67,7 +69,19 @@ with dpg.theme() as _completion_theme:
             dpg.mvNodeCol_TitleBarSelected, [37, 28, 138], category=dpg.mvThemeCat_Nodes
         )
 
-
+with dpg.theme() as _tools_theme:
+    with dpg.theme_component(dpg.mvAll):
+        dpg.add_theme_color(
+            dpg.mvNodeCol_TitleBar, [225, 112, 85], category=dpg.mvThemeCat_Nodes
+        )
+        dpg.add_theme_color(
+            dpg.mvNodeCol_TitleBarHovered, [225, 112, 85], category=dpg.mvThemeCat_Nodes
+        )
+        dpg.add_theme_color(
+            dpg.mvNodeCol_TitleBarSelected,
+            [225, 112, 85],
+            category=dpg.mvThemeCat_Nodes,
+        )
 ########################################################################################################################
 # Node DPG Wrappings
 ########################################################################################################################
@@ -667,6 +681,26 @@ class ValueNode(Node):
 ########################################################################################################################
 # Application
 ########################################################################################################################
+def save_graph(node_editor):
+    import json
+
+    state = dpg.get_item_configuration(node_editor)
+
+    # save the state to a JSON file
+    with open("my_graph.json", "w") as f:
+        json.dump(state, f)
+
+
+def view_state(node_editor):
+    nodes = node_editor._nodes
+    for node in nodes:
+        # print(node._label, node._data)
+        print(f"{node=}, {vars(node)}")
+        print(f"Children:\n")
+        print([dir(attribute) for attribute in node._output_attributes])
+        print(dir(node))
+
+
 class App:
     @staticmethod
     def data_node_factory(name, data):
@@ -731,6 +765,13 @@ class App:
     def start(self):
 
         # dpg.setup_registries()
+        from dearpygui_ext.themes import create_theme_imgui_light
+
+        dpg.create_context()
+        # dpg.create_viewport(title='Custom Title', width=600, height=600)
+
+        light_theme = create_theme_imgui_light()
+        dpg.bind_theme(light_theme)
         dpg.set_viewport_title("Simple Data Flow")
         dpg.show_viewport()
         node_editor = NodeEditor()
@@ -746,6 +787,11 @@ class App:
                         callback=lambda: dpg.delete_item(
                             node_editor.uuid, children_only=True
                         ),
+                    )
+                    dpg.add_menu_item(
+                        label="Save graph",
+                        # callback=lambda: save_graph(node_editor),
+                        callback=lambda: view_state(node_editor),
                     )
 
                 with dpg.menu(label="Plugins"):
