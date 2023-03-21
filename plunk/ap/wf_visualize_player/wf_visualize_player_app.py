@@ -66,6 +66,14 @@ def wf_three_channel_mixed_sine_tone() -> WfSr:
     return np.array([m, s, t]), sr
 
 
+def wf_four_channel() -> WfSr:
+    m, _ = wf_mix()
+    s, _ = wf_sine()
+    b, _ = wf_bleeps()
+    t, sr = wf_pure_tone()
+    return np.array([m, s, b, t]), sr
+
+
 if __name__ == '__main__':
     from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
     from streamlitfront import mk_app
