@@ -1,12 +1,16 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, TypedDict
 
 from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
-from streamlitfront import mk_app, binder as b
+from plunk.ap.wf_visualize_player.wf_visualize_player_element import WfVisualizePlayer
+from streamlitfront import mk_app
 
-from plunk.ap.session_table.session_table_element import (
-    SessionQuery,
-    OtoTableAll,
-)
+from plunk.ap.session_table.session_table_element import OtoTable
+
+
+class SessionQuery(TypedDict):
+    filter: dict
+    sort: dict
+    pagination: dict
 
 
 def mock_annotations(
@@ -134,32 +138,58 @@ if __name__ == '__main__':
     def identity(x):
         return x
 
+    def session_wf(sessions):
+        if sessions:
+            from plunk.ap.wf_visualize_player.wf_visualize_player_app import (
+                wf_mix,
+                wf_two_channel_sine_tone,
+                wf_three_channel_mixed_sine_tone,
+                wf_four_channel,
+            )
+
+            session = next(s for s in MOCK_SESSIONS if s.get('ID') == sessions[0])
+            n_channels = len(session.get('channels', 1))
+            example_wfs = {
+                1: wf_mix,
+                2: wf_two_channel_sine_tone,
+                3: wf_three_channel_mixed_sine_tone,
+                4: wf_four_channel,
+            }
+
+            return example_wfs[n_channels]()
+
     app = mk_app(
-        [identity],
+        [identity, session_wf],
         config={
             APP_KEY: {'title': 'Session Table'},
             RENDERING_KEY: {
-                # 'list_session': {
-                #     NAME_KEY: 'Session Table',
-                #     'description': {'content': 'Session Table'},
-                #     'execution': {
-                #         'inputs': {'query': {ELEMENT_KEY: OtoTableQuery,},},
-                #         'output': {ELEMENT_KEY: OtoTable},
-                #         'auto_submit': True,
-                #     },
-                # },
                 'identity': {
-                    NAME_KEY: 'Session Table',
-                    'description': {'content': 'Session Table'},
+                    NAME_KEY: 'Session Table Multiselect',
+                    'description': {'content': 'Session Table Multiselect'},
                     'execution': {
                         'inputs': {
                             'x': {
-                                ELEMENT_KEY: OtoTableAll,
-                                'list_session': mock_list_sessions,
-                                'query': b.oto_table_query,
+                                ELEMENT_KEY: OtoTable,
+                                'sessions': MOCK_SESSIONS,
+                                'is_multiselect': True,
                             },
                         },
                         # 'output': {ELEMENT_KEY: Pass},
+                        'auto_submit': True,
+                    },
+                },
+                'session_wf': {
+                    NAME_KEY: 'Session Table Single Select',
+                    'description': {'content': 'Session Table Single Select'},
+                    'execution': {
+                        'inputs': {
+                            'sessions': {
+                                ELEMENT_KEY: OtoTable,
+                                'sessions': MOCK_SESSIONS,
+                                'is_multiselect': False,
+                            },
+                        },
+                        'output': {ELEMENT_KEY: WfVisualizePlayer},
                         'auto_submit': True,
                     },
                 },
