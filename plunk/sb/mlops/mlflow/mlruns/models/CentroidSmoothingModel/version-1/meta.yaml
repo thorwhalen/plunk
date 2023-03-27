@@ -1,0 +1,12 @@
+creation_timestamp: 1679582627412
+current_stage: None
+description: null
+last_updated_timestamp: 1679582627412
+name: CentroidSmoothingModel
+run_id: 50d8d840454545f3a0af5b185d800192
+run_link: null
+source: file:///Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/mlops/mlflow/mlruns/0/50d8d840454545f3a0af5b185d800192/artifacts/model
+status: READY
+status_message: null
+user_id: null
+version: 1
