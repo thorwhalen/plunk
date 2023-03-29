@@ -21,8 +21,35 @@ import os
 import warnings
 
 # Create an experiment with your api key
+import os
+from config2py import get_config, ask_user_for_input, get_configs_local_store
+
+# can specify a name of a subdirectory as an argument. By default, will be config2py'
+
+configs_local_store = get_configs_local_store()
+
+api_key = get_config(
+    "comet.ini",
+    sources=[
+        # Try to find it in oa configs
+        configs_local_store,
+        # Try to find it in os.environ (environmental variables)
+        os.environ,
+        # If not, ask the user to input it
+        lambda k: ask_user_for_input(
+            f"Please set your comet API key and press enter to continue. "
+            "If you don't have one, you can get one at "
+            "https://www.comet.com/ ",
+            mask_input=True,
+            masking_toggle_str="",
+            egress=lambda v: configs_local_store.__setitem__(k, v),
+        ),
+    ],
+).rstrip()
+
+
 experiment = Experiment(
-    api_key="68ycobZeRe4wslOtdD7sfszp8",
+    api_key=api_key,
     project_name="general",
     workspace="sylvainbonnot",
 )
