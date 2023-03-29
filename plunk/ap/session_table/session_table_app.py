@@ -133,67 +133,69 @@ def mock_list_sessions(query: SessionQuery):
     return s
 
 
-if __name__ == '__main__':
+def identity(x):
+    return x
 
-    def identity(x):
-        return x
 
-    def session_wf(sessions):
-        if sessions:
-            from plunk.ap.wf_visualize_player.wf_visualize_player_app import (
-                wf_mix,
-                wf_two_channel_sine_tone,
-                wf_three_channel_mixed_sine_tone,
-                wf_four_channel,
-            )
+def session_wf(sessions):
+    if sessions:
+        from plunk.ap.wf_visualize_player.wf_visualize_player_app import (
+            wf_mix,
+            wf_two_channel_sine_tone,
+            wf_three_channel_mixed_sine_tone,
+            wf_four_channel,
+        )
 
-            session = next(s for s in MOCK_SESSIONS if s.get('ID') == sessions[0])
-            n_channels = len(session.get('channels', 1))
-            example_wfs = {
-                1: wf_mix,
-                2: wf_two_channel_sine_tone,
-                3: wf_three_channel_mixed_sine_tone,
-                4: wf_four_channel,
-            }
+        session = next(s for s in MOCK_SESSIONS if s.get('ID') == sessions[0])
+        n_channels = len(session.get('channels', 1))
+        example_wfs = {
+            1: wf_mix,
+            2: wf_two_channel_sine_tone,
+            3: wf_three_channel_mixed_sine_tone,
+            4: wf_four_channel,
+        }
 
-            return example_wfs[n_channels]()
+        return example_wfs[n_channels]()
 
-    app = mk_app(
-        [identity, session_wf],
-        config={
-            APP_KEY: {'title': 'Session Table'},
-            RENDERING_KEY: {
-                'identity': {
-                    NAME_KEY: 'Session Table Multiselect',
-                    'description': {'content': 'Session Table Multiselect'},
-                    'execution': {
-                        'inputs': {
-                            'x': {
-                                ELEMENT_KEY: OtoTable,
-                                'sessions': MOCK_SESSIONS,
-                                'is_multiselect': True,
-                            },
-                        },
-                        # 'output': {ELEMENT_KEY: Pass},
-                        'auto_submit': True,
+
+features = [identity, session_wf]
+
+config = {
+    APP_KEY: {'title': 'Session Table'},
+    RENDERING_KEY: {
+        'identity': {
+            NAME_KEY: 'Session Table Multiselect',
+            'description': {'content': 'Session Table Multiselect'},
+            'execution': {
+                'inputs': {
+                    'x': {
+                        ELEMENT_KEY: OtoTable,
+                        'sessions': MOCK_SESSIONS,
+                        'is_multiselect': True,
                     },
                 },
-                'session_wf': {
-                    NAME_KEY: 'Session Table Single Select',
-                    'description': {'content': 'Session Table Single Select'},
-                    'execution': {
-                        'inputs': {
-                            'sessions': {
-                                ELEMENT_KEY: OtoTable,
-                                'sessions': MOCK_SESSIONS,
-                                'is_multiselect': False,
-                            },
-                        },
-                        'output': {ELEMENT_KEY: WfVisualizePlayer},
-                        'auto_submit': True,
-                    },
-                },
+                'auto_submit': True,
             },
         },
-    )
+        'session_wf': {
+            NAME_KEY: 'Session Table Single Select',
+            'description': {'content': 'Session Table Single Select'},
+            'execution': {
+                'inputs': {
+                    'sessions': {
+                        ELEMENT_KEY: OtoTable,
+                        'sessions': MOCK_SESSIONS,
+                        'is_multiselect': False,
+                    },
+                },
+                'output': {ELEMENT_KEY: WfVisualizePlayer},
+                'auto_submit': True,
+            },
+        },
+    },
+}
+
+
+if __name__ == '__main__':
+    app = mk_app(features, config=config)
     app()
