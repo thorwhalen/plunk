@@ -20,39 +20,38 @@ import os
 
 import warnings
 
-# Create an experiment with your api key
 import os
-from config2py import get_config, ask_user_for_input, get_configs_local_store
-
-# can specify a name of a subdirectory as an argument. By default, will be config2py'
-
-configs_local_store = get_configs_local_store()
-
-api_key = get_config(
-    "comet.ini",
-    sources=[
-        # Try to find it in oa configs
-        configs_local_store,
-        # Try to find it in os.environ (environmental variables)
-        os.environ,
-        # If not, ask the user to input it
-        lambda k: ask_user_for_input(
-            f"Please set your comet API key and press enter to continue. "
-            "If you don't have one, you can get one at "
-            "https://www.comet.com/ ",
-            mask_input=True,
-            masking_toggle_str="",
-            egress=lambda v: configs_local_store.__setitem__(k, v),
-        ),
-    ],
-).rstrip()
+from config2py import get_configs_local_store
 
 
-experiment = Experiment(
-    api_key=api_key,
-    project_name="general",
-    workspace="sylvainbonnot",
-)
+def mk_experiment():
+    import configparser
+
+    conf_store = get_configs_local_store()
+    try:
+        s = conf_store["comet.ini"]
+    except KeyError:
+        raise KeyError(
+            "Could not find comet.ini in your config store. "
+            "Please create one in the form:"
+            "***************"
+            "[EXPERIMENT]"
+            "api_key = your_api_key"
+            "project_name=your_project"
+            "workspace=workspace"
+            "***************"
+            "You can those https://www.comet.com/ "
+        )
+    config = configparser.ConfigParser()
+    config.read_string(s)
+    return Experiment(
+        api_key=config["EXPERIMENT"]["api_key"],
+        project_name=config["EXPERIMENT"]["project_name"],
+        workspace=config["EXPERIMENT"]["workspace"],
+    )
+
+
+experiment = mk_experiment()
 
 # Report multiple hyperparameters using a dictionary:
 hyper_params = {
