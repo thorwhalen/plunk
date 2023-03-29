@@ -17,11 +17,39 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import os
 
+
+import os
+from config2py import get_configs_local_store
+
+
+def mk_run_params():
+    import configparser
+
+    conf_store = get_configs_local_store()
+    try:
+        s = conf_store["neptune.ini"]
+    except KeyError:
+        raise KeyError(
+            "Could not find comet.ini in your config store. "
+            "Please create one in the form:"
+            "***************"
+            "[PARAMS]"
+            "project=your_project_name"
+            "api_token=your_api_token"
+            "***************"
+            "You can get those at https://neptune.ai "
+        )
+    config = configparser.ConfigParser()
+    config.read_string(s)
+    return {
+        "project": config["PARAMS"]["project"],
+        "api_token": config["PARAMS"]["api_token"],
+    }
+
+
 # Create a Neptune run object
-run = neptune.init_run(
-    project="sppbonnot/PSMS",
-    api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vbmV3LXVpLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9uZXctdWkubmVwdHVuZS5haSIsImFwaV9rZXkiOiJmNGE4MmRkNi03OTQwLTQyMTItYTRmOS1jYjAzZDEyZGMyZTYifQ==",
-)  # your credentials
+run = neptune.init_run(**mk_run_params())  # your credentials
+
 
 # Track metadata and hyperparameters by assigning them to the run
 run["algorithm"] = "CentroidSmoothing"
