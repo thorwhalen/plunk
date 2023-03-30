@@ -46,7 +46,7 @@ def audio_anomalies():
 
 # filepath = /Users/sylvain/Dropbox/Otosense/VacuumEdgeImpulse/train/noise.AirConditioner_2.9.1440000-1600000.wav.23q8e34o.ingestion-6bc8b65f8c-vrv59.wav
 
-file_to_bytes = Pipe(Path, methodcaller("read_bytes"))
+file_to_bytes = Pipe(Path, methodcaller('read_bytes'))
 wav_file_to_array = Pipe(
     file_to_bytes,
     decode_wav_bytes,
@@ -75,15 +75,15 @@ func_mapping = dict(
         sml.auto_spectral_anomaly_learner,
         allow_removal_of_non_defaulted_params=True,
         params_to_remove=[
-            "learner",
-            "chk_size",
-            "chk_step",
-            "n_features",
-            "n_centroids",
-            "log_factor",
+            'learner',
+            'chk_size',
+            'chk_step',
+            'n_features',
+            'n_centroids',
+            'log_factor',
         ],
     ),
-    apply=PicklableLambda(lambda model, wf: model(wf), name="step3"),
+    apply=PicklableLambda(lambda model, wf: model(wf), name='step3'),
     display_results=visualize_results,
 )
 audio_anomalies = ch_funcs(
@@ -92,7 +92,7 @@ audio_anomalies = ch_funcs(
 
 print(f'{Sig(func_mapping["train"])=}')
 # filepath = '/Users/thorwhalen/Dropbox/_odata/sound/engines/aircraft/Aircraft Engine 01.wav'
-filepath = "/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav"
+filepath = '/Users/sylvain/Dropbox/_odata/sound/guns/01 Gunshot Pistol - Small Caliber - 18 Versions.wav'
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -107,14 +107,14 @@ def mk_pipeline_maker_app_with_mall(
         b.mall = mall
     mall = b.mall()
 
-    _funcs = crudify_funcs(var_nodes="wf model results", dag=audio_anomalies, mall=mall)
+    _funcs = crudify_funcs(var_nodes='wf model results', dag=audio_anomalies, mall=mall)
 
     def debug_check_mall():
         st.write(mall)
         return None
 
     def result_viewer(key):
-        results = mall["results_store"][key]
+        results = mall['results_store'][key]
         return results
 
     step1, step2, step3, step4 = _funcs  # remove list
@@ -124,15 +124,11 @@ def mk_pipeline_maker_app_with_mall(
     # print(f"{Sig(step3)=}")
 
     config = {
-        APP_KEY: {"title": "Data Preparation"},
+        APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
-            "visualize_results": {
+            'visualize_results': {
                 # NAME_KEY: "Apply model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
+                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
         },
     }
@@ -151,7 +147,7 @@ def mk_pipeline_maker_app_with_mall(
     return app
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import streamlit as st
 
     mall = dict()

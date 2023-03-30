@@ -1,0 +1,10 @@
+mlflow<3,>=2.2
+cloudpickle==2.2.1
+dill==0.3.5.1
+enum34==1.1.10
+librosa==0.10.0.post1
+numpy==1.21.2
+pandas==1.4.1
+psutil==5.9.0
+scikit-learn==1.2.1
+scipy==1.7.3

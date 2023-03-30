@@ -25,11 +25,11 @@ def mov_to_transcription(mov_filepath: str):
 
     # Load the MOV file and extract the audio
     video = mp.VideoFileClip(mov_filepath)
-    audio = video.audio.to_audiofile("temp.wav")
+    audio = video.audio.to_audiofile('temp.wav')
 
     # Transcribe the audio using Google Speech Recognition API
     recognizer = sr.Recognizer()
-    with sr.AudioFile("temp.wav") as source:
+    with sr.AudioFile('temp.wav') as source:
         audio = recognizer.record(source)
     transcription = recognizer.recognize_google(audio)
 
@@ -46,16 +46,16 @@ def mov_to_transcription(mov_filepath: str):
 def mov_to_mp4(
     mov_filepath: str,
     output_file_path=None,
-    output_format="mp4",
-    output_codec="libx264",
-    audio_codec='acc'
+    output_format='mp4',
+    output_codec='libx264',
+    audio_codec='acc',
 ):
     from moviepy.editor import VideoFileClip
 
     if output_file_path is None:
         import os
 
-        output_file_path = os.path.splitext(mov_filepath)[0] + f".{output_format}"
+        output_file_path = os.path.splitext(mov_filepath)[0] + f'.{output_format}'
 
     # Load the video file
     video = VideoFileClip(mov_filepath)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pprint import pprint
 from typing import Iterator, List
-from audiostream2py import PyAudioSourceReader, AudioData
+from audiostream2py import PyAudioSourceReader, AudioSegment
 from creek.infinite_sequence import (
     BufferedGetter,
     OverlapsPastError,
@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 
 
 @dataclass
-class AudioDataGetter:
-    iterator: Iterator[AudioData]
+class InfiniteAudioSequence:
+    iterator: Iterator[AudioSegment]
     buffer_len: int
 
     def __post_init__(self):
@@ -33,17 +33,17 @@ class AudioDataGetter:
                 f'{self.head.start_date}:{self.tail.end_date}'
             )
 
-        def query(chunk: AudioData):
+        def query(chunk: AudioSegment):
             return chunk.end_date > s.start and chunk.start_date <= s.stop
 
         chunks = self.buffer_getter[query]
         return self.trim_and_merge_audio_data(chunks, s.start, s.stop)
 
     @staticmethod
-    def trim_and_merge_audio_data(chunks: List[AudioData], start, stop):
+    def trim_and_merge_audio_data(chunks: List[AudioSegment], start, stop):
         chunks[0] = chunks[0][start:]
         chunks[-1] = chunks[-1][:stop]
-        return AudioData.concatenate(chunks)
+        return AudioSegment.concatenate(chunks)
 
     def fill_to_stop_date(self, stop):
         for ad in self.iterator:
@@ -55,11 +55,11 @@ class AudioDataGetter:
         return len(self.buffer_getter._deque)
 
     @property
-    def head(self) -> AudioData:
+    def head(self) -> AudioSegment:
         return self.buffer_getter._deque[0]
 
     @property
-    def tail(self) -> AudioData:
+    def tail(self) -> AudioSegment:
         return self.buffer_getter._deque[-1]
 
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
         buffer_reader = stream_buffer.mk_reader()
 
-        audio = AudioDataGetter(buffer_reader, buffer_len=BUFFER_LEN)
+        audio = InfiniteAudioSequence(buffer_reader, buffer_len=BUFFER_LEN)
         now_plus_1 = datetime.now() + timedelta(seconds=1)
         bt = int(now_plus_1.timestamp() * 1000000)
         tt = int((now_plus_1 + timedelta(seconds=QUERY_SECONDS)).timestamp() * 1000000)

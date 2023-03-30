@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/sylvain/Desktop/dev/otosense/plunk/plunk/sb/mlops/mlflow/mlruns/0/50d8d840454545f3a0af5b185d800192/artifacts
+end_time: 1679582627417
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 50d8d840454545f3a0af5b185d800192
+run_name: persistent-conch-739
+run_uuid: 50d8d840454545f3a0af5b185d800192
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1679582598431
+status: 3
+tags: []
+user_id: sylvain

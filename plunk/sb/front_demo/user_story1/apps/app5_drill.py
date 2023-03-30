@@ -1,21 +1,14 @@
 """
 An app that loads either a wav file from local folder or records a sound
 and visualizes the resulting numpy array 
-This app implements the strategy outlined by Thor:
-'For example, one rule could go through all functions and remove any params that:
-are defaulted
-and have defaults that are not handled by py-to-gui_element casting rules (c.f. routing)'
 """
-from typing import Mapping
-from know.boxes import *
 from functools import partial
-from typing import Callable, Iterable
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
-from i2 import Sig
-from front.crude import Crudifier
+from typing import List, Mapping, Iterable, Callable
+from i2 import FuncFactory, Sig
 from lined import LineParametrized
-import numpy as np
 
+from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+from front.crude import Crudifier
 from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import (
     SelectBox,
@@ -24,71 +17,23 @@ from streamlitfront.elements import (
 )
 from streamlitfront.elements import FileUploader
 
-import soundfile as sf
-from io import BytesIO
-from plunk.sb.front_demo.user_story1.components.components import (
+from olab.types import (
+    Step,
+    Pipeline,
+    WaveForm,
     AudioArrayDisplay,
     GraphOutput,
     ArrayPlotter,
-    ArrayWithIntervalsPlotter,
 )
-from plunk.sb.front_demo.user_story1.utils.tools import (
-    DFLT_FEATURIZER,
-    DFLT_CHK_SIZE,
-    chunker,
-    WaveForm,
-    Stroll,
+from olab.util import (
+    simple_chunker,
     scores_to_intervals,
-)
-from typing import List
-from i2 import Sig, FuncFactory, rm_params
-
-
-def simple_chunker(wfs, chk_size: int = DFLT_CHK_SIZE):
-    return list(chunker(wfs, chk_size=chk_size))
-
-
-def simple_featurizer(chks):
-    fvs = np.array(list(map(DFLT_FEATURIZER, chks)))
-    return fvs
-
-
-mk_chunker = rm_params(
-    FuncFactory(simple_chunker),
-    params_to_remove=['wfs'],
-    allow_removal_of_non_defaulted_params=True,
+    simple_featurizer,
+    ArrayWithIntervalsPlotter,
+    clean_dict,
 )
 
-mk_featurizer = rm_params(
-    FuncFactory(simple_featurizer),
-    params_to_remove=['chks'],
-    allow_removal_of_non_defaulted_params=True,
-)
-
-
-def tagged_sound_to_array(train_audio: WaveForm, tag: str):
-    sound, tag = train_audio, tag
-    if not isinstance(sound, bytes):
-        sound = sound.getvalue()
-
-    arr = sf.read(BytesIO(sound), dtype='int16')[0]
-    return arr, tag
-
-
-def tagged_sounds_to_single_array(train_audio: List[WaveForm], tag: str):
-    sounds, tag = train_audio, tag
-    result = []
-    for sound in sounds:
-        sound = sound.getvalue()
-        arr = sf.read(BytesIO(sound), dtype='int16')[0]
-        result.append(arr)
-    return np.hstack(result).reshape(-1, 1), tag
-
-
-def assert_dims(wfs):
-    if wfs.ndim >= 2:
-        wfs = wfs[:, 0]
-    return wfs
+from olab.base import learn_outlier_model, apply_fitted_model
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -101,7 +46,10 @@ def mk_pipeline_maker_app_with_mall(
     pipelines_store=None,
     data: str = 'data',
     data_store=None,
+    learned_models=None,
+    models_scores=None,
 ):
+
     if not b.mall():
         b.mall = mall
     mall = b.mall()
@@ -118,54 +66,53 @@ def mk_pipeline_maker_app_with_mall(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
     )
     def mk_step(step_factory: Callable, kwargs: dict):
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
         step = partial(step_factory, **kwargs)()
-
-        return step
-
-    #
-    @crudifier(output_store=pipelines_store,)
-    def mk_pipeline(steps: Iterable[Callable]):
-        result = LineParametrized(*steps)
-        print(f'{Sig(result)=}')
+        result = Step(step=step, step_factory=step_factory)
         return result
 
     @crudifier(
+        param_to_mall_map=dict(step_to_modify=steps_store), output_store=steps_store
+    )
+    def modify_step(step_to_modify: Step, kwargs: dict):
+
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step_factory = step_to_modify.step_factory
+        step = partial(step_factory, **kwargs)()
+        return Step(step=step, step_factory=step_factory)
+
+    @crudifier(output_store=pipelines_store,)
+    def mk_pipeline(steps: Iterable[Callable]):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
+        return pipeline
+
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store), output_store=pipelines_store,
+    )
+    def modify_pipeline(pipeline, steps):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipe = LineParametrized(*named_funcs)
+        return Pipeline(steps=named_funcs, pipe=pipe)
+
+    learn_outlier_model_crudified = crudifier(
         param_to_mall_map=dict(
             tagged_data='sound_output', preprocess_pipeline='pipelines'
         ),
         output_store='learned_models',
-    )
-    def learn_outlier_model(tagged_data, preprocess_pipeline, n_centroids=5):
-        sound, tag = tagged_sounds_to_single_array(*tagged_data)
-        wfs = np.array(sound)
+    )(learn_outlier_model)
 
-        wfs = assert_dims(wfs)
-
-        fvs = preprocess_pipeline(wfs)
-        model = Stroll(n_centroids=n_centroids)
-        model.fit(X=fvs)
-
-        return model
-
-    @crudifier(
+    apply_fitted_model_crudified = crudifier(
         param_to_mall_map=dict(
             tagged_data='sound_output',
             preprocess_pipeline='pipelines',
             fitted_model='learned_models',
         ),
         output_store='models_scores',
-    )
-    def apply_fitted_model(tagged_data, preprocess_pipeline, fitted_model):
-        sound, tag = tagged_sounds_to_single_array(*tagged_data)
-        wfs = np.array(sound)
-        wfs = assert_dims(wfs)
-
-        fvs = preprocess_pipeline(wfs)
-        scores = fitted_model.score_samples(X=fvs)
-        return scores
+    )(apply_fitted_model)
 
     @crudifier(param_to_mall_map=dict(pipeline=pipelines_store),)
-    def visualize_pipeline(pipeline: LineParametrized):
+    def visualize_pipeline(pipeline: Pipeline):
 
         return pipeline
 
@@ -178,11 +125,10 @@ def mk_pipeline_maker_app_with_mall(
 
     @crudifier(output_store='sound_output')
     def upload_sound(train_audio: List[WaveForm], tag: str):
-
         return train_audio, tag
 
     def get_step_name(step):
-        return [k for k, v in mall[steps].items() if v == step][0]
+        return [k for k, v in mall[steps].items() if v.step == step][0]
 
     def get_selected_step_factory_sig():
         selected_step_factory = mall['step_factories'].get(
@@ -190,6 +136,16 @@ def mk_pipeline_maker_app_with_mall(
         )
         if selected_step_factory:
             return Sig(selected_step_factory)
+
+    def get_step_to_modify_factory_sig():
+        selected_step_factory = (
+            mall['steps'].get(b.selected_step_to_modify.get()).step_factory
+        )
+        if selected_step_factory:
+            return Sig(selected_step_factory)
+
+    def on_select_pipeline(pipeline):
+        b.steps_of_selected_pipeline.set(mall['pipelines'][pipeline].steps)
 
     config = {
         APP_KEY: {'title': 'Data Preparation'},
@@ -226,13 +182,26 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            'modify_step': {
+                NAME_KEY: 'Modify Step',
+                'execution': {
+                    'inputs': {
+                        'step_to_modify': {'value': b.selected_step_to_modify,},
+                        'kwargs': {'func_sig': get_step_to_modify_factory_sig},
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The step has been created successfully.',
+                    },
+                },
+            },
             'mk_pipeline': {
                 NAME_KEY: 'Pipeline Maker',
                 'execution': {
                     'inputs': {
                         steps: {
                             ELEMENT_KEY: PipelineMaker,
-                            'items': list(mall[steps].values()),
+                            'items': [v.step for v in mall[steps].values()],
                             'serializer': get_step_name,
                         },
                     },
@@ -242,16 +211,26 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
-            'exec_pipeline': {
-                NAME_KEY: 'Pipeline Executor',
+            'modify_pipeline': {
+                NAME_KEY: 'Pipeline Modify',
                 'execution': {
                     'inputs': {
-                        'pipeline': {'value': b.selected_pipeline,},
-                        'data': {
+                        'pipeline': {
                             ELEMENT_KEY: SelectBox,
-                            'options': mall['sound_output'],
+                            'value': b.selected_pipeline,
+                            'on_value_change': on_select_pipeline,
                         },
-                    }
+                        steps: {
+                            ELEMENT_KEY: PipelineMaker,
+                            'items': [v.step for v in mall[steps].values()],
+                            'steps': b.steps_of_selected_pipeline(),
+                            'serializer': get_step_name,
+                        },
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The pipeline has been modified successfully.',
+                    },
                 },
             },
             'visualize_pipeline': {
@@ -283,9 +262,11 @@ def mk_pipeline_maker_app_with_mall(
     funcs = [
         upload_sound,
         mk_step,
+        modify_step,
         mk_pipeline,
-        learn_outlier_model,
-        apply_fitted_model,
+        modify_pipeline,
+        learn_outlier_model_crudified,
+        apply_fitted_model_crudified,
         visualize_pipeline,
         visualize_scores,
     ]
@@ -299,8 +280,8 @@ mall = dict(
     sound_output=dict(),
     step_factories=dict(
         # ML
-        chunker=mk_chunker,
-        featurizer=mk_featurizer,
+        chunker=FuncFactory(simple_chunker),
+        featurizer=FuncFactory(simple_featurizer),
     ),
     # Output Store
     data=dict(),
