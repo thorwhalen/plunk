@@ -39,7 +39,7 @@ with dpg.theme() as _completion_theme:
 # Node DPG Wrappings
 ########################################################################################################################
 class OutputNodeAttribute:
-    def __init__(self, label: str = "output"):
+    def __init__(self, label: str = 'output'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -72,7 +72,7 @@ class OutputNodeAttribute:
 
 
 class InputNodeAttribute:
-    def __init__(self, label: str = "input"):
+    def __init__(self, label: str = 'input'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -129,7 +129,7 @@ class Node:
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(
-                    label="Execute",
+                    label='Execute',
                     user_data=self,
                     callback=lambda s, a, u: u.execute(),
                 )
@@ -209,7 +209,7 @@ class DragSource:
         with dpg.drag_payload(
             parent=dpg.last_item(), drag_data=(self, self._generator, self._data)
         ):
-            dpg.add_text(f"Name: {self.label}")
+            dpg.add_text(f'Name: {self.label}')
 
 
 class DragSourceContainer:
@@ -260,8 +260,8 @@ class ChunkerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("wf"))
-        self.add_output_attribute(OutputNodeAttribute("chks"))
+        self.add_input_attribute(InputNodeAttribute('wf'))
+        self.add_output_attribute(OutputNodeAttribute('chks'))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
         self.x_shift = dpg.generate_uuid()
@@ -269,7 +269,7 @@ class ChunkerNode(Node):
 
     def custom(self):
 
-        dpg.add_input_int(label="chk_size", tag=self.x_shift, step=0, width=150)
+        dpg.add_input_int(label='chk_size', tag=self.x_shift, step=0, width=150)
         # dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
     def execute(self):
@@ -301,9 +301,9 @@ class FeaturizerNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("chks"))
+        self.add_input_attribute(InputNodeAttribute('chks'))
 
-        self.add_output_attribute(OutputNodeAttribute("fvs"))
+        self.add_output_attribute(OutputNodeAttribute('fvs'))
         # self.add_output_attribute(OutputNodeAttribute("y mod"))
 
         self.x_shift = dpg.generate_uuid()
@@ -311,7 +311,7 @@ class FeaturizerNode(Node):
 
     def custom(self):
 
-        dpg.add_input_float(label="x", tag=self.x_shift, step=0, width=150)
+        dpg.add_input_float(label='x', tag=self.x_shift, step=0, width=150)
         # dpg.add_input_float(label="y", tag=self.y_shift, step=0, width=150)
 
     def execute(self):
@@ -346,13 +346,13 @@ class ViewNode_1D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
+        self.add_input_attribute(InputNodeAttribute('x'))
         self.simple_plot = dpg.generate_uuid()
 
     def custom(self):
 
         dpg.add_simple_plot(
-            label="Data View", width=200, height=80, tag=self.simple_plot
+            label='Data View', width=200, height=80, tag=self.simple_plot
         )
 
     def execute(self):
@@ -372,8 +372,8 @@ class ViewNode_2D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("x"))
-        self.add_input_attribute(InputNodeAttribute("y"))
+        self.add_input_attribute(InputNodeAttribute('x'))
+        self.add_input_attribute(InputNodeAttribute('y'))
 
         self.x_axis = dpg.generate_uuid()
         self.y_axis = dpg.generate_uuid()
@@ -381,8 +381,8 @@ class ViewNode_2D(Node):
     def custom(self):
 
         with dpg.plot(height=400, width=400, no_title=True):
-            dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
-            dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
+            dpg.add_plot_axis(dpg.mvXAxis, label='', tag=self.x_axis)
+            dpg.add_plot_axis(dpg.mvYAxis, label='', tag=self.y_axis)
 
     def execute(self):
 
@@ -408,7 +408,7 @@ class PlotNode_1D(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("y"))
+        self.add_input_attribute(InputNodeAttribute('y'))
         # self.add_input_attribute(InputNodeAttribute("y"))
 
         self.x_axis = dpg.generate_uuid()
@@ -417,8 +417,8 @@ class PlotNode_1D(Node):
     def custom(self):
 
         with dpg.plot(height=400, width=400, no_title=True):
-            dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
-            dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
+            dpg.add_plot_axis(dpg.mvXAxis, label='', tag=self.x_axis)
+            dpg.add_plot_axis(dpg.mvYAxis, label='', tag=self.y_axis)
 
     def execute(self):
 
@@ -447,7 +447,7 @@ class WavFilePlotNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("filepath"))
+        self.add_input_attribute(InputNodeAttribute('filepath'))
 
         self.x_axis = dpg.generate_uuid()
         self.y_axis = dpg.generate_uuid()
@@ -457,7 +457,7 @@ class WavFilePlotNode(Node):
         # with dpg.plot(height=400, width=400, no_title=True):
         #     dpg.add_plot_axis(dpg.mvXAxis, label="", tag=self.x_axis)
         #     dpg.add_plot_axis(dpg.mvYAxis, label="", tag=self.y_axis)
-        dpg.add_simple_plot(label="Data View", width=200, height=80, tag=self.x_axis)
+        dpg.add_simple_plot(label='Data View', width=200, height=80, tag=self.x_axis)
 
     def execute(self):
         import soundfile as sf
@@ -465,7 +465,7 @@ class WavFilePlotNode(Node):
         filepath_input = self._input_attributes[0].get_data()
 
         data, _ = sf.read(filepath_input)
-        print(f"data imported: {data.shape}")
+        print(f'data imported: {data.shape}')
         # dpg.add_simple_plot(
         #     label="Data View", width=200, height=80, tag=self.x_axis, data=data
         # )
@@ -483,7 +483,7 @@ class SpectrogramPlotNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_input_attribute(InputNodeAttribute("filepath"))
+        self.add_input_attribute(InputNodeAttribute('filepath'))
 
         self.x_axis = dpg.generate_uuid()
         self.y_axis = dpg.generate_uuid()
@@ -537,7 +537,7 @@ class ValueNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_output_attribute(OutputNodeAttribute("Value"))
+        self.add_output_attribute(OutputNodeAttribute('Value'))
 
         self.value = dpg.generate_uuid()
 
@@ -545,7 +545,7 @@ class ValueNode(Node):
 
         with dpg.group(width=150):
             dpg.add_input_text(
-                label="Input Value", tag=self.value, default_value="alarm-bell.wav"
+                label='Input Value', tag=self.value, default_value='alarm-bell.wav'
             )
 
     def execute(self):
@@ -566,7 +566,7 @@ class UploaderNode(Node):
     def __init__(self, label: str, data):
         super().__init__(label, data)
 
-        self.add_output_attribute(OutputNodeAttribute("Value"))
+        self.add_output_attribute(OutputNodeAttribute('Value'))
 
         self.value = dpg.generate_uuid()
 
@@ -578,42 +578,41 @@ class UploaderNode(Node):
             # )
 
             def callback(sender, app_data, user_data):
-                print("Sender: ", sender)
-                print("App Data: ", app_data)
+                print('Sender: ', sender)
+                print('App Data: ', app_data)
 
             with dpg.file_dialog(
                 directory_selector=False,
                 show=False,
                 callback=callback,
-                id="file_dialog_id",
+                id='file_dialog_id',
                 width=700,
                 height=400,
             ):
-                dpg.add_file_extension(".*")
-                dpg.add_file_extension("", color=(150, 255, 150, 255))
+                dpg.add_file_extension('.*')
+                dpg.add_file_extension('', color=(150, 255, 150, 255))
                 dpg.add_file_extension(
-                    "Source files (*.cpp *.h *.hpp){.cpp,.h,.hpp}",
+                    'Source files (*.cpp *.h *.hpp){.cpp,.h,.hpp}',
                     color=(0, 255, 255, 255),
                 )
                 dpg.add_file_extension(
-                    ".h", color=(255, 0, 255, 255), custom_text="[header]"
+                    '.h', color=(255, 0, 255, 255), custom_text='[header]'
                 )
                 dpg.add_file_extension(
-                    ".py", color=(0, 255, 0, 255), custom_text="[Python]"
+                    '.py', color=(0, 255, 0, 255), custom_text='[Python]'
                 )
                 dpg.add_file_extension(
-                    ".wav", color=(0, 177, 0, 255), custom_text="[Wav]"
+                    '.wav', color=(0, 177, 0, 255), custom_text='[Wav]'
                 )
             dpg.add_button(
-                label="File Selector",
-                callback=lambda: dpg.show_item("file_dialog_id"),
+                label='File Selector', callback=lambda: dpg.show_item('file_dialog_id'),
             )
 
     def execute(self):
 
         # get input attribute data
         value = dpg.get_value(self.value)
-        print(f"execute value = {value}")
+        print(f'execute value = {value}')
         self._output_attributes[0].execute(value)
 
         self.finish()
@@ -626,14 +625,14 @@ def save_graph(node_editor):
     import pickle
 
     # save the state to a pickle file
-    with open("my_graph.p", "w") as f:
+    with open('my_graph.p', 'w') as f:
         pickle.dumps(node_editor._nodes, f)
 
 
 def view_state(node_editor):
     nodes = node_editor._nodes
     links = node_editor._links
-    print(f"{nodes=}, {links=}")
+    print(f'{nodes=}, {links=}')
     # state = dpg.get_item_state(node_editor)
     # print(dpg.get_selected_nodes(node_editor.uuid))
     # print(dpg.get_selected_links(node_editor.uuid))
@@ -668,15 +667,15 @@ class App:
     @staticmethod
     def data_node_factory(name, data):
         node = Node(name, data)
-        node.add_output_attribute(OutputNodeAttribute("data"))
+        node.add_output_attribute(OutputNodeAttribute('data'))
         return node
 
     def __init__(self):
 
-        self.data_set_container = DragSourceContainer("Data Sets", 150, -500)
-        self.tool_container = DragSourceContainer("Tools", 150, -1)
-        self.inspector_container = DragSourceContainer("Inspectors", 150, -500)
-        self.modifier_container = DragSourceContainer("Functions", 150, -1)
+        self.data_set_container = DragSourceContainer('Data Sets', 150, -500)
+        self.tool_container = DragSourceContainer('Tools', 150, -1)
+        self.inspector_container = DragSourceContainer('Inspectors', 150, -500)
+        self.modifier_container = DragSourceContainer('Functions', 150, -1)
         self.plugin_menu_id = dpg.generate_uuid()
         self.left_panel = dpg.generate_uuid()
         self.right_panel = dpg.generate_uuid()
@@ -684,18 +683,18 @@ class App:
         self.plugins = []
 
         self.add_data_set(
-            "Test Data", [-5.0, -5.0, -3.0, -3.0, 0.0, 0.0, 3.0, 3.0, 5.0, 5.0]
+            'Test Data', [-5.0, -5.0, -3.0, -3.0, 0.0, 0.0, 3.0, 3.0, 5.0, 5.0]
         )
-        self.add_tool("1D Data View", ViewNode_1D.factory)
-        self.add_tool("2D Data View", ViewNode_2D.factory)
+        self.add_tool('1D Data View', ViewNode_1D.factory)
+        self.add_tool('2D Data View', ViewNode_2D.factory)
         # self.add_modifier("Data Shifter", DataShifterNode.factory)
-        self.add_modifier("Chunker", ChunkerNode.factory)
-        self.add_modifier("Featurizer", FeaturizerNode.factory)
-        self.add_modifier("Plotter", PlotNode_1D.factory)
-        self.add_modifier("Upload", UploaderNode.factory)
-        self.add_tool("Value Tool", ValueNode.factory)
-        self.add_tool("WfPlot Tool", WavFilePlotNode.factory)
-        self.add_tool("Spectrogram Tool", SpectrogramPlotNode.factory)
+        self.add_modifier('Chunker', ChunkerNode.factory)
+        self.add_modifier('Featurizer', FeaturizerNode.factory)
+        self.add_modifier('Plotter', PlotNode_1D.factory)
+        self.add_modifier('Upload', UploaderNode.factory)
+        self.add_tool('Value Tool', ValueNode.factory)
+        self.add_tool('WfPlot Tool', WavFilePlotNode.factory)
+        self.add_tool('Spectrogram Tool', SpectrogramPlotNode.factory)
 
         # PlotNode_1D
 
@@ -737,7 +736,7 @@ class App:
 
         light_theme = create_theme_imgui_light()
         dpg.bind_theme(light_theme)
-        dpg.set_viewport_title("Simple Data Flow")
+        dpg.set_viewport_title('Simple Data Flow')
         dpg.show_viewport()
         node_editor = NodeEditor()
 
@@ -745,21 +744,21 @@ class App:
 
             with dpg.menu_bar():
 
-                with dpg.menu(label="Operations"):
+                with dpg.menu(label='Operations'):
 
                     dpg.add_menu_item(
-                        label="Reset",
+                        label='Reset',
                         callback=lambda: dpg.delete_item(
                             node_editor.uuid, children_only=True
                         ),
                     )
                     dpg.add_menu_item(
-                        label="Save graph",
+                        label='Save graph',
                         # callback=lambda: save_graph(node_editor),
                         callback=lambda: view_state(node_editor),
                     )
 
-                with dpg.menu(label="Plugins"):
+                with dpg.menu(label='Plugins'):
                     for plugin in self.plugins:
                         dpg.add_menu_item(label=plugin[0], callback=plugin[1])
 
@@ -785,7 +784,7 @@ class App:
         dpg.start_dearpygui()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     app = App()
     app.start()

@@ -25,22 +25,20 @@ import warnings
 
 
 default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "start_date": datetime(2023, 3, 28),
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2023, 3, 28),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
 dag = DAG(
-    "airflow_sms_dag",
-    default_args=default_args,
-    schedule_interval=timedelta(days=1),
+    'airflow_sms_dag', default_args=default_args, schedule_interval=timedelta(days=1),
 )
 
 
 def first_slash_component(x):
-    return x.split("/")[0]
+    return x.split('/')[0]
 
 
 def prefix_filtered_store(store, prefix):
@@ -65,7 +63,7 @@ def chk_to_fv(chk):
 
 
 matrix_to_fvs = Pipe(
-    attrgetter("values"),  # equivalent: lambda x: x.value
+    attrgetter('values'),  # equivalent: lambda x: x.value
     chunker,
     partial(map, chk_to_fv),  # equivalent: lambda chks: map(chk_to_fv, chks)
 )
@@ -85,20 +83,20 @@ def get_full_matrix(store):
 def mk_dataset():
     mydacc = dacc.mk_dacc()
 
-    healthy = featurizer_store(prefix_filtered_store(mydacc.data, "Healthy"))
+    healthy = featurizer_store(prefix_filtered_store(mydacc.data, 'Healthy'))
     key_to_tag = lambda x: x.split(os.path.sep)[0]
 
     tags = Counter((key_to_tag(x) for x in mydacc.data))
-    not_healthy_tags = tags.keys() - {"Healthy"}
+    not_healthy_tags = tags.keys() - {'Healthy'}
     not_healthy = featurizer_store(prefix_filtered_store(mydacc.data, not_healthy_tags))
 
     # from tested import train_test_split_keys
     # train_test_split_keys()
 
     X_healthy = np.array(list(itertools.chain.from_iterable(healthy.values())))
-    y_healthy = ["healthy"] * len(X_healthy)
+    y_healthy = ['healthy'] * len(X_healthy)
     X_not_healthy = np.array(list(itertools.chain.from_iterable(not_healthy.values())))
-    y_not_healthy = ["not_healthy"] * len(X_not_healthy)
+    y_not_healthy = ['not_healthy'] * len(X_not_healthy)
 
     X = np.vstack([X_healthy, X_not_healthy])
     y = np.hstack([y_healthy, y_not_healthy])
@@ -109,9 +107,9 @@ def mk_dataset():
 def learn_model(X, y):
     model = Pipeline(
         steps=[
-            ("scale", StandardScaler()),
-            ("pca", PCA(n_components=50)),
-            ("model", CentroidSmoothing()),
+            ('scale', StandardScaler()),
+            ('pca', PCA(n_components=50)),
+            ('model', CentroidSmoothing()),
         ]
     )
     model.fit(X, y)
@@ -121,30 +119,22 @@ def learn_model(X, y):
 def apply_model(model, data):
     X, y = data
     preds = model.predict(X)
-    yy = list(map(int, y == "healthy"))
-    yy_pred = list(map(int, preds == "healthy"))
+    yy = list(map(int, y == 'healthy'))
+    yy_pred = list(map(int, preds == 'healthy'))
 
     f1_res = f1_score(yy, yy_pred)
     print(f1_res)
     return f1_res
 
 
-mk_dataset = PythonOperator(
-    task_id="mk_dataset",
-    python_callable=mk_dataset,
-    dag=dag,
-)
+mk_dataset = PythonOperator(task_id='mk_dataset', python_callable=mk_dataset, dag=dag,)
 
 learn_model = PythonOperator(
-    task_id="learn_model",
-    python_callable=learn_model,
-    dag=dag,
+    task_id='learn_model', python_callable=learn_model, dag=dag,
 )
 
 apply_model = PythonOperator(
-    task_id="apply_model",
-    python_callable=apply_model,
-    dag=dag,
+    task_id='apply_model', python_callable=apply_model, dag=dag,
 )
 mk_dataset >> learn_model
 learn_model >> apply_model

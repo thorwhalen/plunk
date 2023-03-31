@@ -1,8 +1,10 @@
 from meshed import code_to_dag
 
+
 def extract_funcs(dag):
     for func_node in dag.func_nodes:
         yield func_node.func
+
 
 @code_to_dag
 def _audio_ml():
@@ -30,4 +32,3 @@ def _make_children_story(story, image_style):
 funcs = [audio_ml]
 
 funcs = [_make_children_story] + list(extract_funcs(make_children_story))
-

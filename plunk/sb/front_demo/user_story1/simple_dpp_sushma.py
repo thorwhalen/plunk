@@ -13,7 +13,7 @@ Path = Union[str, os.PathLike]
 
 # simple uploader of wav files
 def read_sound(sound: Path):
-    arr, _ = sf.read(sound, dtype="int16")
+    arr, _ = sf.read(sound, dtype='int16')
     return arr
 
 
@@ -36,11 +36,11 @@ def apply_model(fvs, fitted_model):
 
 
 d = {
-    "upload_sound": upload_sound,
-    "simple_chunker": simple_chunker,
-    "simple_featurizer": simple_featurizer,
-    "learn_model": learn_model,
-    "apply_model": apply_model,
+    'upload_sound': upload_sound,
+    'simple_chunker': simple_chunker,
+    'simple_featurizer': simple_featurizer,
+    'learn_model': learn_model,
+    'apply_model': apply_model,
 }
 
 # simple DPP in form of a DAG
@@ -53,13 +53,13 @@ def simple_dpp(wfs: List[WaveForm]):
     scores = apply_model(fvs, model)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # make input data for test
     from pyckup import grab
     from io import BytesIO
 
-    f1 = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
-    f2 = grab("https://www.dropbox.com/s/hruf3u7oufx6fqg/0_1.wav?dl=0")
+    f1 = grab('https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0')
+    f2 = grab('https://www.dropbox.com/s/hruf3u7oufx6fqg/0_1.wav?dl=0')
 
     wav_list = [BytesIO(f1), BytesIO(f2)]
 

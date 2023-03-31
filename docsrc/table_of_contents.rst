@@ -42,6 +42,7 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/lab
    module_docs/plunk/sb/front_demo/user_story1/apps/lab2
    module_docs/plunk/sb/front_demo/user_story1/components/components
+   module_docs/plunk/sb/front_demo/user_story1/simple_dpp_sushma
    module_docs/plunk/sb/front_demo/user_story1/utils/funcs
    module_docs/plunk/sb/front_demo/user_story1/utils/scratch_pickle
    module_docs/plunk/sb/front_demo/user_story1/utils/simple_config
@@ -163,6 +164,10 @@
    module_docs/plunk/tw/front_examples/crude_examples/take_09_model_pipe
    module_docs/plunk/tw/front_examples/data_binding_1
    module_docs/plunk/tw/front_examples/make_pipelines
+   module_docs/plunk/tw/i2i_demos/play
+   module_docs/plunk/tw/i2i_demos/play/app
+   module_docs/plunk/tw/i2i_demos/play/resources
+   module_docs/plunk/tw/i2i_demos/play/server
    module_docs/plunk/tw/ipython_magic
    module_docs/plunk/tw/mov_to_transcription
    module_docs/plunk/tw/potentially_useful_utils
@@ -171,6 +176,7 @@
    module_docs/plunk/tw/py2py_front_example/simple_pycode
    module_docs/plunk/tw/routing
    module_docs/plunk/tw/scrap
+   module_docs/plunk/tw/scrap2
    module_docs/plunk/tw/things_decorators_break
    module_docs/plunk/tw/user_story_to_poc_demo
    module_docs/plunk/vf/decorators

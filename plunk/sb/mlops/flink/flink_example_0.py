@@ -24,8 +24,8 @@ def process_json_data():
     def chunker(data):
         # parse the json
         json_data = json.loads(data[1])
-        chks = list(windowed(json_data["flux"], DFLT_CHK_SIZE))
-        return (data[0], {"chks": chks})
+        chks = list(windowed(json_data['flux'], DFLT_CHK_SIZE))
+        return (data[0], {'chks': chks})
 
     def filter_by_index(data):
 
@@ -37,7 +37,7 @@ def process_json_data():
     env.execute()
 
 
-if __name__ == "__main__":
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(message)s")
+if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
 
     process_json_data()
