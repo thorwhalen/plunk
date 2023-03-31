@@ -166,6 +166,7 @@
    module_docs/plunk/tw/front_examples/make_pipelines
    module_docs/plunk/tw/i2i_demos/play
    module_docs/plunk/tw/i2i_demos/play/app
+   module_docs/plunk/tw/i2i_demos/play/configurations
    module_docs/plunk/tw/i2i_demos/play/resources
    module_docs/plunk/tw/i2i_demos/play/server
    module_docs/plunk/tw/ipython_magic

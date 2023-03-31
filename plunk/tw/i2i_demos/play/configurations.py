@@ -5,13 +5,11 @@ from front.elements import OutputBase
 configs = None
 
 
-
 @dataclass
 class Markdown(OutputBase):
     def render(self):
         return st.markdown(
-            f"<html><body><h1>{self.output}</h1></body></html>",
-            unsafe_allow_html=True
+            f'<html><body><h1>{self.output}</h1></body></html>', unsafe_allow_html=True
         )
 
 
@@ -28,11 +26,7 @@ config = {
                     No description
                 ''',
             },
-            'execution': {
-                'output': {
-                    ELEMENT_KEY: Markdown,
-                },
-            },
+            'execution': {'output': {ELEMENT_KEY: Markdown,},},
         }
-    }
+    },
 }
