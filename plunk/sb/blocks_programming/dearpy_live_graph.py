@@ -35,38 +35,38 @@ def update_data():
 
         # set the series x and y to the last nsamples
         dpg.set_value(
-            "series_tag", [list(data_x[-nsamples:]), list(data_y[-nsamples:])]
+            'series_tag', [list(data_x[-nsamples:]), list(data_y[-nsamples:])]
         )
-        dpg.fit_axis_data("x_axis")
-        dpg.fit_axis_data("y_axis")
+        dpg.fit_axis_data('x_axis')
+        dpg.fit_axis_data('y_axis')
 
         time.sleep(0.01)
         sample = sample + 1
 
 
 dpg.create_context()
-with dpg.window(label="Tutorial", tag="win", width=800, height=600):
+with dpg.window(label='Tutorial', tag='win', width=800, height=600):
 
-    with dpg.plot(label="Line Series", height=-1, width=-1):
+    with dpg.plot(label='Line Series', height=-1, width=-1):
         # optionally create legend
         dpg.add_plot_legend()
 
         # REQUIRED: create x and y axes, set to auto scale.
-        x_axis = dpg.add_plot_axis(dpg.mvXAxis, label="x", tag="x_axis")
-        y_axis = dpg.add_plot_axis(dpg.mvYAxis, label="y", tag="y_axis")
+        x_axis = dpg.add_plot_axis(dpg.mvXAxis, label='x', tag='x_axis')
+        y_axis = dpg.add_plot_axis(dpg.mvYAxis, label='y', tag='y_axis')
 
         # series belong to a y axis. Note the tag name is used in the update
         # function update_data
         dpg.add_line_series(
             x=list(data_x),
             y=list(data_y),
-            label="Temp",
-            parent="y_axis",
-            tag="series_tag",
+            label='Temp',
+            parent='y_axis',
+            tag='series_tag',
         )
 
 
-dpg.create_viewport(title="Custom Title", width=850, height=640)
+dpg.create_viewport(title='Custom Title', width=850, height=640)
 
 dpg.setup_dearpygui()
 dpg.show_viewport()

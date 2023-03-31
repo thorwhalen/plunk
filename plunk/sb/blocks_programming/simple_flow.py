@@ -687,7 +687,7 @@ def save_graph(node_editor):
     state = dpg.get_item_configuration(node_editor)
 
     # save the state to a JSON file
-    with open("my_graph.json", "w") as f:
+    with open('my_graph.json', 'w') as f:
         json.dump(state, f)
 
 
@@ -695,8 +695,8 @@ def view_state(node_editor):
     nodes = node_editor._nodes
     for node in nodes:
         # print(node._label, node._data)
-        print(f"{node=}, {vars(node)}")
-        print(f"Children:\n")
+        print(f'{node=}, {vars(node)}')
+        print(f'Children:\n')
         print([dir(attribute) for attribute in node._output_attributes])
         print(dir(node))
 
@@ -765,7 +765,6 @@ class App:
     def start(self):
 
         # dpg.setup_registries()
-<<<<<<< HEAD
         from dearpygui_ext.themes import create_theme_imgui_light
 
         dpg.create_context()
@@ -773,10 +772,7 @@ class App:
 
         light_theme = create_theme_imgui_light()
         dpg.bind_theme(light_theme)
-        dpg.set_viewport_title("Simple Data Flow")
-=======
         dpg.set_viewport_title('Simple Data Flow')
->>>>>>> ead567c7c8b236b24ce0e5c83b8b5dbd9f3cef1e
         dpg.show_viewport()
         node_editor = NodeEditor()
 
@@ -793,7 +789,7 @@ class App:
                         ),
                     )
                     dpg.add_menu_item(
-                        label="Save graph",
+                        label='Save graph',
                         # callback=lambda: save_graph(node_editor),
                         callback=lambda: view_state(node_editor),
                     )

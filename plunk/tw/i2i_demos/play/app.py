@@ -1,6 +1,6 @@
-from resources import funcs
 from extrude import mk_web_app
 
+from resources import funcs
 from configurations import config
 
 if __name__ == '__main__':

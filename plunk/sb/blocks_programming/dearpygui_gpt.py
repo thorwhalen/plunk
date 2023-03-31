@@ -4,7 +4,7 @@ dpg.create_context()
 
 
 class OutputNodeAttribute:
-    def __init__(self, label: str = "output"):
+    def __init__(self, label: str = 'output'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -34,7 +34,7 @@ class OutputNodeAttribute:
 
 
 class InputNodeAttribute:
-    def __init__(self, label: str = "input"):
+    def __init__(self, label: str = 'input'):
 
         self._label = label
         self.uuid = dpg.generate_uuid()
@@ -88,7 +88,7 @@ class Node:
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(
-                    label="Execute",
+                    label='Execute',
                     user_data=self,
                     callback=lambda s, a, u: u.execute(),
                 )
@@ -159,27 +159,27 @@ def delink_callback(sender, app_data):
     dpg.delete_item(app_data)
 
 
-with dpg.window(label="Tutorial", width=400, height=400):
+with dpg.window(label='Tutorial', width=400, height=400):
     # node_editor = dpg.node_editor(
     #     callback=link_callback, delink_callback=delink_callback
     # )
     node_editor = NodeEditor()
     # with node_editor:
-    with dpg.node(label="Node 1"):
-        with dpg.node_attribute(label="Node A1"):
-            dpg.add_input_float(label="F1", width=150)
+    with dpg.node(label='Node 1'):
+        with dpg.node_attribute(label='Node A1'):
+            dpg.add_input_float(label='F1', width=150)
 
-        with dpg.node_attribute(label="Node A2", attribute_type=dpg.mvNode_Attr_Output):
-            dpg.add_input_float(label="F2", width=150)
+        with dpg.node_attribute(label='Node A2', attribute_type=dpg.mvNode_Attr_Output):
+            dpg.add_input_float(label='F2', width=150)
 
-    with dpg.node(label="Node 2"):
-        with dpg.node_attribute(label="Node A3"):
-            dpg.add_input_float(label="F3", width=200)
+    with dpg.node(label='Node 2'):
+        with dpg.node_attribute(label='Node A3'):
+            dpg.add_input_float(label='F3', width=200)
 
-        with dpg.node_attribute(label="Node A4", attribute_type=dpg.mvNode_Attr_Output):
-            dpg.add_input_float(label="F4", width=200)
+        with dpg.node_attribute(label='Node A4', attribute_type=dpg.mvNode_Attr_Output):
+            dpg.add_input_float(label='F4', width=200)
     print(node_editor._nodes)
-dpg.create_viewport(title="Custom Title", width=800, height=600)
+dpg.create_viewport(title='Custom Title', width=800, height=600)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
