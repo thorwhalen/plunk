@@ -30,11 +30,11 @@ def apply_model(fvs, fitted_model):
 
 
 d = {
-    "bytes_to_wf": bytes_to_wf,
-    "simple_chunker": simple_chunker,
-    "simple_featurizer": simple_featurizer,
-    "learn_model": learn_model,
-    "apply_model": apply_model,
+    'bytes_to_wf': bytes_to_wf,
+    'simple_chunker': simple_chunker,
+    'simple_featurizer': simple_featurizer,
+    'learn_model': learn_model,
+    'apply_model': apply_model,
 }
 
 # simple DPP in form of a DAG
@@ -47,12 +47,12 @@ def simple_dpp(wav_bytes: bytes):
     scores = apply_model(fvs, model)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # make input data for testing purposes
     from recode.audio import decode_wav_bytes
     from pyckup import grab
 
-    f1 = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+    f1 = grab('https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0')
 
     wf, sr = decode_wav_bytes(f1)
     print(wf[:50])
