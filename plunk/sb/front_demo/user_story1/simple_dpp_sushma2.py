@@ -50,19 +50,17 @@ def simple_dpp(wav_bytes: bytes):
 if __name__ == "__main__":
     # make input data for testing purposes
     from recode.audio import decode_wav_bytes
+    from pyckup import grab
 
-    wav_bytes = (
-        b"RIFF.\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"  # header
-        b"*\x00\x00\x00T\x00\x00\x00\x02\x00\x10\x00data\n\x00\x00\x00"  # header
-        b"\x00\x00\x01\x00\xff\xff\x02\x00\xfe\xff"  # data
-    )
-    wf, sr = decode_wav_bytes(wav_bytes)
-    print(wf)
+    f1 = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+
+    wf, sr = decode_wav_bytes(f1)
+    print(wf[:50])
     # wfs = upload_sound(wav_list)
 
     # print(type(wfs))
 
     # # run the experiment
-    scores = simple_dpp(wav_bytes)
+    scores = simple_dpp(f1)
 
     print(scores)
