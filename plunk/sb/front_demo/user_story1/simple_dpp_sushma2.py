@@ -30,11 +30,11 @@ def apply_model(fvs, fitted_model):
 
 
 d = {
-    "bytes_to_wf": bytes_to_wf,
-    "simple_chunker": simple_chunker,
-    "simple_featurizer": simple_featurizer,
-    "learn_model": learn_model,
-    "apply_model": apply_model,
+    'bytes_to_wf': bytes_to_wf,
+    'simple_chunker': simple_chunker,
+    'simple_featurizer': simple_featurizer,
+    'learn_model': learn_model,
+    'apply_model': apply_model,
 }
 
 # simple DPP in form of a DAG
@@ -47,14 +47,14 @@ def simple_dpp(wav_bytes: bytes):
     scores = apply_model(fvs, model)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # make input data for testing purposes
     from recode.audio import decode_wav_bytes
 
     wav_bytes = (
-        b"RIFF.\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"  # header
-        b"*\x00\x00\x00T\x00\x00\x00\x02\x00\x10\x00data\n\x00\x00\x00"  # header
-        b"\x00\x00\x01\x00\xff\xff\x02\x00\xfe\xff"  # data
+        b'RIFF.\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00'  # header
+        b'*\x00\x00\x00T\x00\x00\x00\x02\x00\x10\x00data\n\x00\x00\x00'  # header
+        b'\x00\x00\x01\x00\xff\xff\x02\x00\xfe\xff'  # data
     )
     wf, sr = decode_wav_bytes(wav_bytes)
     print(wf)
