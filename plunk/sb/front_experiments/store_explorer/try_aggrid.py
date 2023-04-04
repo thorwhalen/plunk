@@ -6,11 +6,11 @@ import streamlit as st
 
 # get some data
 df = pd.read_csv(
-    "https://raw.githubusercontent.com/fivethirtyeight/data/master/airline-safety/airline-safety.csv"
+    'https://raw.githubusercontent.com/fivethirtyeight/data/master/airline-safety/airline-safety.csv'
 )
 # configure the grid to have selectable rows
 gb = GridOptionsBuilder.from_dataframe(df)
-gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+gb.configure_selection(selection_mode='multiple', use_checkbox=True)
 gridOptions = gb.build()
 
 
@@ -22,4 +22,4 @@ data = AgGrid(
 )
 
 # write the selected rows
-st.write(data["selected_rows"])
+st.write(data['selected_rows'])
