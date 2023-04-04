@@ -26,11 +26,11 @@ def apply_model(fvs, fitted_model):
 
 
 d = {
-    "bytes_to_wf": bytes_to_wf,
-    "simple_chunker": simple_chunker,
-    "simple_featurizer": simple_featurizer,
-    "learn_model": learn_model,
-    "apply_model": apply_model,
+    'bytes_to_wf': bytes_to_wf,
+    'simple_chunker': simple_chunker,
+    'simple_featurizer': simple_featurizer,
+    'learn_model': learn_model,
+    'apply_model': apply_model,
 }
 
 # simple DPP in form of a DAG
@@ -43,15 +43,15 @@ def simple_dpp(wav_bytes: bytes):
     scores = apply_model(fvs, model)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # make input data for testing purposes
     from pyckup import grab
 
     # make a wf as a bytes object
-    wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+    wf = grab('https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0')
 
     # check the type
-    print(f"{type(wf)=}")
+    print(f'{type(wf)=}')
 
     # # run the experiment
     scores = simple_dpp(wf)
