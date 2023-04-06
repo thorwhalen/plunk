@@ -15,9 +15,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import streamlit as st
 from streamlitfront import binder as b
-from plunk.sb.front_demo.user_story1.components.components import (
-    AudioArrayDisplay,
-)
+from plunk.sb.front_demo.user_story1.components.components import AudioArrayDisplay
 
 
 class SessionQuery(TypedDict):
@@ -33,7 +31,7 @@ class Grid(InputBase):
 
     def render(self):
         gb = GridOptionsBuilder.from_dataframe(self.sessions)
-        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_selection(selection_mode='multiple', use_checkbox=True)
         gridOptions = gb.build()
 
         data = AgGrid(
@@ -44,7 +42,7 @@ class Grid(InputBase):
         )
 
         # print(dir(self))
-        return data["selected_rows"]
+        return data['selected_rows']
 
 
 @dataclass
@@ -60,32 +58,32 @@ def retrieve_data(sref):
     import os
 
     # sref = "/Dropbox/OtoSense/VacuumEdgeImpulse/" + sref
-    home_directory = os.path.expanduser("~")
+    home_directory = os.path.expanduser('~')
     st.write(home_directory)
-    path = os.path.join(home_directory + "/Dropbox/OtoSense/VacuumEdgeImpulse/", sref)
+    path = os.path.join(home_directory + '/Dropbox/OtoSense/VacuumEdgeImpulse/', sref)
 
     # path = os.path.expanduser(sref)
     st.write(path)
-    arr = sf.read(path, dtype="int16")[0]
+    arr = sf.read(path, dtype='int16')[0]
     return path, arr
 
 
 @dataclass
 class WavSelectionViewer(OutputBase):
     def render(self):
-        st.write("wav selection viewer")
+        st.write('wav selection viewer')
         import soundfile as sf
 
-        sref = self.output[0]["sref"]
+        sref = self.output[0]['sref']
         path, arr = retrieve_data(sref)
         # arr = sf.read(sref, dtype="int16")[0]
         # st.write(type(arr))
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
         with tab1:
             # if not isinstance(sound, bytes):
             #     sound = sound.getvalue()
             # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-            st.write(f"type of data={type(sref)}")
+            st.write(f'type of data={type(sref)}')
 
             st.audio(path)
         with tab2:
@@ -114,8 +112,8 @@ def random_sample_from_list(choices, k=1):
     return random.sample(choices, k=k)
 
 
-DFLT_HEALTHY = ["Healthy_0", "Healthy_1", "Healthy_2"]
-DFLT_UNHEALTHY = ["Failure", "Imbalance", "Defect", "Noise"]
+DFLT_HEALTHY = ['Healthy_0', 'Healthy_1', 'Healthy_2']
+DFLT_UNHEALTHY = ['Failure', 'Imbalance', 'Defect', 'Noise']
 
 
 def random_int():
@@ -146,21 +144,21 @@ def mock_session_gen(n: int = 10) -> List[Dict]:
 
         sessions.append(
             {
-                "ID": f"mockSession{i}",
-                "device_id": f"deviceId{i % 2 + 1}",
-                "bt": bt,
-                "tt": tt,
-                "sr": sample_rates[i % 2],
+                'ID': f'mockSession{i}',
+                'device_id': f'deviceId{i % 2 + 1}',
+                'bt': bt,
+                'tt': tt,
+                'sr': sample_rates[i % 2],
                 #'bit_depth': 8,
                 #'channels': channels,
-                "annotations": mock_annotations(),
+                'annotations': mock_annotations(),
             }
         )
 
     return sessions
 
 
-DFLT_FPATH = "../data/mock_data.csv"
+DFLT_FPATH = '../data/mock_data.csv'
 
 
 def mk_dataset() -> pd.DataFrame:
@@ -174,12 +172,12 @@ MOCK_SESSIONS = mk_dataset()
 def filterByNamesOperator(
     names: List[str], operator: str, namedList: List[Dict[str, str]]
 ) -> bool:
-    if operator == "and" and not all(
-        name in [item["name"] for item in namedList] for name in names
+    if operator == 'and' and not all(
+        name in [item['name'] for item in namedList] for name in names
     ):
         return False
-    elif operator == "or" and not any(
-        name in [item["name"] for item in namedList] for name in names
+    elif operator == 'or' and not any(
+        name in [item['name'] for item in namedList] for name in names
     ):
         return False
     return True
@@ -190,25 +188,25 @@ def filterSessions(f: dict, sessions: List[dict]) -> List[dict]:
     return list(
         filter(
             lambda s: (
-                (f.get("from_bt") is None or s["bt"] >= f["from_bt"])
-                and (f.get("to_bt") is None or s["bt"] <= f["to_bt"])
-                and (f.get("from_tt") is None or s["tt"] >= f["from_tt"])
-                and (f.get("to_tt") is None or s["tt"] <= f["to_tt"])
-                and (f.get("sr") is None or s["sr"] == f["sr"])
+                (f.get('from_bt') is None or s['bt'] >= f['from_bt'])
+                and (f.get('to_bt') is None or s['bt'] <= f['to_bt'])
+                and (f.get('from_tt') is None or s['tt'] >= f['from_tt'])
+                and (f.get('to_tt') is None or s['tt'] <= f['to_tt'])
+                and (f.get('sr') is None or s['sr'] == f['sr'])
                 and (
-                    f.get("channels") is None
+                    f.get('channels') is None
                     or filterByNamesOperator(
-                        f["channels"]["names"],
-                        f["channels"]["operator"],
-                        [c["name"] for c in s["channels"]],
+                        f['channels']['names'],
+                        f['channels']['operator'],
+                        [c['name'] for c in s['channels']],
                     )
                 )
                 and (
-                    f.get("annotations") is None
+                    f.get('annotations') is None
                     or filterByNamesOperator(
-                        f["annotations"]["names"],
-                        f["annotations"]["operator"],
-                        [a["name"] for a in s["annotations"]],
+                        f['annotations']['names'],
+                        f['annotations']['operator'],
+                        [a['name'] for a in s['annotations']],
                     )
                 )
             ),
@@ -220,8 +218,8 @@ def filterSessions(f: dict, sessions: List[dict]) -> List[dict]:
 def sort_sessions(sort, sessions: list):
     _sessions = sessions.copy()
     if len(_sessions) > 0:
-        _field = sort["field"]
-        if sort["mode"] == "asc":
+        _field = sort['field']
+        if sort['mode'] == 'asc':
             _sessions = sorted(_sessions, key=lambda s: s[_field])
         else:
             _sessions = sorted(_sessions, key=lambda s: s[_field], reverse=True)
@@ -233,14 +231,14 @@ def mock_list_sessions(query: SessionQuery):
 
     if not query:
         return s
-    if _filter := query.get("filter"):
+    if _filter := query.get('filter'):
         s = filterSessions(_filter, s)
 
-    if _sort := query.get("sort"):
+    if _sort := query.get('sort'):
         s = sort_sessions(_sort, s)
 
-    if _pagination := query.get("pagination"):
-        s = s[_pagination.get("from_idx") : _pagination.get("to_idx")]
+    if _pagination := query.get('pagination'):
+        s = s[_pagination.get('from_idx') : _pagination.get('to_idx')]
 
     return s
 
@@ -263,8 +261,8 @@ def session_wf(sessions):
             wf_four_channel,
         )
 
-        session = next(s for s in MOCK_SESSIONS if s.get("ID") == sessions[0])
-        n_channels = len(session.get("channels", 1))
+        session = next(s for s in MOCK_SESSIONS if s.get('ID') == sessions[0])
+        n_channels = len(session.get('channels', 1))
         example_wfs = {
             1: wf_mix,
             2: wf_two_channel_sine_tone,
@@ -281,20 +279,20 @@ features = [select_sessions]
 
 
 config = {
-    APP_KEY: {"title": "Session Table"},
+    APP_KEY: {'title': 'Session Table'},
     RENDERING_KEY: {
-        "select_sessions": {
-            NAME_KEY: "Session Table Multiselect",
-            "description": {"content": "Session Table Multiselect"},
-            "execution": {
-                "inputs": {
-                    "sessions": {
+        'select_sessions': {
+            NAME_KEY: 'Session Table Multiselect',
+            'description': {'content': 'Session Table Multiselect'},
+            'execution': {
+                'inputs': {
+                    'sessions': {
                         ELEMENT_KEY: Grid,
-                        "sessions": MOCK_SESSIONS,
+                        'sessions': MOCK_SESSIONS,
                         # "value": b.selected_row,
                     },
                 },
-                "output": {ELEMENT_KEY: WavSelectionViewer},
+                'output': {ELEMENT_KEY: WavSelectionViewer},
                 # "auto_submit": True,
             },
         },
@@ -317,6 +315,6 @@ config = {
 }
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = mk_app(features, config=config)
     app()
