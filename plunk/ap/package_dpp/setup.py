@@ -14,11 +14,19 @@ class CustomSdistCommand(sdist):
     description = 'create a source distribution tarball with embedded wheels'
 
     def run(self):
+        if self.dist_dir is None:
+            self.dist_dir = 'dist'
+        if os.path.exists(self.dist_dir):
+            print(f'Deleting {self.dist_dir}')
+            shutil.rmtree(self.dist_dir)
+        os.mkdir(self.dist_dir)
 
         # create a temporary directory to store the wheels
         project_dir = os.getcwd()
         wheel_generation_dir = os.path.join(project_dir, 'wheels')
         if os.path.exists(wheel_generation_dir):
+            print(f'Deleting {wheel_generation_dir}')
+
             shutil.rmtree(wheel_generation_dir)
         os.mkdir(wheel_generation_dir)
         print(f'{project_dir=}, {wheel_generation_dir=}')
@@ -27,18 +35,15 @@ class CustomSdistCommand(sdist):
         )
 
         # copy the wheels into the package directory
-        for wheel_file in os.listdir(wheel_generation_dir):
+        wheelhouse_dir = os.path.join(wheel_generation_dir, 'wheelhouse')
+        for wheel_file in os.listdir(wheelhouse_dir):
             if wheel_file.endswith('.whl'):
-                shutil.copy2(os.path.join(wheel_generation_dir, wheel_file), 'dist')
+                copy_wheel_file = os.path.join(wheelhouse_dir, wheel_file)
+                shutil.copy2(copy_wheel_file, self.dist_dir)
+                print(f'Copying to {copy_wheel_file}')
 
         # cleanup the temporary directory
-        # shutil.rmtree(wheel_generation_dir)
-        if self.dist_dir is None:
-            self.dist_dir = 'dist'
-        base_dir = self.distribution.get_fullname()
-        print(f'{self.dist_dir=}')
-        base_name = os.path.join(self.dist_dir, base_dir)
-        print(f'{self.dist_dir=}, {base_dir=}, {base_name=}')
+        shutil.rmtree(wheel_generation_dir)
 
         # call the default sdist command to create the tar.gz file
         super().run()
