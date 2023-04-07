@@ -4,7 +4,9 @@ from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
 from front.elements import InputBase, OutputBase, ExecContainerBase
 from plunk.ap.wf_visualize_player.wf_visualize_player_element import WfVisualizePlayer
 from streamlitfront import mk_app
-
+from streamlitfront.elements import (
+    SelectBox,
+)
 from plunk.ap.session_table.session_table_element import OtoTable
 import random
 import pandas as pd
@@ -277,15 +279,25 @@ def session_wf(sessions):
 
 # App
 # features = [identity, session_wf]
-features = [select_sessions]
+def pre_configure_dpp(model_type, chk_size, featurizer):
+    pass
+
+
+features = [select_sessions, pre_configure_dpp]
 
 
 config = {
-    APP_KEY: {"title": "Session Table"},
+    APP_KEY: {"title": "DPP builder"},
     RENDERING_KEY: {
         "select_sessions": {
-            NAME_KEY: "Session Table Multiselect",
-            "description": {"content": "Session Table Multiselect"},
+            NAME_KEY: "Original dataset",
+            "description": {
+                "content": """
+                            Review carefully the dataset that will be used to train and test the model, then press NEXT.
+                            If the dataset does not look right, close the DPP Builder, return to the Session List, 
+                            and preselect the relevant sessions before reopening the DPP Builder.
+                            """
+            },
             "execution": {
                 "inputs": {
                     "sessions": {
@@ -295,6 +307,35 @@ config = {
                     },
                 },
                 "output": {ELEMENT_KEY: WavSelectionViewer},
+                # "auto_submit": True,
+            },
+        },
+        "pre_configure_dpp": {
+            NAME_KEY: "Pre-configure DPP",
+            "description": {
+                "content": """
+                            TBD
+                            """
+            },
+            "execution": {
+                "inputs": {
+                    "model_type": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": ["Outlier model"],
+                        "value": "Outlier model",
+                    },
+                    "chk_size": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": [1024, 512, 256],
+                        "value": 1024,
+                    },
+                    "featurizer": {
+                        ELEMENT_KEY: SelectBox,
+                        "options": ["Default featurizer"],
+                        # "value": 1024,
+                    },
+                },
+                # "output": {ELEMENT_KEY: WavSelectionViewer},
                 # "auto_submit": True,
             },
         },
