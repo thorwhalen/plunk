@@ -17,9 +17,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import streamlit as st
 from streamlitfront import binder as b
-from plunk.sb.front_demo.user_story1.components.components import (
-    AudioArrayDisplay,
-)
+from plunk.sb.front_demo.user_story1.components.components import AudioArrayDisplay
 
 
 class SessionQuery(TypedDict):
@@ -339,21 +337,6 @@ config = {
                 # "auto_submit": True,
             },
         },
-        # "session_wf": {
-        #     NAME_KEY: "Session Table Single Select",
-        #     "description": {"content": "Session Table Single Select"},
-        #     "execution": {
-        #         "inputs": {
-        #             "sessions": {
-        #                 ELEMENT_KEY: OtoTable,
-        #                 "sessions": MOCK_SESSIONS,
-        #                 "is_multiselect": False,
-        #             },
-        #         },
-        #         "output": {ELEMENT_KEY: WfVisualizePlayer},
-        #         "auto_submit": True,
-        #     },
-        # },
     },
 }
 
