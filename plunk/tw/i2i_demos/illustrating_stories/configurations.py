@@ -7,10 +7,7 @@ configs = None
 
 class HtmlOutput(OutputBase):
     def render(self):
-        st.markdown(
-            self.output,
-            unsafe_allow_html=True
-        )
+        st.markdown(self.output, unsafe_allow_html=True)
 
 
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
@@ -27,13 +24,8 @@ config = {
             #         No description
             #     ''',
             # },
-            'execution': {
-                'output': {
-                    ELEMENT_KEY: HtmlOutput,
-                },
-            },
+            'execution': {'output': {ELEMENT_KEY: HtmlOutput,},},
         },
-
         'aggregate_story_and_image': {
             # NAME_KEY: 'Hit the value',
             # 'description': {
@@ -41,14 +33,7 @@ config = {
             #         No description
             #     ''',
             # },
-            'execution': {
-                'output': {
-                    ELEMENT_KEY: HtmlOutput,
-                },
-            },
+            'execution': {'output': {ELEMENT_KEY: HtmlOutput,},},
         },
-    }
+    },
 }
-
-
-

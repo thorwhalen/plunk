@@ -16,10 +16,7 @@ func_src = {
 }
 
 
-@code_to_dag(
-    func_src=func_src,
-    name='slide_maker'
-)
+@code_to_dag(func_src=func_src, name='slide_maker')
 def dag():
     talking_points = get_talking_points(topic, n_talking_points)
     illustration_description = make_illustration_description(talking_point, image_style)
@@ -28,5 +25,3 @@ def dag():
 
 
 funcs = list(dag.find_funcs())
-
-

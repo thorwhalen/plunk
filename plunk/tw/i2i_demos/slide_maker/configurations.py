@@ -2,12 +2,8 @@ import streamlitfront.tools as t
 
 configs = None
 
-render_image_url = t.Pipe(
-    t.html_img_wrap, t.render_html,
-)
-render_bullet = t.Pipe(
-    t.lines_to_html_paragraphs, t.text_to_html, t.render_html,
-)
+render_image_url = t.Pipe(t.html_img_wrap, t.render_html,)
+render_bullet = t.Pipe(t.lines_to_html_paragraphs, t.text_to_html, t.render_html,)
 
 from front import APP_KEY
 from streamlitfront.tools import trans_output, dynamic_trans
@@ -31,6 +27,7 @@ trans_output(working_config, 'aggregate_story_and_image', t.dynamic_trans)
 # THis DOES NOT YET:
 from dol.paths import path_edit
 from streamlitfront.tools import render_edits
+
 edits = list(
     render_edits(
         {
@@ -53,9 +50,6 @@ from front import RENDERING_KEY, NAME_KEY, ELEMENT_KEY
 from dol import path_set
 
 config = path_edit(config, edits)
-
-
-
 
 
 # SCRAP for DEBUG

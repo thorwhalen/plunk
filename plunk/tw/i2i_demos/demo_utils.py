@@ -17,24 +17,19 @@ class HtmlOutputWrap(OutputBase):
     def render(self):
         st.markdown(
             f'<html> <body> <img src="{self.output}" /> </body> </html>',
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
 
 class HtmlOutput(OutputBase):
     def render(self):
-        st.markdown(
-            self.output,
-            unsafe_allow_html=True
-        )
-
+        st.markdown(self.output, unsafe_allow_html=True)
 
 
 from i2 import mk_sentinel
 
 
 NoChanges = mk_sentinel('NoChanges')
-
 
 
 def forgiving_path_get(d: dict, path: list, default=None):
@@ -45,7 +40,6 @@ def forgiving_path_get(d: dict, path: list, default=None):
         else:
             return default
     return d
-
 
 
 # def add_output_trans(configs: dict, **trans_for_key):

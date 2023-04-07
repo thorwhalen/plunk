@@ -1,13 +1,10 @@
 import streamlitfront.tools as t
 from front import APP_KEY, RENDERING_KEY
+
 config = {APP_KEY: {'title': 'Illustrating concepts'}, RENDERING_KEY: {}}
 
-render_image_url = t.Pipe(
-    t.html_img_wrap, t.render_html,
-)
-render_bullet = t.Pipe(
-    t.lines_to_html_paragraphs, t.text_to_html, t.render_html,
-)
+render_image_url = t.Pipe(t.html_img_wrap, t.render_html,)
+render_bullet = t.Pipe(t.lines_to_html_paragraphs, t.text_to_html, t.render_html,)
 
 
 from streamlitfront.tools import trans_output
