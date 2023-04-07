@@ -1,38 +1,17 @@
-import streamlit as st
-from dataclasses import dataclass
-from front.elements import OutputBase
+import streamlitfront.tools as t
+from front import APP_KEY, RENDERING_KEY
+config = {APP_KEY: {'title': 'Illustrating concepts'}, RENDERING_KEY: {}}
 
-configs = None
-
-
-
-@dataclass
-class Markdown(OutputBase):
-    def render(self):
-        return st.markdown(
-            f"<html><body><h1>{self.output}</h1></body></html>",
-            unsafe_allow_html=True
-        )
+render_image_url = t.Pipe(
+    t.html_img_wrap, t.render_html,
+)
+render_bullet = t.Pipe(
+    t.lines_to_html_paragraphs, t.text_to_html, t.render_html,
+)
 
 
-from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+from streamlitfront.tools import trans_output
 
-
-config = {
-    APP_KEY: {'title': "Making children's stories"},
-    RENDERING_KEY: {
-        'aggregate_story_and_image': {
-            NAME_KEY: 'Hit the value',
-            'description': {
-                'content': '''
-                    No description
-                ''',
-            },
-            'execution': {
-                'output': {
-                    ELEMENT_KEY: Markdown,
-                },
-            },
-        }
-    }
-}
+trans_output(config, 'topic_points', render_bullet)
+trans_output(config, 'get_illustration', render_image_url)
+trans_output(config, 'aggregate_story_and_image', t.dynamic_trans)
