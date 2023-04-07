@@ -21,19 +21,21 @@ from olab.types import (
     Step,
     Pipeline,
     WaveForm,
+)
+from olab.util import clean_dict
+from plunk.sb.front_demo.user_story1.components.components import (
     AudioArrayDisplay,
+    ArrayWithIntervalsPlotter,
     GraphOutput,
     ArrayPlotter,
 )
-from olab.util import (
-    simple_chunker,
+from olab.base import (
     scores_to_intervals,
     simple_featurizer,
-    ArrayWithIntervalsPlotter,
-    clean_dict,
+    learn_outlier_model,
+    apply_fitted_model,
+    simple_chunker,
 )
-
-from olab.base import learn_outlier_model, apply_fitted_model
 
 
 def mk_pipeline_maker_app_with_mall(

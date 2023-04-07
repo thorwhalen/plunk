@@ -1,6 +1,6 @@
 import json
 from functools import wraps
-from typing import Protocol, runtime_checkable, Hashable, Any, Union
+from typing import Protocol, runtime_checkable, Hashable, Any, Union, Callable
 
 from boltons.typeutils import make_sentinel
 from py2json import Ctor
@@ -43,6 +43,10 @@ class Store(Protocol):
 
 
 class Persist:
+    """
+
+    """
+
     ctor: Ctor = Ctor
 
     @classmethod
@@ -54,7 +58,7 @@ class Persist:
         serializer: Serializer,
         store: Store,
         validate_conversion=False,
-    ) -> Any:
+    ) -> Callable:
         if not isinstance(store, Store):
             raise PersistArgsError(
                 'Persist decorator store arg must have __setitem__ implemented'
@@ -87,14 +91,14 @@ class Persist:
         key_getter: KeyGetter = None,
         store=None,
         validate_conversion=False,
-    ) -> Any:
+    ) -> Callable:
         """Function decorator to serialize function, args, and kwargs
 
-        :param func:
-        :param key_getter:
-        :param store:
-        :param validate_conversion:
-        :return:
+        :param func: function to decorate
+        :param key_getter: takes function and args to make a store key
+        :param store: store for serialized function call
+        :param validate_conversion: will deserialize and make a check after serializing
+        :return: decorated function
         """
 
         return cls.any(
@@ -116,11 +120,11 @@ class Persist:
     ) -> Serialized:
         """Serializer method
 
-        :param args:
-        :param kwargs:
-        :param function:
+        :param args: function args to serialize
+        :param kwargs: function kwargs to serialize
+        :param function: function to serialize
         :param return_value: N/A
-        :param validate_conversion:
+        :param validate_conversion: will deserialize and make a check after serializing
         :return:
         """
         if function is NOT_SET:
@@ -141,13 +145,13 @@ class Persist:
         key_getter: KeyGetter = None,
         store=None,
         validate_conversion=False,
-    ) -> Any:
+    ) -> Callable:
         """Function decorator to serialize the return value of the function
 
-        :param func:
-        :param key_getter:
-        :param store:
-        :param validate_conversion:
+        :param func: function to decorate
+        :param key_getter: takes function and args to make a store key
+        :param store: store for serialized return value
+        :param validate_conversion: will deserialize and make a check after serializing
         :return:
         """
 
@@ -173,8 +177,8 @@ class Persist:
         :param args: N/A
         :param kwargs: N/A
         :param function: N/A
-        :param return_value:
-        :param validate_conversion:
+        :param return_value: return value to serialize
+        :param validate_conversion: will deserialize and make a check after serializing
         :return:
         """
         if return_value is NOT_SET:
@@ -185,7 +189,12 @@ class Persist:
         return json.dumps(ctor_jdict)
 
     @classmethod
-    def deserialize(cls, serialized: Serialized):
+    def deserialize(cls, serialized: Serialized) -> Any:
+        """Deserialize and execute function call or return value
+
+        :param serialized:
+        :return:
+        """
         if isinstance(serialized, bytes):
             serialized = serialized.decode('utf-8')
         jdict = json.loads(serialized)
