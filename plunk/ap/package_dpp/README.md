@@ -1,1 +1,0 @@
-# Simple Data Processing Pipeline
