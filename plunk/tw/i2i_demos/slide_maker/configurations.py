@@ -10,38 +10,55 @@ render_bullet = t.Pipe(
 )
 
 from front import APP_KEY
-from streamlitfront.tools import trans_output
-
-config = {APP_KEY: {'title': 'Illustrating concepts'}}
-trans_output(config, 'topic_points', render_bullet)
-trans_output(config, 'get_illustration', render_image_url)
-trans_output(config, 'aggregate_story_and_image', t.dynamic_trans)
+from streamlitfront.tools import trans_output, dynamic_trans
 
 
+# THIS WORKS:
+working_config = {APP_KEY: {'title': 'Illustrating concepts'}}
+trans_output(working_config, 'topic_points', render_bullet)
+trans_output(working_config, 'get_illustration', render_image_url)
+trans_output(working_config, 'aggregate_story_and_image', t.dynamic_trans)
+
+# SOMETHING LIKE THIS SHOULD WORK (when defined)
+# mult_trans_output(config, {
+#     'topic_points': render_bullet,
+#     'get_illustration': render_image_url,
+#     'aggregate_story_and_image', t.dynamic_trans,
+# })
+
+
+# THIS is meant to be more general and eventually plugin-able
+# THis DOES NOT YET:
 from dol.paths import path_edit
 from streamlitfront.tools import render_edits
-# edits = list(
-#     render_edits(
-#         {
-#             'topic_points': dict(output_trans=render_bullet),
-#             # Renderer obj for
-#             # output_trans
-#             'get_illustration': dict(  # multiple edits needed: use dict
-#                 description_content='Generate an image', output_trans=render_image_url,
-#             ),
-#             # just a function (will be wrapped in an OutputBase, for output_trans)
-#             'aggregate_story_and_image': dynamic_trans,  # just a function (will be wrapped)
-#         }
-#     )
-# )
-#
-#
-# config = {APP_KEY: {'title': 'Illustrating concepts'}}
-#
-# from front import RENDERING_KEY, NAME_KEY, ELEMENT_KEY
-# from dol import path_set
-#
-# config = path_edit(config, edits)
+edits = list(
+    render_edits(
+        {
+            # Renderer obj for output_trans
+            'topic_points': dict(output_trans=render_bullet),
+            # multiple edits needed: use dict
+            'get_illustration': dict(
+                # description_content='Generate an image',
+                output_trans=render_image_url,
+            ),
+            # just a function (will be wrapped in an OutputBase, for output_trans)
+            'aggregate_story_and_image': t.dynamic_trans,
+        }
+    )
+)
+
+config = {APP_KEY: {'title': 'Illustrating concepts'}}
+
+from front import RENDERING_KEY, NAME_KEY, ELEMENT_KEY
+from dol import path_set
+
+config = path_edit(config, edits)
+
+
+
+
+
+# SCRAP for DEBUG
 # import copy
 # before = copy.deepcopy(config)
 #
