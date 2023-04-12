@@ -1,4 +1,4 @@
-from platform_poc.data import mall
+from plunk.sb.front_demo.user_story1.apps.app8_extrude.data.mall import mall
 from i2 import Sig
 
 

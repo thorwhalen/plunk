@@ -136,12 +136,8 @@ def mk_pipeline_maker_app_with_mall(
     steps_store=None,
     pipelines: str = 'pipelines',
     pipelines_store=None,
-<<<<<<< HEAD
     mapped_annotations_store=None,
     data: str = "data",
-=======
-    data: str = 'data',
->>>>>>> fac68ac765d2ccdc3687b4d12759e5acbe2fe57d
     data_store=None,
     annots_set=None,
     learned_models=None,

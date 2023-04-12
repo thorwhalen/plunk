@@ -1,6 +1,11 @@
 from meshed import code_to_dag
 
 
+def dummy_func():
+    pass
+
+
+funcs = [dummy_func]
 # import oa.examples.illustrate_stories as ii
 
 

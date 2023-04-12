@@ -1,7 +1,7 @@
 import os
 from extrude import mk_api, run_api
 
-from ..data.mall import mall
+from plunk.sb.front_demo.user_story1.apps.app8_extrude.data.mall import mall
 from plunk.sb.front_demo.user_story1.apps.app8_extrude.apps.web_service.handlers import (
     handlers,
 )
