@@ -138,8 +138,10 @@ def mk_pipeline_maker_app_with_mall(
     steps_store=None,
     pipelines: str = "pipelines",
     pipelines_store=None,
+    mapped_annotations_store=None,
     data: str = "data",
     data_store=None,
+    annots_set=None,
     learned_models=None,
     models_scores=None,
 ):
@@ -155,6 +157,15 @@ def mk_pipeline_maker_app_with_mall(
     pipelines_store = pipelines_store or pipelines
 
     crudifier = partial(Crudifier, mall=mall)
+
+    @crudifier(
+        param_to_mall_map=dict(annots=annots_set), output_store=mapped_annotations_store
+    )
+    def map_annots_to_class(class_item, annots):
+        return class_item, annots
+
+    def debug_view():
+        st.write(mall)
 
     @crudifier(
         param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
@@ -272,6 +283,24 @@ def mk_pipeline_maker_app_with_mall(
                     # "auto_submit": True,
                 },
             },
+            "map_annots_to_classes": {
+                NAME_KEY: "Map annotations to classes",
+                "execution": {
+                    # "inputs": {
+                    #     "class_item": {
+                    #         ELEMENT_KEY: TextInput,
+                    #     },
+                    #     "annots": {
+                    #         ELEMENT_KEY: SelectBox,
+                    #         "options": set(MOCK_SESSIONS["annotations"]),
+                    #     },
+                    # },
+                    "output": {
+                        ELEMENT_KEY: SuccessNotification,
+                        "message": "The step has been created successfully.",
+                    },
+                },
+            },
             "mk_step": {
                 NAME_KEY: "Pipeline Step Maker",
                 "execution": {
@@ -385,14 +414,16 @@ def mk_pipeline_maker_app_with_mall(
     funcs = [
         select_sessions,
         # upload_sound,
-        mk_step,
-        modify_step,
-        mk_pipeline,
-        modify_pipeline,
-        learn_outlier_model_crudified,
-        apply_fitted_model_crudified,
-        visualize_pipeline,
-        visualize_scores,
+        map_annots_to_class,
+        # mk_step,
+        # modify_step,
+        # mk_pipeline,
+        # modify_pipeline,
+        # learn_outlier_model_crudified,
+        # apply_fitted_model_crudified,
+        # visualize_pipeline,
+        # visualize_scores,
+        debug_view,
     ]
     app = mk_app(funcs, config=config)
 
@@ -408,9 +439,11 @@ mall = dict(
         chunker=FuncFactory(simple_chunker),
         featurizer=FuncFactory(simple_featurizer),
     ),
+    annots_set=set(MOCK_SESSIONS["annotation"]),
     # Output Store
     data=dict(),
     steps=dict(),
+    mapped_annots=dict(),
     pipelines=dict(),
     exec_outputs=dict(),
     learned_models=dict(),
