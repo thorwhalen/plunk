@@ -9,7 +9,7 @@ importlib.reload(configurations)
 
 from configurations import config
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # validate_config(config, funcs)  # validate config against funcs
-    app = mk_web_app(funcs, config=config, api_url="http://localhost:3030/openapi")
+    app = mk_web_app(funcs, config=config, api_url='http://localhost:3030/openapi')
     app()

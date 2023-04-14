@@ -29,14 +29,10 @@ def main():
         visualize_output,
         visualize_session,
     ]
-    api = HttpClient(url=urljoin(API_URL, "openapi"))
-    app = mk_web_app(
-        features,
-        api=api,
-        config=mk_config(api),
-    )
+    api = HttpClient(url=urljoin(API_URL, 'openapi'))
+    app = mk_web_app(features, api=api, config=mk_config(api),)
     app()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

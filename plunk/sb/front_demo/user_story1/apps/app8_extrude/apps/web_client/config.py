@@ -32,44 +32,44 @@ def mk_config(api):
     #     b.steps_of_selected_pipeline.set(pipeline.steps)
 
     _init_cache('sessions', api.list_sessions())
-    _init_cache('step_factories', mall["step_factories"])
-    _init_cache('step_names', api.get_store_keys("steps"))
+    _init_cache('step_factories', mall['step_factories'])
+    _init_cache('step_names', api.get_store_keys('steps'))
 
     return {
-        APP_KEY: {"title": "Otosense Platform PoC"},
+        APP_KEY: {'title': 'Otosense Platform PoC'},
         RENDERING_KEY: {
-            "upload_audio_data": {
+            'upload_audio_data': {
                 # NAME_KEY: "Data Loader",
-                "execution": {
-                    "inputs": {
-                        "audio_data": {
+                'execution': {
+                    'inputs': {
+                        'audio_data': {
                             ELEMENT_KEY: FileUploader,
-                            "type": "wav",
-                            "accept_multiple_files": True,
+                            'type': 'wav',
+                            'accept_multiple_files': True,
                         }
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "Wav files loaded successfully.",
+                        'message': 'Wav files loaded successfully.',
                     },
-                    "on_submit": lambda output: _invalidate_cache('sessions'),
+                    'on_submit': lambda output: _invalidate_cache('sessions'),
                 },
             },
-            "mk_step": {
-                NAME_KEY: "Pipeline Step Maker",
-                "execution": {
-                    "inputs": {
-                        "step_factory": {
-                            "value": b.selected_step_factory,
-                            "on_value_change": on_select_step_factory,
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {
+                            'value': b.selected_step_factory,
+                            'on_value_change': on_select_step_factory,
                         },
-                        "kwargs": {"func_sig": b.selected_step_factory_sig},
+                        'kwargs': {'func_sig': b.selected_step_factory_sig},
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The step has been created successfully.",
+                        'message': 'The step has been created successfully.',
                     },
-                    "on_submit": lambda output: _invalidate_cache('step_names'),
+                    'on_submit': lambda output: _invalidate_cache('step_names'),
                 },
             },
             # "modify_step": {
@@ -89,18 +89,15 @@ def mk_config(api):
             #         "on_submit": lambda output: _invalidate_cache('step_names'),
             #     },
             # },
-            "mk_pipeline": {
-                NAME_KEY: "Pipeline Maker",
-                "execution": {
-                    "inputs": {
-                        "steps": {
-                            ELEMENT_KEY: PipelineMaker,
-                            "items": b.step_names(),
-                        },
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
+                        'steps': {ELEMENT_KEY: PipelineMaker, 'items': b.step_names(),},
                     },
-                    "output": {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The pipeline has been created successfully.",
+                        'message': 'The pipeline has been created successfully.',
                     },
                 },
             },
@@ -124,50 +121,36 @@ def mk_config(api):
             #         },
             #     },
             # },
-            "learn_outlier_model": {
-                NAME_KEY: "Train Model",
-                "execution": {
-                    "output": {
+            'learn_outlier_model': {
+                NAME_KEY: 'Train Model',
+                'execution': {
+                    'output': {
                         ELEMENT_KEY: SuccessNotification,
-                        "message": "The model has been trained successfully.",
+                        'message': 'The model has been trained successfully.',
                     },
                 },
             },
-            "apply_fitted_model": {
-                NAME_KEY: "Test Model",
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayPlotter,
-                    },
-                },
+            'apply_fitted_model': {
+                NAME_KEY: 'Test Model',
+                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
             },
-            "visualize_output": {
-                "execution": {
-                    "output": {
-                        ELEMENT_KEY: ArrayWithIntervalsPlotter,
-                    },
-                },
+            'visualize_output': {
+                'execution': {'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},},
             },
             Callable: {
-                "execution": {
-                    "inputs": {
-                        "save_name": {
-                            NAME_KEY: "Save as",
-                        },
-                    },
-                },
+                'execution': {'inputs': {'save_name': {NAME_KEY: 'Save as',},},},
             },
-            "visualize_session": {
-                "execution": {
-                    "inputs": {
-                        "session": {
+            'visualize_session': {
+                'execution': {
+                    'inputs': {
+                        'session': {
                             ELEMENT_KEY: OtoTable,
-                            "sessions": b.sessions,
-                            "is_multiselect": False,
+                            'sessions': b.sessions,
+                            'is_multiselect': False,
                         },
                     },
-                    "output": {ELEMENT_KEY: WfVisualizePlayer},
-                    "auto_submit": True,
+                    'output': {ELEMENT_KEY: WfVisualizePlayer},
+                    'auto_submit': True,
                 },
             },
         },

@@ -7,11 +7,10 @@ from platform_poc.data.store_factory import mk_mongodb_store, mk_ram_store
 mall = dict(
     tagged_data=mk_ram_store(),
     step_factories=mk_ram_store(
-        chunker=FuncFactory(simple_chunker),
-        featurizer=FuncFactory(simple_featurizer),
+        chunker=FuncFactory(simple_chunker), featurizer=FuncFactory(simple_featurizer),
     ),
-    steps=mk_mongodb_store(collection_name="steps"),
-    pipelines=mk_mongodb_store(collection_name="pipelines"),
+    steps=mk_mongodb_store(collection_name='steps'),
+    pipelines=mk_mongodb_store(collection_name='pipelines'),
     # steps=mk_ram_store(),
     # pipelines=mk_ram_store(),
     annotation_dicts=mk_ram_store(),

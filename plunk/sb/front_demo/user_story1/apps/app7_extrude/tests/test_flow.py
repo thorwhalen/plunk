@@ -18,14 +18,14 @@ def retrieve_data(sref):
     import soundfile as sf
     import os
 
-    home_directory = os.path.expanduser("~")
-    path = os.path.join(home_directory + "/Dropbox/OtoSense/VacuumEdgeImpulse/", sref)
+    home_directory = os.path.expanduser('~')
+    path = os.path.join(home_directory + '/Dropbox/OtoSense/VacuumEdgeImpulse/', sref)
 
-    arr = sf.read(path, dtype="int16")[0]
+    arr = sf.read(path, dtype='int16')[0]
     return path, arr
 
 
-DFLT_FPATH = "../data/mock_data.csv"
+DFLT_FPATH = '../data/mock_data.csv'
 
 
 def mk_dataset() -> pd.DataFrame:
@@ -41,7 +41,7 @@ crudifier = partial(
 
 
 @crudifier(
-    output_store="sessions",
+    output_store='sessions',
     auto_namer=lambda: str(uuid.uuid4()),
     output_trans=lambda: None,
 )
@@ -50,7 +50,7 @@ def generate_session():
 
 
 @pytest.mark.parametrize(
-    "source",
+    'source',
     [features]
     # , lambda: HttpClient(url=urljoin(API_URL, "openapi"))],
 )
@@ -60,14 +60,14 @@ def test_flow(source):
     if callable(source):
         source = source()
     sessions = source.generate_session()
-    training_data = list(get_data("training", 50))
-    testing_data = list(get_data("testing", 50))
+    training_data = list(get_data('training', 50))
+    testing_data = list(get_data('testing', 50))
 
     # Load data
     source.upload_audio_data(
-        audio_data=training_data, tag="training", save_name="my_training_data"
+        audio_data=training_data, tag='training', save_name='my_training_data'
     )
     source.upload_audio_data(
-        audio_data=testing_data, tag="testing", save_name="my_testing_data"
+        audio_data=testing_data, tag='testing', save_name='my_testing_data'
     )
     assert True

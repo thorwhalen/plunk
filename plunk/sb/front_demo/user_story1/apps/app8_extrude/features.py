@@ -30,7 +30,7 @@ crudifier = partial(
 #     return get_value_list
 
 
-@crudifier(output_store="tagged_data", output_trans=lambda: None)
+@crudifier(output_store='tagged_data', output_trans=lambda: None)
 def upload_audio_data(audio_data: List[WaveForm], tag: str):
     return audio_data, tag
 
@@ -43,8 +43,8 @@ def upload_audio_data(audio_data: List[WaveForm], tag: str):
 
 mk_step = crudifier(
     olab_mk_step,
-    param_to_mall_map=dict(step_factory="step_factories"),
-    output_store="steps",
+    param_to_mall_map=dict(step_factory='step_factories'),
+    output_store='steps',
     output_trans=lambda: None,
 )
 
@@ -57,8 +57,8 @@ mk_step = crudifier(
 
 mk_pipeline = crudifier(
     olab_mk_pipeline,
-    param_to_mall_map=["steps"],
-    output_store="pipelines",
+    param_to_mall_map=['steps'],
+    output_store='pipelines',
     output_trans=lambda: None,
 )
 
@@ -71,18 +71,18 @@ mk_pipeline = crudifier(
 
 learn_outlier_model = crudifier(
     olab_learn_outlier_model,
-    param_to_mall_map=dict(tagged_data="tagged_data", preprocess_pipeline="pipelines"),
-    output_store="learned_models",
+    param_to_mall_map=dict(tagged_data='tagged_data', preprocess_pipeline='pipelines'),
+    output_store='learned_models',
     output_trans=lambda: None,
 )
 apply_fitted_model = crudifier(
     olab_apply_fitted_model,
     param_to_mall_map=dict(
-        tagged_data="tagged_data",
-        preprocess_pipeline="pipelines",
-        fitted_model="learned_models",
+        tagged_data='tagged_data',
+        preprocess_pipeline='pipelines',
+        fitted_model='learned_models',
     ),
-    output_store="model_outputs",
+    output_store='model_outputs',
 )
 
 
@@ -91,9 +91,7 @@ apply_fitted_model = crudifier(
 #     return pipeline.pipe
 
 
-@crudifier(
-    param_to_mall_map=dict(model_output="model_outputs"),
-)
+@crudifier(param_to_mall_map=dict(model_output='model_outputs'),)
 def visualize_output(model_output, threshold=80, num_segs=3):
     intervals = scores_to_intervals(model_output, threshold, num_segs)
 

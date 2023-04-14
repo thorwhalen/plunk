@@ -6,7 +6,10 @@ from py2http.decorators import (
 )
 from i2 import Sig
 
-from platform_poc.apps.web_service.util_endpoints import get_pipeline, get_step_factory_sig
+from platform_poc.apps.web_service.util_endpoints import (
+    get_pipeline,
+    get_step_factory_sig,
+)
 from platform_poc.features import (
     upload_audio_data,
     mk_step,
@@ -49,11 +52,7 @@ handlers = [
     dict(endpoint=visualize_output, output_mapper=send_binary_resp_output_handler,),
     dict(endpoint=list_sessions, output_mapper=send_json_resp_output_handler,),
     dict(endpoint=visualize_session, output_mapper=send_binary_resp_output_handler,),
-
     # util endpoints
     dict(endpoint=get_step_factory_sig, output_mapper=send_binary_resp_output_handler,),
-    dict(
-        endpoint=get_pipeline,
-        output_mapper=send_binary_resp_output_handler,
-    ),
+    dict(endpoint=get_pipeline, output_mapper=send_binary_resp_output_handler,),
 ]

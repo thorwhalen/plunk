@@ -35,6 +35,26 @@
    module_docs/plunk/sb/front_demo/user_story1/apps/app5_s3dol
    module_docs/plunk/sb/front_demo/user_story1/apps/app6_drill
    module_docs/plunk/sb/front_demo/user_story1/apps/app7_drill
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude/app
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude/configurations
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude/mall
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude/resources
+   module_docs/plunk/sb/front_demo/user_story1/apps/app7_extrude/server
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_client/app
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_client/components
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_client/config
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_service
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_service/app
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_service/handlers
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/apps/web_service/util_endpoints
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/config
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/data
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/data/mall
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/data/store_factory
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/data/store_factory/mongodb
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/data/store_factory/ram
+   module_docs/plunk/sb/front_demo/user_story1/apps/app8_extrude/features
    module_docs/plunk/sb/front_demo/user_story1/apps/app_base_audio
    module_docs/plunk/sb/front_demo/user_story1/apps/app_choosing_model
    module_docs/plunk/sb/front_demo/user_story1/apps/app_dummy

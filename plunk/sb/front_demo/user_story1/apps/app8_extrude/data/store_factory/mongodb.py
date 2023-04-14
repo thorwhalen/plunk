@@ -11,20 +11,17 @@ MONGODB_ID_FIELD = '_id'
 
 
 def mk_mongodb_store(*, key_field='key', **kwargs):
-        key_field = key_field or MONGODB_ID_FIELD
-        if 'iter_projection' not in kwargs:
-            kwargs['iter_projection'] = {
-                '_id': False,
-                key_field: True
-            }
-        store = MongoStore(**kwargs)
-        return wrap_kvs(
-            store,
-            id_of_key=lambda x: {key_field: x},
-            key_of_id=lambda x: x[key_field],
-            data_of_obj=_value_input_mapper,
-            obj_of_data=_value_output_mapper,
-        )
+    key_field = key_field or MONGODB_ID_FIELD
+    if 'iter_projection' not in kwargs:
+        kwargs['iter_projection'] = {'_id': False, key_field: True}
+    store = MongoStore(**kwargs)
+    return wrap_kvs(
+        store,
+        id_of_key=lambda x: {key_field: x},
+        key_of_id=lambda x: x[key_field],
+        data_of_obj=_value_input_mapper,
+        obj_of_data=_value_output_mapper,
+    )
 
 
 @lru_cache
