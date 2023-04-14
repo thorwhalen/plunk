@@ -59,7 +59,7 @@ def test_flow(source):
     # computes the parameters in `pytest.mark.parametrize`.
     if callable(source):
         source = source()
-    sessions = generate_session()
+    sessions = source.generate_session()
     training_data = list(get_data("training", 50))
     testing_data = list(get_data("testing", 50))
 
