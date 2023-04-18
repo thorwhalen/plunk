@@ -65,6 +65,7 @@
    module_docs/plunk/sb/front_demo/user_story1/components/components
    module_docs/plunk/sb/front_demo/user_story1/simple_dpp_sushma
    module_docs/plunk/sb/front_demo/user_story1/simple_dpp_sushma2
+   module_docs/plunk/sb/front_demo/user_story1/simple_dpp_sushma3
    module_docs/plunk/sb/front_demo/user_story1/utils/funcs
    module_docs/plunk/sb/front_demo/user_story1/utils/scratch_pickle
    module_docs/plunk/sb/front_demo/user_story1/utils/simple_config
