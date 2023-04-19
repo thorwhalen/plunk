@@ -47,14 +47,14 @@ def segment_to_bt_tt(segment: AudioSegment) -> tuple:
 
 
 def aggregate_scores(scores, aggregation_method):
-    if aggregation_method == 'max':
+    if aggregation_method == "max":
         return max(scores)
 
-    elif aggregation_method == 'mean':
+    elif aggregation_method == "mean":
         return np.mean(scores)
 
     else:
-        raise ValueError(f'Aggregation method {aggregation_method} not supported')
+        raise ValueError(f"Aggregation method {aggregation_method} not supported")
 
 
 def decision(score, threshold: float):
@@ -67,20 +67,20 @@ def decision(score, threshold: float):
 def format_output(decision, bt_tt):
     bt, tt = bt_tt
     if decision:
-        return {'output': 'outlier', 'bt': bt, 'tt': tt}
+        return {"output": "outlier", "bt": bt, "tt": tt}
     else:
-        return {'output': 'normal', 'bt': bt, 'tt': tt}
+        return {"output": "normal", "bt": bt, "tt": tt}
 
 
 d = {
     # "bytes_to_wf": bytes_to_wf,
-    'segment_to_wf': segment_to_wf,
-    'simple_chunker': simple_chunker,
-    'simple_featurizer': simple_featurizer,
-    'learn_model': learn_model,
-    'apply_model': apply_model,
-    'aggregate_scores': aggregate_scores,
-    'decision': decision,
+    "segment_to_wf": segment_to_wf,
+    "simple_chunker": simple_chunker,
+    "simple_featurizer": simple_featurizer,
+    "learn_model": learn_model,
+    "apply_model": apply_model,
+    "aggregate_scores": aggregate_scores,
+    "decision": decision,
 }
 
 # simple DPP in form of a DAG
@@ -95,18 +95,27 @@ def simple_dpp(block: AudioSegment, aggregation_method: str):
     result = decision(aggregated_scores, threshold=2.0)
 
 
-if __name__ == '__main__':
+def apply_trained_model(block: AudioSegment, fitted_model, preprocessing_pipeline):
+    wf = segment_to_wf(block)
+
+    fvs = simple_featurizer(wf)
+    scores = apply_model(fvs, fitted_model)
+    
+    return scores
+
+
+if __name__ == "__main__":
     # make input data for testing purposes
     from pyckup import grab
 
     # make a wf as a bytes object
-    wf = grab('https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0')
+    wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
     block = AudioSegment(waveform=wf, start_date=0, end_date=1e6 * len(wf) / 16000)
 
     # check the type
     # print(f"{type(wf)=}")
 
     # # run the experiment
-    result = simple_dpp(block, 'max')
+    result = simple_dpp(block, "max")
 
     # print(scores[:10])
