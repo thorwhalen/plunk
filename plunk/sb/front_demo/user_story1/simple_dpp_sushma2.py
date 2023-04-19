@@ -66,4 +66,5 @@ if __name__ == "__main__":
     model = simple_dpp(wf)
     model_dict = model.to_jdict()
     # result = model.to_jdict()
+    # Stroll.from_jdict(model_dict)
     pprint(model_dict)
