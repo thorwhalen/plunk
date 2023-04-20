@@ -53,18 +53,24 @@ if __name__ == "__main__":
     # make input data for testing purposes
     from pyckup import grab
     from pprint import pprint
+    import numpy as np
 
     # from py2json impo
 
     # make a wf as a bytes object
     wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
-
+    wfs = bytes_to_wf(wf)
+    chks = simple_chunker(wfs)
+    fvs = simple_featurizer(chks)
     # check the type
-    print(f"{type(wf)=}")
+    print(f"{fvs.shape=}")
 
     # # run the experiment
     model = simple_dpp(wf)
-    model_dict = model.to_jdict()
+    scores_1 = apply_model(fvs, model)
+    model_dict = model.to_dpp_jdict()
     # result = model.to_jdict()
-    # Stroll.from_jdict(model_dict)
-    pprint(model_dict)
+    model_new = Stroll.from_dpp_jdict(model_dict)
+    scores_2 = apply_model(fvs, model_new)
+    pprint(np.abs(scores_1 - scores_2))
+    # pprint(scores_2)
