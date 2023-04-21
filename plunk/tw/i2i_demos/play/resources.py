@@ -28,14 +28,13 @@ funcs = list(dag.find_funcs())
 # Adding persistence
 
 
-q,f,g,r = funcs
+q, f, g, r = funcs
 
 from front.crude import prepare_for_crude_dispatch, Crudifier
 from functools import partial
 
 
 mall = {'illustration_description_store': dict()}
-
 crudifier = partial(Crudifier, mall=mall)
 
 
@@ -53,6 +52,7 @@ ff = crudifier(
 gg = crudifier(
     param_to_mall_map={'illustration_description': 'illustration_description_store'},
 )(g)
+
 
 # ff = prepare_for_crude_dispatch(
 #     f,

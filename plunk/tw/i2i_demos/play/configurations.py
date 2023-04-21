@@ -5,23 +5,6 @@ config = {}
 from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
 from streamlitfront.elements import SelectBox
 
-config = {
-    APP_KEY: {'title': 'Data Preparation'},
-    RENDERING_KEY: {
-        'g': {
-            NAME_KEY: 'gg func',
-
-            'execution': {
-                'inputs': {
-                    'illustration_description': {
-                        ELEMENT_KEY: SelectBox,
-                    },
-                },
-
-            },
-        },
-    }
-}
 # config = {APP_KEY: {'title': 'Illustrating concepts'}}
 
 # render_image_url = t.Pipe(
