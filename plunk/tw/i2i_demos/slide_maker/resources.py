@@ -1,12 +1,6 @@
 from meshed import code_to_dag
 
-
 import oa.examples.illustrate_stories as ii
-
-
-# def topic_points(topic, n_talking_points=3):
-#     return 'Blah blah blah\nbloo bloo'
-
 
 func_src = {
     'get_talking_points': ii.topic_points,

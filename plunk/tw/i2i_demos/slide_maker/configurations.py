@@ -1,19 +1,23 @@
-import streamlitfront.tools as t
+config = None
 
-configs = None
-
-render_image_url = t.Pipe(t.html_img_wrap, t.render_html,)
-render_bullet = t.Pipe(t.lines_to_html_paragraphs, t.text_to_html, t.render_html,)
+render_image_url = t.Pipe(
+    t.html_img_wrap, t.render_html,
+)
+render_bullet = t.Pipe(
+    t.lines_to_html_paragraphs, t.text_to_html, t.render_html,
+)
 
 from front import APP_KEY
 from streamlitfront.tools import trans_output, dynamic_trans
 
 
 # THIS WORKS:
-working_config = {APP_KEY: {'title': 'Illustrating concepts'}}
-trans_output(working_config, 'topic_points', render_bullet)
-trans_output(working_config, 'get_illustration', render_image_url)
-trans_output(working_config, 'aggregate_story_and_image', t.dynamic_trans)
+config = {APP_KEY: {'title': 'Illustrating concepts'}}
+trans_output(config, 'topic_points', render_bullet)
+trans_output(config, 'get_illustration', render_image_url)
+trans_output(config, 'aggregate_story_and_image', t.dynamic_trans)
+
+
 
 # SOMETHING LIKE THIS SHOULD WORK (when defined)
 # mult_trans_output(config, {
@@ -27,7 +31,6 @@ trans_output(working_config, 'aggregate_story_and_image', t.dynamic_trans)
 # THis DOES NOT YET:
 from dol.paths import path_edit
 from streamlitfront.tools import render_edits
-
 edits = list(
     render_edits(
         {
@@ -44,12 +47,15 @@ edits = list(
     )
 )
 
-config = {APP_KEY: {'title': 'Illustrating concepts'}}
+not_working_config = {APP_KEY: {'title': 'Illustrating concepts'}}
 
 from front import RENDERING_KEY, NAME_KEY, ELEMENT_KEY
 from dol import path_set
 
-config = path_edit(config, edits)
+not_working_config = path_edit(not_working_config, edits)
+
+# config = not_working_config
+
 
 
 # SCRAP for DEBUG
