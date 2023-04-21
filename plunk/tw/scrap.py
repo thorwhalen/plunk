@@ -54,7 +54,7 @@ if __name__ == '__main__':
 # api_key = get_config(
 #     'NAME_OF_CONFIG_KEY',
 #     sources=[
-#         # Try to find it in oa configs
+#         # Try to find it in oa config
 #         configs_local_store,
 #         # Try to find it in os.environ (environmental variables)
 #         os.environ,

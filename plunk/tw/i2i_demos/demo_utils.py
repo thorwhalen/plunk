@@ -48,7 +48,7 @@ def forgiving_path_get(d: dict, path: list, default=None):
 
 
 
-# def add_output_trans(configs: dict, **trans_for_key):
+# def add_output_trans(config: dict, **trans_for_key):
 #     def _gen():
 
 from copy import deepcopy
