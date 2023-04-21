@@ -4,6 +4,7 @@ from resources import funcs
 
 import importlib
 import configurations
+
 importlib.reload(configurations)
 
 from configurations import config

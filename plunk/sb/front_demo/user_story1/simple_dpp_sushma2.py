@@ -5,6 +5,7 @@ from olab.types import WaveForm
 from omodel.outliers.pystroll import OutlierModel as Stroll
 from meshed import code_to_dag
 from recode import decode_wav_bytes
+from py2json import Ctor
 
 
 def bytes_to_wf(wav_bytes: bytes) -> WaveForm:
@@ -26,11 +27,13 @@ def apply_model(fvs, fitted_model):
 
 
 d = {
-    'bytes_to_wf': bytes_to_wf,
-    'simple_chunker': simple_chunker,
-    'simple_featurizer': simple_featurizer,
-    'learn_model': learn_model,
-    'apply_model': apply_model,
+    "bytes_to_wf": bytes_to_wf,
+    "simple_chunker": simple_chunker,
+    "simple_featurizer": simple_featurizer,
+    "learn_model": learn_model,
+    "apply_model": apply_model,
+    # "deconstruct": Ctor.deconstruct,
+    # "construct": Ctor.construct,
 }
 
 # simple DPP in form of a DAG
@@ -40,20 +43,34 @@ def simple_dpp(wav_bytes: bytes):
     chks = simple_chunker(wfs)
     fvs = simple_featurizer(chks)
     model = learn_model(fvs)
-    scores = apply_model(fvs, model)
+    # model_dict = model.to_jdict()
+    # model_dict = deconstruct(model)
+    # model_2 = construct(model_dict)
+    # scores = apply_model(fvs, model_2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # make input data for testing purposes
     from pyckup import grab
+    from pprint import pprint
+    import numpy as np
+
+    # from py2json impo
 
     # make a wf as a bytes object
-    wf = grab('https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0')
-
+    wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+    wfs = bytes_to_wf(wf)
+    chks = simple_chunker(wfs)
+    fvs = simple_featurizer(chks)
     # check the type
-    print(f'{type(wf)=}')
+    print(f"{fvs.shape=}")
 
     # # run the experiment
-    scores = simple_dpp(wf)
-
-    print(scores[:10])
+    model = simple_dpp(wf)
+    scores_1 = apply_model(fvs, model)
+    model_dict = model.to_dpp_jdict()
+    # result = model.to_jdict()
+    model_new = Stroll.from_dpp_jdict(model_dict)
+    scores_2 = apply_model(fvs, model_new)
+    pprint(np.abs(scores_1 - scores_2))
+    # pprint(scores_2)

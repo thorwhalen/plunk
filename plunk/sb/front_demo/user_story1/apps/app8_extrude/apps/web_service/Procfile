@@ -1,0 +1,1 @@
+web: python platform_poc/apps/web_service/app.py

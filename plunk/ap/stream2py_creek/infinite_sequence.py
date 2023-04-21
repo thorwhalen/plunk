@@ -48,7 +48,7 @@ class InfiniteAudioSequence:
     def fill_to_stop_date(self, stop):
         for ad in self.iterator:
             self.buffer_getter.append(ad)
-            if stop is None or ad.end_date > stop:
+            if stop is None or ad.end_date >= stop:
                 break
 
     def __len__(self):

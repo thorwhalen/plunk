@@ -1,29 +1,45 @@
-from typing import List, Dict, Union, TypedDict
+from typing import List, Dict, Union, TypedDict, Callable, Mapping, Iterable
 
 from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
-from front.elements import InputBase, OutputBase, ExecContainerBase
+from front.elements import InputBase, OutputBase
 from plunk.ap.wf_visualize_player.wf_visualize_player_element import WfVisualizePlayer
 from streamlitfront import mk_app
+from streamlitfront.elements import SelectBox, SelectBoxBase
+from lined import LineParametrized
+
+from i2 import FuncFactory, Sig
 from streamlitfront.elements import (
-    SelectBox,
+    SuccessNotification,
+    PipelineMaker,
 )
-from plunk.ap.session_table.session_table_element import OtoTable
-import random
+from functools import partial
 import pandas as pd
 from dataclasses import dataclass
 from st_aggrid import AgGrid
-import pandas as pd
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import streamlit as st
 from streamlitfront import binder as b
-from plunk.sb.front_demo.user_story1.components.components import AudioArrayDisplay
-
-
-class SessionQuery(TypedDict):
-    filter: dict
-    sort: dict
-    pagination: dict
+from front.crude import Crudifier
+from olab.types import (
+    Step,
+    Pipeline,
+    WaveForm,
+)
+from olab.util import clean_dict
+from olab.base import (
+    scores_to_intervals,
+    simple_featurizer,
+    learn_outlier_model,
+    apply_fitted_model,
+    simple_chunker,
+)
+from plunk.sb.front_demo.user_story1.components.components import (
+    AudioArrayDisplay,
+    ArrayWithIntervalsPlotter,
+    GraphOutput,
+    ArrayPlotter,
+)
 
 
 @dataclass
@@ -33,7 +49,7 @@ class Grid(InputBase):
 
     def render(self):
         gb = GridOptionsBuilder.from_dataframe(self.sessions)
-        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_selection(selection_mode='multiple', use_checkbox=True)
         gridOptions = gb.build()
 
         data = AgGrid(
@@ -44,7 +60,7 @@ class Grid(InputBase):
         )
 
         # print(dir(self))
-        return data["selected_rows"]
+        return data['selected_rows']
 
 
 @dataclass
@@ -59,34 +75,20 @@ def retrieve_data(sref):
     import soundfile as sf
     import os
 
-    # sref = "/Dropbox/OtoSense/VacuumEdgeImpulse/" + sref
-    home_directory = os.path.expanduser("~")
-    st.write(home_directory)
-    path = os.path.join(home_directory + "/Dropbox/OtoSense/VacuumEdgeImpulse/", sref)
+    home_directory = os.path.expanduser('~')
+    path = os.path.join(home_directory + '/Dropbox/OtoSense/VacuumEdgeImpulse/', sref)
 
-    # path = os.path.expanduser(sref)
-    st.write(path)
-    arr = sf.read(path, dtype="int16")[0]
+    arr = sf.read(path, dtype='int16')[0]
     return path, arr
 
 
 @dataclass
 class WavSelectionViewer(OutputBase):
     def render(self):
-        st.write("wav selection viewer")
-        import soundfile as sf
-
-        sref = self.output[0]["sref"]
+        sref = self.output[0]['sref']
         path, arr = retrieve_data(sref)
-        # arr = sf.read(sref, dtype="int16")[0]
-        # st.write(type(arr))
-        tab1, tab2 = st.tabs(["Audio Player", "Waveform"])
+        tab1, tab2 = st.tabs(['Audio Player', 'Waveform'])
         with tab1:
-            # if not isinstance(sound, bytes):
-            #     sound = sound.getvalue()
-            # arr = sf.read(BytesIO(sound), dtype="int16")[0]
-            st.write(f"type of data={type(sref)}")
-
             st.audio(path)
         with tab2:
             import matplotlib.pyplot as plt
@@ -95,72 +97,9 @@ class WavSelectionViewer(OutputBase):
             ax.plot(arr)
             ax.legend()
             st.pyplot(fig)
-            # st.write(arr[:10])
 
 
-# @dataclass
-# class WavSelectionViewer(AudioArrayDisplay):
-#     def render(self):
-#         print(f"output is rendered")
-#         data = self.output
-#         import soundfile as sf
-
-#         data = sf.read(data[0]["sref"])
-#         super().render(data)
-#         st.write(self.output)
-
-
-def random_sample_from_list(choices, k=1):
-    return random.sample(choices, k=k)
-
-
-DFLT_HEALTHY = ["Healthy_0", "Healthy_1", "Healthy_2"]
-DFLT_UNHEALTHY = ["Failure", "Imbalance", "Defect", "Noise"]
-
-
-def random_int():
-    return random.randint(0, 1)
-
-
-def mock_annotations():
-    choice = random_int()
-    if choice == 0:
-        return random_sample_from_list(
-            DFLT_HEALTHY, k=random.randint(1, len(DFLT_HEALTHY))
-        )
-    else:
-        return random_sample_from_list(
-            DFLT_UNHEALTHY, k=random.randint(1, len(DFLT_HEALTHY))
-        )
-
-
-# adapted from Andie's code
-def mock_session_gen(n: int = 10) -> List[Dict]:
-    sessions = []
-    time_step = 600000000
-    sample_rates = [44100, 48000]
-
-    for i in range(n):
-        bt = 1677672000000000 + (i * time_step)
-        tt = 1677672000000000 + ((i + 1) * time_step)
-
-        sessions.append(
-            {
-                "ID": f"mockSession{i}",
-                "device_id": f"deviceId{i % 2 + 1}",
-                "bt": bt,
-                "tt": tt,
-                "sr": sample_rates[i % 2],
-                #'bit_depth': 8,
-                #'channels': channels,
-                "annotations": mock_annotations(),
-            }
-        )
-
-    return sessions
-
-
-DFLT_FPATH = "../data/mock_data.csv"
+DFLT_FPATH = '../data/mock_data.csv'
 
 
 def mk_dataset() -> pd.DataFrame:
@@ -171,78 +110,77 @@ def mk_dataset() -> pd.DataFrame:
 MOCK_SESSIONS = mk_dataset()
 
 
-def filterByNamesOperator(
-    names: List[str], operator: str, namedList: List[Dict[str, str]]
-) -> bool:
-    if operator == "and" and not all(
-        name in [item["name"] for item in namedList] for name in names
-    ):
-        return False
-    elif operator == "or" and not any(
-        name in [item["name"] for item in namedList] for name in names
-    ):
-        return False
-    return True
+@dataclass
+class MultiInput(InputBase):
+    n_classes: str = ''
+    session_df: pd.DataFrame = None
+
+    def render(self):
+
+        if isinstance(self.n_classes, str):
+            self.n_classes = int(self.n_classes)
+        d = dict()
+
+        # if self.n_classes:
+        for i in range(self.n_classes):
+            with st.form(key=f'form_{i}'):
+                label = st.text_input(label=f'Class_{i}')
+                if (
+                    isinstance(self.session_df, pd.DataFrame)
+                    and 'annotation' in self.session_df.columns
+                ):
+                    annots = (
+                        st.multiselect(
+                            label=f'label_{i}', options=self.session_df['annotation']
+                        )
+                        or []
+                    )
+                else:
+                    annots = []
+                d[label] = annots
+                st.form_submit_button(label=f'Submit_{i}')
+
+            print(f'{i=}')
+        st.write(d)
+        return d
 
 
-def filterSessions(f: dict, sessions: List[dict]) -> List[dict]:
-    _sessions = sessions.copy()
-    return list(
-        filter(
-            lambda s: (
-                (f.get("from_bt") is None or s["bt"] >= f["from_bt"])
-                and (f.get("to_bt") is None or s["bt"] <= f["to_bt"])
-                and (f.get("from_tt") is None or s["tt"] >= f["from_tt"])
-                and (f.get("to_tt") is None or s["tt"] <= f["to_tt"])
-                and (f.get("sr") is None or s["sr"] == f["sr"])
-                and (
-                    f.get("channels") is None
-                    or filterByNamesOperator(
-                        f["channels"]["names"],
-                        f["channels"]["operator"],
-                        [c["name"] for c in s["channels"]],
-                    )
-                )
-                and (
-                    f.get("annotations") is None
-                    or filterByNamesOperator(
-                        f["annotations"]["names"],
-                        f["annotations"]["operator"],
-                        [a["name"] for a in s["annotations"]],
-                    )
-                )
-            ),
-            _sessions,
+@dataclass
+class DummyMultiInput(InputBase):
+    n_classes: int = None
+    session_df: pd.DataFrame = None
+
+    # def __init__(self, n_classes, session_df):
+    #     super().__init__(n_classes, session_df)
+    #     self.n_classes = n_classes
+    #     self.session_df = session_df
+
+    def render(self):
+        st.write(f'{self=}')
+        # d = dict()
+        # for i in range(self.n_classes):
+        #     label = st.text_input(f"Class {i}")
+        #     annots = st.multiselect(
+        #         options=self.session_df["annotations"].unique(), label=f"Annots {i}"
+        #     )
+        #     d[label] = annots
+
+        # return d
+
+
+@dataclass
+class SelectBoxArgs(SelectBoxBase):
+    args: tuple = None
+    callback: callable = None
+
+    def render(self):
+        return st.selectbox(
+            on_change=self.callback,
+            args=self.args,
+            label=self.name,
+            options=self._options,
+            index=self._preselected_index,
         )
-    )
-
-
-def sort_sessions(sort, sessions: list):
-    _sessions = sessions.copy()
-    if len(_sessions) > 0:
-        _field = sort["field"]
-        if sort["mode"] == "asc":
-            _sessions = sorted(_sessions, key=lambda s: s[_field])
-        else:
-            _sessions = sorted(_sessions, key=lambda s: s[_field], reverse=True)
-    return _sessions
-
-
-def mock_list_sessions(query: SessionQuery):
-    s = MOCK_SESSIONS.copy()
-
-    if not query:
-        return s
-    if _filter := query.get("filter"):
-        s = filterSessions(_filter, s)
-
-    if _sort := query.get("sort"):
-        s = sort_sessions(_sort, s)
-
-    if _pagination := query.get("pagination"):
-        s = s[_pagination.get("from_idx") : _pagination.get("to_idx")]
-
-    return s
 
 
 def identity(x=None):
@@ -254,93 +192,379 @@ def select_sessions(sessions):
     return sessions
 
 
-def session_wf(sessions):
-    if sessions:
-        from plunk.ap.wf_visualize_player.wf_visualize_player_app import (
-            wf_mix,
-            wf_two_channel_sine_tone,
-            wf_three_channel_mixed_sine_tone,
-            wf_four_channel,
-        )
-
-        session = next(s for s in MOCK_SESSIONS if s.get("ID") == sessions[0])
-        n_channels = len(session.get("channels", 1))
-        example_wfs = {
-            1: wf_mix,
-            2: wf_two_channel_sine_tone,
-            3: wf_three_channel_mixed_sine_tone,
-            4: wf_four_channel,
-        }
-
-        return example_wfs[n_channels]()
-
-
-# App
-# features = [identity, session_wf]
 def pre_configure_dpp(model_type, chk_size, featurizer):
-    pass
+    return model_type
 
 
-features = [select_sessions, pre_configure_dpp]
+def get_annotations_from_sessions(session_df):
+    return set.union(*session_df['annotations'].apply(set))
 
 
-config = {
-    APP_KEY: {"title": "DPP builder"},
-    RENDERING_KEY: {
-        "select_sessions": {
-            NAME_KEY: "Original dataset",
-            "description": {
-                "content": """
+def mk_pipeline_maker_app_with_mall(
+    mall: Mapping,
+    *,
+    step_factories: str = 'step_factories',
+    steps: str = 'steps',
+    steps_store=None,
+    pipelines: str = 'pipelines',
+    pipelines_store=None,
+    annotation_dict_store=None,
+    data: str = 'data',
+    data_store=None,
+    # sessions_store=None,
+    annots_set=None,
+    learned_models=None,
+    models_scores=None,
+):
+
+    if not b.mall():
+        b.mall = mall
+    mall = b.mall()
+    if not b.selected_step_factory():
+        b.selected_step_factory = 'chunker'  # TODO make this dynamic
+
+    steps_store = steps_store or steps
+    data_store = data_store or data
+    pipelines_store = pipelines_store or pipelines
+
+    crudifier = partial(Crudifier, mall=mall)
+
+    @crudifier(
+        param_to_mall_map=dict(session_df='sessions_store'),
+        output_store=annotation_dict_store,
+    )
+    def map_annotations_to_classes(session_df, selection_string):
+        result = session_df[session_df['annotation'].isin(selection_string.split(','))]
+        st.write(result)
+        # return d
+
+    def debug_view():
+        st.write(mall)
+
+    def select_disabled(selected, sr):
+        return selected * sr
+
+    @crudifier(
+        param_to_mall_map=dict(step_factory=step_factories), output_store=steps_store
+    )
+    def mk_step(step_factory: Callable, kwargs: dict):
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step = partial(step_factory, **kwargs)()
+        result = Step(step=step, step_factory=step_factory)
+        return result
+
+    @crudifier(
+        param_to_mall_map=dict(step_to_modify=steps_store), output_store=steps_store
+    )
+    def modify_step(step_to_modify: Step, kwargs: dict):
+
+        kwargs = clean_dict(kwargs)  # TODO improve that logic
+        step_factory = step_to_modify.step_factory
+        step = partial(step_factory, **kwargs)()
+        return Step(step=step, step_factory=step_factory)
+
+    @crudifier(
+        output_store=pipelines_store,
+    )
+    def mk_pipeline(steps: Iterable[Callable]):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
+        return pipeline
+
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store),
+        output_store=pipelines_store,
+    )
+    def modify_pipeline(pipeline, steps):
+        named_funcs = [(get_step_name(step), step) for step in steps]
+        pipe = LineParametrized(*named_funcs)
+        return Pipeline(steps=named_funcs, pipe=pipe)
+
+    learn_outlier_model_crudified = crudifier(
+        param_to_mall_map=dict(
+            tagged_data='sound_output', preprocess_pipeline='pipelines'
+        ),
+        output_store='learned_models',
+    )(learn_outlier_model)
+
+    apply_fitted_model_crudified = crudifier(
+        param_to_mall_map=dict(
+            tagged_data='sound_output',
+            preprocess_pipeline='pipelines',
+            fitted_model='learned_models',
+        ),
+        output_store='models_scores',
+    )(apply_fitted_model)
+
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store),
+    )
+    def visualize_pipeline(pipeline: Pipeline):
+
+        return pipeline
+
+    @crudifier(
+        param_to_mall_map=dict(scores='models_scores'),
+    )
+    def visualize_scores(scores, threshold=80, num_segs=3):
+
+        intervals = scores_to_intervals(scores, threshold, num_segs)
+
+        return scores, intervals
+
+    @crudifier(output_store='sound_output')
+    def upload_sound(train_audio: List[WaveForm], tag: str):
+        return train_audio, tag
+
+    def get_step_name(step):
+        return [k for k, v in mall[steps].items() if v.step == step][0]
+
+    def get_selected_step_factory_sig():
+        selected_step_factory = mall['step_factories'].get(
+            b.selected_step_factory.get()
+        )
+        if selected_step_factory:
+            return Sig(selected_step_factory)
+
+    def get_step_to_modify_factory_sig():
+        selected_step_factory = (
+            mall['steps'].get(b.selected_step_to_modify.get()).step_factory
+        )
+        if selected_step_factory:
+            return Sig(selected_step_factory)
+
+    def on_select_pipeline(pipeline):
+        b.steps_of_selected_pipeline.set(mall['pipelines'][pipeline].steps)
+
+    config = {
+        APP_KEY: {'title': 'Data Preparation'},
+        RENDERING_KEY: {
+            'select_sessions': {
+                NAME_KEY: 'Original dataset',
+                'description': {
+                    'content': '''
                             Review carefully the dataset that will be used to train and test the model, then press NEXT.
                             If the dataset does not look right, close the DPP Builder, return to the Session List, 
                             and preselect the relevant sessions before reopening the DPP Builder.
-                            """
+                            '''
+                },
+                'execution': {
+                    'inputs': {
+                        'sessions': {
+                            ELEMENT_KEY: Grid,
+                            'sessions': MOCK_SESSIONS,
+                            # "value": b.selected_row,
+                        },
+                    },
+                    'output': {ELEMENT_KEY: WavSelectionViewer},
+                    # "auto_submit": True,
+                },
             },
-            "execution": {
-                "inputs": {
-                    "sessions": {
-                        ELEMENT_KEY: Grid,
-                        "sessions": MOCK_SESSIONS,
-                        # "value": b.selected_row,
+            Callable: {
+                'execution': {
+                    'inputs': {
+                        'save_name': {
+                            NAME_KEY: 'Save as',
+                        },
                     },
                 },
-                "output": {ELEMENT_KEY: WavSelectionViewer},
-                # "auto_submit": True,
             },
-        },
-        "pre_configure_dpp": {
-            NAME_KEY: "Pre-configure DPP",
-            "description": {
-                "content": """
-                            TBD
-                            """
-            },
-            "execution": {
-                "inputs": {
-                    "model_type": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": ["Outlier model"],
-                        "value": "Outlier model",
+            'map_annotations_to_classes': {
+                NAME_KEY: 'Map annotations to classes',
+                'execution': {
+                    'inputs': {
+                        'session_df': {'value': b.session_df},
+                        'selection_string': {
+                            'value': b.selection_string,
+                        },
                     },
-                    "chk_size": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": [1024, 512, 256],
-                        "value": 1024,
-                    },
-                    "featurizer": {
-                        ELEMENT_KEY: SelectBox,
-                        "options": ["Default featurizer"],
-                        # "value": 1024,
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The step has been created successfully.',
                     },
                 },
-                # "output": {ELEMENT_KEY: WavSelectionViewer},
-                # "auto_submit": True,
+            },
+            'mk_step': {
+                NAME_KEY: 'Pipeline Step Maker',
+                'execution': {
+                    'inputs': {
+                        'step_factory': {
+                            'value': b.selected_step_factory,
+                        },
+                        'kwargs': {'func_sig': get_selected_step_factory_sig},
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The step has been created successfully.',
+                    },
+                },
+            },
+            'select_disabled': {
+                NAME_KEY: 'Selection Disabled',
+                'execution': {
+                    'inputs': {
+                        'selected': {
+                            ELEMENT_KEY: SelectBoxArgs,
+                            'options': [1, 4],
+                            'disabled': False,
+                            #'args': (b.selected_dis(), 10),
+                            #'value': b.selected_dis,
+                            #'callback': lambda a, b: st.write(f'{a*b}'),
+                        },
+                        'sr': {
+                            # ELEMENT_KEY: SelectBox,
+                            'value': 48000,
+                            #'disabled': True,
+                        },
+                    },
+                    #'output': {
+                    #    ELEMENT_KEY: TextOutput,
+                    #'message': 'The step has been created successfully.',
+                    # },
+                },
+            },
+            'modify_step': {
+                NAME_KEY: 'Modify Step',
+                'execution': {
+                    'inputs': {
+                        'step_to_modify': {
+                            'value': b.selected_step_to_modify,
+                        },
+                        'kwargs': {'func_sig': get_step_to_modify_factory_sig},
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The step has been created successfully.',
+                    },
+                },
+            },
+            'mk_pipeline': {
+                NAME_KEY: 'Pipeline Maker',
+                'execution': {
+                    'inputs': {
+                        steps: {
+                            ELEMENT_KEY: PipelineMaker,
+                            'items': [v.step for v in mall[steps].values()],
+                            'serializer': get_step_name,
+                        },
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The pipeline has been created successfully.',
+                    },
+                },
+            },
+            'modify_pipeline': {
+                NAME_KEY: 'Pipeline Modify',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {
+                            ELEMENT_KEY: SelectBox,
+                            'value': b.selected_pipeline,
+                            'on_value_change': on_select_pipeline,
+                        },
+                        steps: {
+                            ELEMENT_KEY: PipelineMaker,
+                            'items': [v.step for v in mall[steps].values()],
+                            'steps': b.steps_of_selected_pipeline(),
+                            'serializer': get_step_name,
+                        },
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The pipeline has been modified successfully.',
+                    },
+                },
+            },
+            'visualize_pipeline': {
+                NAME_KEY: 'Pipeline Visualization',
+                'execution': {
+                    'inputs': {
+                        'pipeline': {
+                            'value': b.selected_pipeline,
+                        },
+                    },
+                    'output': {
+                        ELEMENT_KEY: GraphOutput,
+                        NAME_KEY: 'Flow',
+                        'use_container_width': True,
+                    },
+                },
+            },
+            'visualize_scores': {
+                NAME_KEY: 'Scores Visualization',
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayWithIntervalsPlotter,
+                    },
+                },
+            },
+            'simple_model': {
+                NAME_KEY: 'Learn model',
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
+            },
+            'apply_fitted_model': {
+                NAME_KEY: 'Apply model',
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
             },
         },
-    },
-}
+    }
+
+    funcs = [
+        select_sessions,
+        # upload_sound,
+        map_annotations_to_classes,
+        # mk_step,
+        # modify_step,
+        # mk_pipeline,
+        # modify_pipeline,
+        # learn_outlier_model_crudified,
+        # apply_fitted_model_crudified,
+        # visualize_pipeline,
+        # visualize_scores,
+        select_disabled,
+        debug_view,
+    ]
+    app = mk_app(funcs, config=config)
+
+    return app
 
 
-if __name__ == "__main__":
-    app = mk_app(features, config=config)
+# Mall
+mall = dict(
+    # Factory Input Stores
+    sound_output=dict(),
+    step_factories=dict(
+        # ML
+        chunker=FuncFactory(simple_chunker),
+        featurizer=FuncFactory(simple_featurizer),
+    ),
+    annots_set=set(MOCK_SESSIONS['annotation']),
+    sessions_store={'my_saved_session': MOCK_SESSIONS},
+    # Output Store
+    data=dict(),
+    steps=dict(),
+    mapped_annots=dict(),
+    annotation_dict_store=dict(),
+    pipelines=dict(),
+    exec_outputs=dict(),
+    learned_models=dict(),
+    models_scores=dict(),
+)
+
+
+if __name__ == '__main__':
+
+    app = mk_pipeline_maker_app_with_mall(
+        mall, step_factories='step_factories', steps='steps', pipelines='pipelines'
+    )
+
     app()
