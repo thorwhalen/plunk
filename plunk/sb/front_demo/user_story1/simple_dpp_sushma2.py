@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+import pickle
 import numpy as np
 
 from olab.base import simple_chunker, simple_featurizer
@@ -5,7 +8,7 @@ from olab.types import WaveForm
 from omodel.outliers.pystroll import OutlierModel as Stroll
 from meshed import code_to_dag
 from recode import decode_wav_bytes
-from py2json import Ctor
+from py2store import LocalPickleStore
 
 
 def bytes_to_wf(wav_bytes: bytes) -> WaveForm:
@@ -58,19 +61,26 @@ if __name__ == "__main__":
     # from py2json impo
 
     # make a wf as a bytes object
-    wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+    # wf = grab("https://www.dropbox.com/s/yueb7mn6mo6abxh/0_0.wav?dl=0")
+    filepath = Path(__file__).parent / '0_0.wav'
+    wf = grab(str(filepath))
     wfs = bytes_to_wf(wf)
     chks = simple_chunker(wfs)
     fvs = simple_featurizer(chks)
-    # check the type
-    print(f"{fvs.shape=}")
+    # # check the type
+    # print(f"{fvs.shape=}")
 
     # # run the experiment
-    model = simple_dpp(wf)
+    model: Stroll = simple_dpp(wf)
     scores_1 = apply_model(fvs, model)
     model_dict = model.to_dpp_jdict()
     # result = model.to_jdict()
+    s = LocalPickleStore(str(Path(__file__).parent))
+    s['fitted_model.pkl'] = model_dict
+    model_dict = s['fitted_model.pkl']
     model_new = Stroll.from_dpp_jdict(model_dict)
     scores_2 = apply_model(fvs, model_new)
-    pprint(np.abs(scores_1 - scores_2))
+    assert all(diff == 0 for diff in np.abs(scores_1 - scores_2))
+    # pprint(np.abs(scores_1 - scores_2))
     # pprint(scores_2)
+    

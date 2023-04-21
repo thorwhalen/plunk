@@ -90,10 +90,10 @@ def simple_dpp(block: AudioSegment, aggregation_method: str):
     chks = simple_chunker(wf)
     fvs = simple_featurizer(chks)
     model = learn_model(fvs)
-    scores = apply_model(fvs, model)
-    aggregated_scores = aggregate_scores(scores, aggregation_method)
-    result = decision(aggregated_scores, threshold=2.0)
-
+    # scores = apply_model(fvs, model)
+    # aggregated_scores = aggregate_scores(scores, aggregation_method)
+    # result = decision(aggregated_scores, threshold=2.0)
+    
 
 def apply_trained_model(block: AudioSegment, fitted_model, preprocessing_pipeline):
     wf = segment_to_wf(block)
