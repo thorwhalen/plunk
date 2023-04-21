@@ -46,6 +46,7 @@ def f(talking_point):
 def g(illustration_description):
     return illustration_description.upper()
 
+
 ff = crudifier(
     output_store='illustration_description_store',
 )(f)
@@ -85,5 +86,5 @@ import i2
 #
 # print('-----------------------------------------------')
 # _, f, g, _ = list(cdag.find_funcs())
-print(f"{f.__name__}: {i2.Sig(f)}")
-print(f"{g.__name__}: {i2.Sig(g)}")
+print(f"{ff.__name__}: {i2.Sig(ff)}")
+print(f"{gg.__name__}: {i2.Sig(gg)}")
