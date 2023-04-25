@@ -1,4 +1,8 @@
 from meshed import code_to_dag
+from platform_poc.data.store_factory import mk_ram_store
+from front.crude import prepare_for_crude_dispatch, Crudifier
+from functools import partial
+from mall import mall
 
 
 @code_to_dag
@@ -17,12 +21,10 @@ funcs = list(dag.find_funcs())
 
 q, f, g, r = funcs
 
-from front.crude import prepare_for_crude_dispatch, Crudifier
-from functools import partial
 
-
-mall = {'illustration_description_store': dict()}
-crudifier = partial(Crudifier, mall=mall)
+crudifier = partial(
+    prepare_for_crude_dispatch, mall=mall, include_stores_attribute=True
+)
 
 
 def f(talking_point):
@@ -34,11 +36,20 @@ def g(illustration_description):
 
 
 ff = crudifier(
+    f,
     output_store='illustration_description_store',
-)(f)
+    output_trans=lambda: None,
+)
+
 gg = crudifier(
+    g,
     param_to_mall_map={'illustration_description': 'illustration_description_store'},
-)(g)
+    output_trans=lambda: None,
+)
+# gg = crudifier(
+#     param_to_mall_map={'illustration_description': 'illustration_description_store'},
+#     output_trans=lambda: None,
+# )(g)
 
 
 # ff = prepare_for_crude_dispatch(
@@ -60,6 +71,8 @@ def debug(x):
 
 
 funcs = [ff, gg, debug]
+# funcs = [debug]
+
 
 # from front.dag import crudify_func_nodes
 #
@@ -68,11 +81,11 @@ funcs = [ff, gg, debug]
 # )
 # funcs = list(cdag.find_funcs())
 
-import i2
+# import i2
 
 # print(*map(lambda x: f"{x.__name__}: {i2.Sig(x)}", funcs), sep='\n')
 #
 # print('-----------------------------------------------')
 # _, f, g, _ = list(cdag.find_funcs())
-print(f"{ff.__name__}: {i2.Sig(ff)}")
-print(f"{gg.__name__}: {i2.Sig(gg)}")
+# print(f"{ff.__name__}: {i2.Sig(ff)}")
+# print(f"{gg.__name__}: {i2.Sig(gg)}")
