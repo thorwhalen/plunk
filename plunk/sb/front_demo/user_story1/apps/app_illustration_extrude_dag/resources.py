@@ -13,13 +13,13 @@ def dag():
     slide = aggregate_story_and_image(img_url, story_text)
 
 
-funcs = list(dag.find_funcs())
+# funcs = list(dag.find_funcs())
 
 # ------------------------------------------------------------------------------
 # Adding persistence
 
 
-q, f, g, r = funcs
+# q, f, g, r = funcs
 
 
 crudifier = partial(
@@ -46,46 +46,21 @@ gg = crudifier(
     param_to_mall_map={'illustration_description': 'illustration_description_store'},
     output_trans=lambda: None,
 )
-# gg = crudifier(
-#     param_to_mall_map={'illustration_description': 'illustration_description_store'},
-#     output_trans=lambda: None,
-# )(g)
-
-
-# ff = prepare_for_crude_dispatch(
-#     f,
-#     mall=mall,
-#     output_store='illustration_description_store',
-# )
-# gg = prepare_for_crude_dispatch(
-#     g,
-#     mall=mall,
-#     param_to_mall_map={'illustration_description': 'illustration_description_store'}
-# )
-
-# import streamlit as st
 
 
 def debug(x):
     return mall
 
 
-funcs = [ff, gg, debug]
+# funcs = [ff, gg, debug]
 # funcs = [debug]
 
+# ------------------------------------------------------------------------------
+# Using crudify_func_nodes
 
-# from front.dag import crudify_func_nodes
-#
-# cdag = crudify_func_nodes(
-#     'illustration_description', dag
-# )
-# funcs = list(cdag.find_funcs())
+from front.dag import crudify_func_nodes
 
-# import i2
-
-# print(*map(lambda x: f"{x.__name__}: {i2.Sig(x)}", funcs), sep='\n')
-#
-# print('-----------------------------------------------')
-# _, f, g, _ = list(cdag.find_funcs())
-# print(f"{ff.__name__}: {i2.Sig(ff)}")
-# print(f"{gg.__name__}: {i2.Sig(gg)}")
+cdag = crudify_func_nodes(
+    'illustration_description', dag, mall=mall, include_stores_attribute=True
+)
+funcs = [*list(cdag.find_funcs()), debug]
