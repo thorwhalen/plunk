@@ -76,6 +76,23 @@ def get_steps_from_selected_pipeline(pipeline):
     return pipeline.steps
 
 
+from streamlitfront.elements import implement_input_component, SelectBoxBase
+
+# MultiSelectBox = implement_input_component(
+#     SelectBoxBase, st.multiselect, options='_options', index='_preselected_index'
+# )
+@dataclass
+class MultiSelectBox(InputBase):
+    options: List[str] = None
+    index: List[int] = None
+
+    def render(self):
+        return st.multiselect(
+            options=self.options,
+            index=self.index,
+        )
+
+
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
@@ -121,14 +138,17 @@ def mk_pipeline_maker_app_with_mall(
         return Step(step=step, step_factory=step_factory)
 
     #
-    @crudifier(output_store=pipelines_store,)
+    @crudifier(
+        output_store=pipelines_store,
+    )
     def mk_pipeline(steps: Iterable[Callable]):
         named_funcs = [(get_step_name(step), step) for step in steps]
         pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
         return pipeline
 
     @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store), output_store=pipelines_store,
+        param_to_mall_map=dict(pipeline=pipelines_store),
+        output_store=pipelines_store,
     )
     def modify_pipeline(pipeline, steps):
         st.write(f'current pipeline={pipeline}')
@@ -136,7 +156,9 @@ def mk_pipeline_maker_app_with_mall(
         pipe = LineParametrized(*named_funcs)
         return Pipeline(steps=named_funcs, pipe=pipe)
 
-    @crudifier(param_to_mall_map=dict(pipeline=pipelines_store),)
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store),
+    )
     def visualize_pipeline(pipeline: Pipeline):
 
         return pipeline
@@ -175,7 +197,9 @@ def mk_pipeline_maker_app_with_mall(
                 NAME_KEY: 'Pipeline Step Maker',
                 'execution': {
                     'inputs': {
-                        'step_factory': {'value': b.selected_step_factory,},
+                        'step_factory': {
+                            'value': b.selected_step_factory,
+                        },
                         'kwargs': {'func_sig': get_selected_step_factory_sig},
                     },
                     'output': {
@@ -188,7 +212,9 @@ def mk_pipeline_maker_app_with_mall(
                 NAME_KEY: 'Modify Step',
                 'execution': {
                     'inputs': {
-                        'step_to_modify': {'value': b.selected_step_to_modify,},
+                        'step_to_modify': {
+                            'value': b.selected_step_to_modify,
+                        },
                         'kwargs': {'func_sig': get_step_to_modify_factory_sig},
                     },
                     'output': {
@@ -247,7 +273,11 @@ def mk_pipeline_maker_app_with_mall(
             'visualize_pipeline': {
                 NAME_KEY: 'Pipeline Visualization',
                 'execution': {
-                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
+                    'inputs': {
+                        'pipeline': {
+                            'value': b.selected_pipeline,
+                        },
+                    },
                     'output': {
                         ELEMENT_KEY: GraphOutput,
                         NAME_KEY: 'Flow',
