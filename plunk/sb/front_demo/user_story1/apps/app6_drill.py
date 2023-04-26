@@ -16,6 +16,7 @@ from streamlitfront.elements import (
     PipelineMaker,
 )
 from streamlitfront.elements import FileUploader
+from front.elements import InputBase
 
 from olab.types import (
     Step,
@@ -36,6 +37,27 @@ from olab.base import (
     apply_fitted_model,
     simple_chunker,
 )
+
+from streamlitfront.elements import implement_input_component, SelectBoxBase
+from dataclasses import dataclass
+
+# MultiSelectBox = implement_input_component(
+#     SelectBoxBase, st.multiselect, options='_options', index='_preselected_index'
+# )
+
+import streamlit as st
+
+
+@dataclass
+class MultiSelectBox(InputBase):
+    options: List[str] = None
+    label: str = ''
+
+    def render(self):
+        return st.multiselect(
+            options=self.options,
+            label=self.label,
+        )
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -83,14 +105,17 @@ def mk_pipeline_maker_app_with_mall(
         step = partial(step_factory, **kwargs)()
         return Step(step=step, step_factory=step_factory)
 
-    @crudifier(output_store=pipelines_store,)
+    @crudifier(
+        output_store=pipelines_store,
+    )
     def mk_pipeline(steps: Iterable[Callable]):
         named_funcs = [(get_step_name(step), step) for step in steps]
         pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
         return pipeline
 
     @crudifier(
-        param_to_mall_map=dict(pipeline=pipelines_store), output_store=pipelines_store,
+        param_to_mall_map=dict(pipeline=pipelines_store),
+        output_store=pipelines_store,
     )
     def modify_pipeline(pipeline, steps):
         named_funcs = [(get_step_name(step), step) for step in steps]
@@ -113,12 +138,16 @@ def mk_pipeline_maker_app_with_mall(
         output_store='models_scores',
     )(apply_fitted_model)
 
-    @crudifier(param_to_mall_map=dict(pipeline=pipelines_store),)
+    @crudifier(
+        param_to_mall_map=dict(pipeline=pipelines_store),
+    )
     def visualize_pipeline(pipeline: Pipeline):
 
         return pipeline
 
-    @crudifier(param_to_mall_map=dict(scores='models_scores'),)
+    @crudifier(
+        param_to_mall_map=dict(scores='models_scores'),
+    )
     def visualize_scores(scores, threshold=80, num_segs=3):
 
         intervals = scores_to_intervals(scores, threshold, num_segs)
@@ -149,6 +178,9 @@ def mk_pipeline_maker_app_with_mall(
     def on_select_pipeline(pipeline):
         b.steps_of_selected_pipeline.set(mall['pipelines'][pipeline].steps)
 
+    def try_multiselect(selected):
+        return selected
+
     config = {
         APP_KEY: {'title': 'Data Preparation'},
         RENDERING_KEY: {
@@ -169,13 +201,19 @@ def mk_pipeline_maker_app_with_mall(
                 },
             },
             'display_tag_sound': {
-                'execution': {'output': {ELEMENT_KEY: AudioArrayDisplay,},},
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: AudioArrayDisplay,
+                    },
+                },
             },
             'mk_step': {
                 NAME_KEY: 'Pipeline Step Maker',
                 'execution': {
                     'inputs': {
-                        'step_factory': {'value': b.selected_step_factory,},
+                        'step_factory': {
+                            'value': b.selected_step_factory,
+                        },
                         'kwargs': {'func_sig': get_selected_step_factory_sig},
                     },
                     'output': {
@@ -188,7 +226,9 @@ def mk_pipeline_maker_app_with_mall(
                 NAME_KEY: 'Modify Step',
                 'execution': {
                     'inputs': {
-                        'step_to_modify': {'value': b.selected_step_to_modify,},
+                        'step_to_modify': {
+                            'value': b.selected_step_to_modify,
+                        },
                         'kwargs': {'func_sig': get_step_to_modify_factory_sig},
                     },
                     'output': {
@@ -238,7 +278,11 @@ def mk_pipeline_maker_app_with_mall(
             'visualize_pipeline': {
                 NAME_KEY: 'Pipeline Visualization',
                 'execution': {
-                    'inputs': {'pipeline': {'value': b.selected_pipeline,},},
+                    'inputs': {
+                        'pipeline': {
+                            'value': b.selected_pipeline,
+                        },
+                    },
                     'output': {
                         ELEMENT_KEY: GraphOutput,
                         NAME_KEY: 'Flow',
@@ -246,31 +290,55 @@ def mk_pipeline_maker_app_with_mall(
                     },
                 },
             },
+            'try_multiselect': {
+                NAME_KEY: 'Pipeline Visualization',
+                'execution': {
+                    'inputs': {
+                        'selected': {
+                            ELEMENT_KEY: MultiSelectBox,
+                            'options': [1, 2, 3, 4],
+                        },
+                    },
+                },
+            },
             'visualize_scores': {
                 NAME_KEY: 'Scores Visualization',
-                'execution': {'output': {ELEMENT_KEY: ArrayWithIntervalsPlotter,},},
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayWithIntervalsPlotter,
+                    },
+                },
             },
             'simple_model': {
                 NAME_KEY: 'Learn model',
-                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
             },
             'apply_fitted_model': {
                 NAME_KEY: 'Apply model',
-                'execution': {'output': {ELEMENT_KEY: ArrayPlotter,},},
+                'execution': {
+                    'output': {
+                        ELEMENT_KEY: ArrayPlotter,
+                    },
+                },
             },
         },
     }
 
     funcs = [
-        upload_sound,
-        mk_step,
-        modify_step,
-        mk_pipeline,
-        modify_pipeline,
-        learn_outlier_model_crudified,
-        apply_fitted_model_crudified,
-        visualize_pipeline,
-        visualize_scores,
+        # upload_sound,
+        # mk_step,
+        # modify_step,
+        # mk_pipeline,
+        # modify_pipeline,
+        # learn_outlier_model_crudified,
+        # apply_fitted_model_crudified,
+        # visualize_pipeline,
+        # visualize_scores,
+        try_multiselect,
     ]
     app = mk_app(funcs, config=config)
 
