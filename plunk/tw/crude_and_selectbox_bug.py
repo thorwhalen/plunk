@@ -81,11 +81,11 @@ if __name__ == '__main__':
 
     validate_config(config, funcs)  # validate config against funcs
 
-    # For mk_web_app version, need to:
-    # In one terminal window, run:
-    #     python o/plunk/plunk/tw/crude_and_selectbox_bug_api.py
-    # In another terminal window, run:
-    #     python o/plunk/plunk/tw/crude_and_selectbox_bug.py
+    # # For mk_web_app version, need to:
+    # # In one terminal window, run:
+    # #     python o/plunk/plunk/tw/crude_and_selectbox_bug_api.py
+    # # In another terminal window, run:
+    # #     python o/plunk/plunk/tw/crude_and_selectbox_bug.py
     # from extrude import mk_web_app
     # app = mk_web_app(funcs, config=config, api_url='http://localhost:3030/openapi')
 
