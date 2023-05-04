@@ -74,6 +74,13 @@ def _interpret_scores(timestamped_data, scores, scope, aggregate):
                     bt=getattr(scope, AGGR_BT_ATTR),
                     tt=timestamped_data['tt'],
                 )
+	    else:
+		yield Annotation(
+                    name='No outlier detected in session.',
+                    kind='DPP',
+                    bt=getattr(scope, AGGR_BT_ATTR),
+                    tt=timestamped_data['tt'],
+                )
             if hasattr(scope, AGGR_BT_ATTR):
                 delattr(scope, AGGR_BT_ATTR)
             if hasattr(scope, AGGR_SESSION_ATTR):
