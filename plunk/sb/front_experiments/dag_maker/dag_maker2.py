@@ -16,8 +16,14 @@ from streamlitfront.elements import (
 )
 from front.crude import Crudifier, prepare_for_crude_dispatch
 import graphviz
+from streamlitfront.examples.util import Graph
+from front.elements import FrontComponentBase
+
+
 import streamlit as st
 from functools import partial
+from meshed.makers import triples_to_fnodes
+from meshed import DAG
 
 from dataclasses import dataclass
 from front.elements import InputBase, ExecContainerBase, OutputBase
@@ -43,7 +49,8 @@ class ExtendableTable(InputBase):
             num_rows="dynamic",
         )
         # return list(self.df.itertuples())
-        return edited_df.itertuples()  # cannot return to dataframe
+        triples = list(edited_df.itertuples())
+        return [item[1:] for item in triples[1:]]  # cannot return to dataframe
 
 
 def df_to_triples(df):
@@ -79,14 +86,38 @@ class RowsToGraph(OutputBase):
         self.rows = self.output
         st.write(list(self.rows))
 
-        self.df = pd.DataFrame(
-            list(self.rows),
-            columns=["Outputs", "Function", "Inputs"],
+
+@dataclass
+class DagViewer(OutputBase):
+    def render(self):
+        self.output.dot_digraph()
+        # st.write(list(self.rows))
+
+
+@dataclass
+class GraphOutput(OutputBase):
+    use_container_width: bool = False
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        dag = self.output
+        st.graphviz_chart(
+            figure_or_dot=dag.dot_digraph(),
+            use_container_width=self.use_container_width,
         )
-        st.write(self.df)
-        st.write(list(self.rows))
-        # graph = mk_graph(self.df)
-        # st.graphviz_chart(graph)
+
+
+@dataclass
+class Graph(FrontComponentBase):
+    use_container_width: bool = False
+
+    def render(self):
+        with st.expander(self.name, True):
+            dag: DAG = self.obj
+            st.graphviz_chart(
+                figure_or_dot=dag.dot_digraph(),
+                use_container_width=self.use_container_width,
+            )
 
 
 def mk_pipeline_maker_app_with_mall(
@@ -94,6 +125,7 @@ def mk_pipeline_maker_app_with_mall(
     *,
     steps: str = 'steps',
     edges_store: str = 'edges_store',
+    dags_store: str = 'dags_store',
 ):
     if not b.mall():
         b.mall = mall
@@ -110,9 +142,12 @@ def mk_pipeline_maker_app_with_mall(
     # def on_select_choice(item):
 
     #     b.selected_multichoice().append(item)
-
-    def add_edge(edge_table=['this', 'func', 'that']):
-        return edge_table
+    @crudifier(
+        output_store=dags_store,
+    )
+    def add_edge(edge_table) -> DAG:
+        dag = DAG(triples_to_fnodes(edge_table))
+        return dag
 
     def debug():
         st.write(mall)
@@ -122,6 +157,16 @@ def mk_pipeline_maker_app_with_mall(
     config = {
         APP_KEY: {'title': 'Dag Maker'},
         RENDERING_KEY: {
+            DAG: {
+                'graph': {
+                    ELEMENT_KEY: Graph,
+                    NAME_KEY: 'Flow',
+                },
+                #'execution': {
+                #    'inputs': delegate_input(nodes_list),
+                # "inputs":{'wf_filepath'}
+                # },
+            },
             'add_edge': {
                 NAME_KEY: 'Dag Maker',
                 'execution': {
@@ -130,7 +175,7 @@ def mk_pipeline_maker_app_with_mall(
                             ELEMENT_KEY: ExtendableTable,
                             'df': pd.DataFrame(
                                 [
-                                    ['this', 'func', 'that'],
+                                    ['output', 'func', 'inputs'],
                                 ],
                                 columns=["Outputs", "Function", "Inputs"],
                             )
@@ -139,7 +184,8 @@ def mk_pipeline_maker_app_with_mall(
                         },
                     },
                     'output': {
-                        ELEMENT_KEY: RowsToGraph,
+                        # ELEMENT_KEY: RowsToGraph,
+                        ELEMENT_KEY: GraphOutput,
                         #'message': f'Edges created',
                     },
                 },
@@ -157,12 +203,13 @@ if __name__ == '__main__':
 
     mall = dict(
         # Output Store
-        steps={'a': 'stepa', 'b': 'stepb'},
-        edges_store=dict(),
+        # steps={'a': 'stepa', 'b': 'stepb'},
+        # edges_store=dict(),
+        dags_store=dict(),
     )
 
     crudifier = partial(prepare_for_crude_dispatch, mall=mall)
 
-    app = mk_pipeline_maker_app_with_mall(mall, steps='steps')
+    app = mk_pipeline_maker_app_with_mall(mall)
 
     app()
