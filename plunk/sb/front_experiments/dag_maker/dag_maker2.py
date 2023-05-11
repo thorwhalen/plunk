@@ -1,9 +1,14 @@
 """
-An app that loads either a wav file from local folder or records a sound
-and visualizes the resulting numpy array 
+User story 2: 
+    - User inputs rows of triples (outputs, function, inputs)
+    - User creates a DAG from the triples
+    - User can view the DAG
+    - User can edit the DAG by changing its functions
 """
+
+
 from typing import Mapping
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Union, List
 from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
 from front.crude import Crudifier, prepare_for_crude_dispatch
 from lined import LineParametrized
@@ -14,11 +19,17 @@ from streamlitfront.elements import (
     SuccessNotification,
     PipelineMaker,
 )
+from i2 import Sig
 from front.crude import Crudifier, prepare_for_crude_dispatch
 import graphviz
 from streamlitfront.examples.util import Graph
 from front.elements import FrontComponentBase
-
+from front.types import Map
+from streamlitfront.elements.js import mk_element_factory
+from dataclasses import dataclass
+from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
+from st_aggrid.shared import GridUpdateMode
 
 import streamlit as st
 from functools import partial
@@ -32,6 +43,46 @@ from front.elements import InputBase, ExecContainerBase, OutputBase
 def _init_cache(key, init_value):
     if not b[key]():
         b[key].set(init_value)
+
+
+def f(a, b: int, /):
+    return a + b
+
+
+def g(a_plus_b, d: float = 4):
+    return a_plus_b * d
+
+
+DFLT_FUNCS_DICT = {'f': f, 'g': g}
+
+
+@dataclass
+class EditableGrid(InputBase):
+    rows: pd.DataFrame = None
+    editable_column: str = None
+    choices: List = None
+    # on_value_change: callable = lambda x: print(x["selected_rows"])
+
+    def render(self):
+        gb = GridOptionsBuilder.from_dataframe(self.rows)
+        # gb.configure_selection(selection_mode='multiple', use_checkbox=True)
+        gb.configure_column(
+            self.editable_column,
+            editable=True,
+            cellEditor='agSelectCellEditor',
+            cellEditorParams={'values': self.choices},
+        )
+        gridOptions = gb.build()
+
+        data = AgGrid(
+            self.rows,
+            gridOptions=gridOptions,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            enable_enterprise_modules=True,
+        )
+
+        # print(dir(self))
+        return data['selected_rows']
 
 
 @dataclass
@@ -108,6 +159,36 @@ class GraphOutput(OutputBase):
 
 
 @dataclass
+class ListSelector(InputBase):
+    keys: Iterable = None
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        for key in self.keys:
+            print(key)
+
+
+@dataclass
+class ListSelect(InputBase):
+    options: Iterable = None
+    keys: Iterable = None
+
+    def __post_init__(self):
+        super().__post_init__()
+
+    def render(self):
+        result = dict()
+        if self.keys:
+            for key in self.keys:
+                # value = st_multiselect(options=self.options, key=key)
+                value = st.selectbox(
+                    options=self.options, label=key
+                )  # TODO: make it multiselect
+                result[key] = DFLT_FUNCS_DICT[value]
+        return result
+
+
+@dataclass
 class Graph(FrontComponentBase):
     use_container_width: bool = False
 
@@ -120,11 +201,39 @@ class Graph(FrontComponentBase):
             )
 
 
+def compare_signatures_by_inserting_defaults(func1, func2):
+    from i2.signatures import Sig, _fill_defaults_and_annotations
+
+    sig1 = Sig(func1)
+    sig2 = Sig(func2)
+    sig_1_from_2 = _fill_defaults_and_annotations(sig1, sig2)
+    sig_2_from_1 = _fill_defaults_and_annotations(sig2, sig1)
+
+    return sig_1_from_2 == sig_2_from_1
+    # return True
+
+
+def compare_signatures_by_lengths(func1, func2):
+    from i2.signatures import Sig
+
+    sig1 = Sig(func1)
+    sig2 = Sig(func2)
+
+    return len(sig1) == len(sig2)
+
+
+from meshed.dag import ch_func_node_func
+
+ch_func_node_func2 = partial(
+    ch_func_node_func, func_comparator=compare_signatures_by_lengths
+)
+
+
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
     *,
-    steps: str = 'steps',
-    edges_store: str = 'edges_store',
+    # steps: str = 'steps',
+    # edges_store: str = 'edges_store',
     dags_store: str = 'dags_store',
 ):
     if not b.mall():
@@ -133,15 +242,6 @@ def mk_pipeline_maker_app_with_mall(
 
     crudifier = partial(Crudifier, mall=mall)
 
-    # @crudifier(param_to_mall_map=dict(edge=steps), output_store=edges_store)
-    # def add_edge(edge):
-    #     return edge
-
-    # b.selected_multichoice = []
-
-    # def on_select_choice(item):
-
-    #     b.selected_multichoice().append(item)
     @crudifier(
         output_store=dags_store,
     )
@@ -149,10 +249,27 @@ def mk_pipeline_maker_app_with_mall(
         dag = DAG(triples_to_fnodes(edge_table))
         return dag
 
+    @crudifier(
+        param_to_mall_map=dict(dag=dags_store),
+        output_store=dags_store,
+    )
+    def chooser(dag, inputs):
+        new_dag = dag.ch_funcs(ch_func_node_func2, **inputs)
+        st.write([node.func for node in new_dag.func_nodes])
+        return new_dag
+
     def debug():
         st.write(mall)
 
     _init_cache('selected_multichoice', [])
+
+    def on_select_dag(dag_name):
+        dag = mall['dags_store'][dag_name]
+        st.write(dag)
+        funcs_names = [node.name for node in dag.func_nodes]
+        st.write(funcs)
+
+        b.names_for_dag.set(funcs_names)
 
     config = {
         APP_KEY: {'title': 'Dag Maker'},
@@ -162,10 +279,6 @@ def mk_pipeline_maker_app_with_mall(
                     ELEMENT_KEY: Graph,
                     NAME_KEY: 'Flow',
                 },
-                #'execution': {
-                #    'inputs': delegate_input(nodes_list),
-                # "inputs":{'wf_filepath'}
-                # },
             },
             'add_edge': {
                 NAME_KEY: 'Dag Maker',
@@ -178,22 +291,39 @@ def mk_pipeline_maker_app_with_mall(
                                     ['output', 'func', 'inputs'],
                                 ],
                                 columns=["Outputs", "Function", "Inputs"],
-                            )
-                            # 'choices': list(mall[steps].values()),
-                            # 'callback': on_select_choice,
+                            ),
                         },
                     },
                     'output': {
-                        # ELEMENT_KEY: RowsToGraph,
                         ELEMENT_KEY: GraphOutput,
-                        #'message': f'Edges created',
+                    },
+                },
+            },
+            'chooser': {
+                NAME_KEY: 'chooser',
+                'execution': {
+                    'inputs': {
+                        'dag': {
+                            ELEMENT_KEY: SelectBox,
+                            'value': b.selected_dag,
+                            'on_value_change': on_select_dag,
+                        },
+                        'inputs': {
+                            ELEMENT_KEY: ListSelect,
+                            'options': list(DFLT_FUNCS_DICT.keys()),
+                            'keys': b.names_for_dag(),
+                        },
+                    },
+                    'output': {
+                        ELEMENT_KEY: SuccessNotification,
+                        'message': 'The step has been created successfully.',
                     },
                 },
             },
         },
     }
 
-    funcs = [add_edge, debug]
+    funcs = [add_edge, chooser, debug]
     app = mk_app(funcs, config=config)
 
     return app
@@ -203,8 +333,6 @@ if __name__ == '__main__':
 
     mall = dict(
         # Output Store
-        # steps={'a': 'stepa', 'b': 'stepb'},
-        # edges_store=dict(),
         dags_store=dict(),
     )
 

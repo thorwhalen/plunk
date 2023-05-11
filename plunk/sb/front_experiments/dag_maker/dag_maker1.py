@@ -1,60 +1,68 @@
-from typing import List, Dict, Union, TypedDict, Callable, Mapping, Iterable
+"""
+User story 1: 
+    - User inputs rows of triples (outputs, function, inputs)
+    - User creates a DAG from the triples
+    - User can view the DAG
+"""
 
-from front import APP_KEY, RENDERING_KEY, NAME_KEY, ELEMENT_KEY
-from front.elements import InputBase, OutputBase
-from plunk.ap.wf_visualize_player.wf_visualize_player_element import WfVisualizePlayer
-from streamlitfront import mk_app
-from streamlitfront.elements import SelectBox, SelectBoxBase
+
+from typing import Mapping
+from typing import Callable, Iterable, Union, List
+from front import APP_KEY, RENDERING_KEY, ELEMENT_KEY, NAME_KEY
+from front.crude import Crudifier, prepare_for_crude_dispatch
 from lined import LineParametrized
-from streamlitfront.examples.util import Graph
-
-from i2 import FuncFactory, Sig
+import pandas as pd
+from streamlitfront import mk_app, binder as b
 from streamlitfront.elements import (
+    SelectBox,
     SuccessNotification,
     PipelineMaker,
 )
-from functools import partial
-import pandas as pd
+from front.crude import Crudifier, prepare_for_crude_dispatch
+import graphviz
+from streamlitfront.examples.util import Graph
+from front.elements import FrontComponentBase
+from front.types import Map
+from streamlitfront.elements.js import mk_element_factory
 from dataclasses import dataclass
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
+
 import streamlit as st
-from streamlitfront import binder as b
-from front.crude import Crudifier
-from olab.types import (
-    Step,
-    Pipeline,
-    WaveForm,
-)
-from olab.util import clean_dict
-from olab.base import (
-    scores_to_intervals,
-    simple_featurizer,
-    learn_outlier_model,
-    apply_fitted_model,
-    simple_chunker,
-)
-from plunk.sb.front_demo.user_story1.components.components import (
-    ArrayWithIntervalsPlotter,
-    GraphOutput,
-    ArrayPlotter,
-)
-from meshed import FuncNode, DAG
+from functools import partial
+from meshed.makers import triples_to_fnodes
+from meshed import DAG
+
+from dataclasses import dataclass
+from front.elements import InputBase, ExecContainerBase, OutputBase
+
+
+def _init_cache(key, init_value):
+    if not b[key]():
+        b[key].set(init_value)
 
 
 @dataclass
-class Grid(InputBase):
-    sessions: pd.DataFrame = None
+class EditableGrid(InputBase):
+    rows: pd.DataFrame = None
+    editable_column: str = None
+    choices: List = None
     # on_value_change: callable = lambda x: print(x["selected_rows"])
 
     def render(self):
-        gb = GridOptionsBuilder.from_dataframe(self.sessions)
-        gb.configure_selection(selection_mode='multiple', use_checkbox=True)
+        gb = GridOptionsBuilder.from_dataframe(self.rows)
+        # gb.configure_selection(selection_mode='multiple', use_checkbox=True)
+        gb.configure_column(
+            self.editable_column,
+            editable=True,
+            cellEditor='agSelectCellEditor',
+            cellEditorParams={'values': self.choices},
+        )
         gridOptions = gb.build()
 
         data = AgGrid(
-            self.sessions,
+            self.rows,
             gridOptions=gridOptions,
             update_mode=GridUpdateMode.SELECTION_CHANGED,
             enable_enterprise_modules=True,
@@ -64,154 +72,181 @@ class Grid(InputBase):
         return data['selected_rows']
 
 
-def retrieve_data(sref):
-    import soundfile as sf
-    import os
+@dataclass
+class ExtendableTable(InputBase):
+    df: pd.DataFrame = None
 
-    home_directory = os.path.expanduser('~')
-    path = os.path.join(home_directory + '/Dropbox/OtoSense/VacuumEdgeImpulse/', sref)
-
-    arr = sf.read(path, dtype='int16')[0]
-    return path, arr
-
-
-def identity(x=None):
-    st.write(b.selected_row())
-    return x
-
-
-def select_sessions(sessions):
-    return sessions
-
-
-def pre_configure_dpp(model_type, chk_size, featurizer):
-    return model_type
+    def render(self):
+        # self.df = pd.DataFrame(
+        #     self.rows,
+        #     columns=["Outputs", "Function", "Inputs"],
+        # )
+        edited_df = st.experimental_data_editor(
+            self.df,
+            use_container_width=True,
+            num_rows="dynamic",
+        )
+        # return list(self.df.itertuples())
+        triples = list(edited_df.itertuples())
+        return [item[1:] for item in triples[1:]]  # cannot return to dataframe
 
 
-def get_annotations_from_sessions(session_df):
-    return set.union(*session_df['annotations'].apply(set))
+def df_to_triples(df):
+    for row in df.itertuples():
+        yield row.Outputs, row.Function, row.Inputs
+
+
+def triple_to_edges(triple_gen):
+    for outputs, func, inputs in triple_gen:
+        func = func.strip()
+        for output in outputs.split(','):
+            yield func, output.strip()
+
+        for input in inputs.split(','):
+            yield input.strip(), func
+
+
+from dol import Pipe
+
+row_to_edges = Pipe(df_to_triples, triple_to_edges)
+
+
+def mk_graph(df, row_to_edges=row_to_edges):
+    graph = graphviz.Digraph()
+    for from_, to_ in row_to_edges(df):
+        graph.edge(from_, to_)
+    return graph
+
+
+@dataclass
+class RowsToGraph(OutputBase):
+    def render(self):
+        self.rows = self.output
+        st.write(list(self.rows))
+
+
+@dataclass
+class DagViewer(OutputBase):
+    def render(self):
+        self.output.dot_digraph()
+        # st.write(list(self.rows))
+
+
+@dataclass
+class GraphOutput(OutputBase):
+    use_container_width: bool = False
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        dag = self.output
+        st.graphviz_chart(
+            figure_or_dot=dag.dot_digraph(),
+            use_container_width=self.use_container_width,
+        )
+
+
+@dataclass
+class ListSelector(InputBase):
+    keys: Iterable = None
+
+    def render(self):
+        # with st.expander(self.name, True): #cannot nest expanders
+        for key in self.keys:
+            print(key)
+
+
+@dataclass
+class ListSelect(InputBase):
+    options: Iterable = None
+    keys: Iterable = None
+    # item_template: ItemTemplate = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        # self.options = normalize_map(self.options)
+        # self.item_template = normalize_map(self.item_template)
+        # if isinstance(self.item_template, Path):
+        #     with self.item_template.open() as f:
+        #         self.item_template = f.read()
+
+    def render(self):
+        # st_multiselect = mk_element_factory('st_multiselect')
+        result = []
+        for key in self.keys:
+            # value = st_multiselect(options=self.options, key=key)
+            value = st.selectbox(
+                options=self.options, label=key
+            )  # TODO: make it multiselect
+            result.append(value)
+        return result
+
+
+@dataclass
+class Graph(FrontComponentBase):
+    use_container_width: bool = False
+
+    def render(self):
+        with st.expander(self.name, True):
+            dag: DAG = self.obj
+            st.graphviz_chart(
+                figure_or_dot=dag.dot_digraph(),
+                use_container_width=self.use_container_width,
+            )
 
 
 def mk_pipeline_maker_app_with_mall(
     mall: Mapping,
-    # *,
-    step_factories: str = 'step_factories',
+    *,
     steps: str = 'steps',
-    # funcnodes: str = 'funcnodes',
-    funcnodes_store: str = 'funcnodes_store',
-    # pipelines: str = 'pipelines',
+    edges_store: str = 'edges_store',
     dags_store: str = 'dags_store',
-    # annotation_dict_store=None,
-    # data: str = 'data',
-    # data_store=None,
-    # # sessions_store=None,
-    # annots_set=None,
-    # learned_models=None,
-    # models_scores=None,
 ):
-
     if not b.mall():
         b.mall = mall
     mall = b.mall()
-    if not b.selected_step_factory():
-        b.selected_step_factory = 'chunker'  # TODO make this dynamic
-
-    # steps_store = steps_store or steps
-    # data_store = data_store or data
-    # funcnodes_store = funcnodes_store or funcnodes
 
     crudifier = partial(Crudifier, mall=mall)
 
-    def debug_view():
-        st.write(mall)
+    # @crudifier(param_to_mall_map=dict(edge=steps), output_store=edges_store)
+    # def add_edge(edge):
+    #     return edge
 
-    @crudifier(
-        param_to_mall_map=dict(func_factory=step_factories),
-        output_store=funcnodes_store,
-    )
-    def mk_funcnode(func_factory: Callable, out: str, kwargs: dict):
-        kwargs = clean_dict(kwargs)  # TODO improve that logic
-        step = partial(func_factory, **kwargs)()
-        result = FuncNode(func=step, out=out)
-        return result
+    # b.selected_multichoice = []
 
+    # def on_select_choice(item):
+
+    #     b.selected_multichoice().append(item)
     @crudifier(
         output_store=dags_store,
     )
-    def mk_dag(steps: Iterable[Callable]):
-        st.write(steps)
-        # named_funcs = [(get_step_name(step), step) for step in steps]
-        # pipeline = Pipeline(steps=steps, pipe=LineParametrized(*named_funcs))
-        return DAG(*steps)
+    def add_edge(edge_table) -> DAG:
+        dag = DAG(triples_to_fnodes(edge_table))
+        return dag
 
-    # learn_outlier_model_crudified = crudifier(
-    #     param_to_mall_map=dict(
-    #         tagged_data='sound_output', preprocess_pipeline='pipelines'
-    #     ),
-    #     output_store='learned_models',
-    # )(learn_outlier_model)
+    @crudifier(
+        param_to_mall_map=dict(dag=dags_store),
+        # output_store=dags_store,
+    )
+    def chooser(dag, inputs):
+        return inputs
 
-    # apply_fitted_model_crudified = crudifier(
-    #     param_to_mall_map=dict(
-    #         tagged_data='sound_output',
-    #         preprocess_pipeline='pipelines',
-    #         fitted_model='learned_models',
-    #     ),
-    #     output_store='models_scores',
-    # )(apply_fitted_model)
+    def debug():
+        st.write(mall)
 
-    # @crudifier(
-    #     param_to_mall_map=dict(pipeline=pipelines_store),
-    # )
-    # def visualize_pipeline(pipeline: Pipeline):
+    _init_cache('selected_multichoice', [])
 
-    #     return pipeline
+    def on_select_dag(dag_name):
+        dag = mall['dags_store'][dag_name]
+        st.write(dag)
+        funcs_names = [node.name for node in dag.func_nodes]
+        st.write(funcs)
 
-    # @crudifier(
-    #     param_to_mall_map=dict(scores='models_scores'),
-    # )
-    # def visualize_scores(scores, threshold=80, num_segs=3):
-
-    #     intervals = scores_to_intervals(scores, threshold, num_segs)
-
-    #     return scores, intervals
-
-    # @crudifier(output_store='sound_output')
-    # def upload_sound(train_audio: List[WaveForm], tag: str):
-    #     return train_audio, tag
-
-    def get_step_name(step):
-        return [k for k, v in mall[funcnodes_store].items() if v == step][0]
-
-    def get_selected_func_factory_sig():
-        selected_step_factory = mall['step_factories'].get(
-            b.selected_func_factory.get()
-        )
-        if selected_step_factory:
-            return Sig(selected_step_factory)
-
-    def get_step_to_modify_factory_sig():
-        selected_step_factory = (
-            mall['steps'].get(b.selected_step_to_modify.get()).step_factory
-        )
-        if selected_step_factory:
-            return Sig(selected_step_factory)
-
-    def on_select_pipeline(pipeline):
-        b.steps_of_selected_pipeline.set(mall['pipelines'][pipeline].steps)
+        b.names_for_dag.set(funcs_names)
+        # b.selected_dag.set(dag)
 
     config = {
-        APP_KEY: {'title': 'Data Preparation'},
+        APP_KEY: {'title': 'Dag Maker'},
         RENDERING_KEY: {
-            Callable: {
-                'execution': {
-                    'inputs': {
-                        'save_name': {
-                            NAME_KEY: 'Save as',
-                        },
-                    },
-                },
-            },
             DAG: {
                 'graph': {
                     ELEMENT_KEY: Graph,
@@ -222,131 +257,72 @@ def mk_pipeline_maker_app_with_mall(
                 # "inputs":{'wf_filepath'}
                 # },
             },
-            'mk_funcnode': {
-                NAME_KEY: 'Funcnode Maker',
-                'execution': {
-                    'inputs': {
-                        'func_factory': {
-                            'value': b.selected_func_factory,
-                        },
-                        'kwargs': {'func_sig': get_selected_func_factory_sig},
-                        'save_name': {
-                            NAME_KEY: 'Save as',
-                        },
-                    },
-                    'output': {
-                        ELEMENT_KEY: SuccessNotification,
-                        'message': 'The step has been created successfully.',
-                    },
-                },
-            },
-            'mk_dag': {
+            'add_edge': {
                 NAME_KEY: 'Dag Maker',
                 'execution': {
                     'inputs': {
-                        steps: {
-                            ELEMENT_KEY: PipelineMaker,
-                            'items': mall[funcnodes_store].values(),
-                            'serializer': get_step_name,
+                        'edge_table': {
+                            ELEMENT_KEY: ExtendableTable,
+                            'df': pd.DataFrame(
+                                [
+                                    ['output', 'func', 'inputs'],
+                                ],
+                                columns=["Outputs", "Function", "Inputs"],
+                            )
+                            # 'choices': list(mall[steps].values()),
+                            # 'callback': on_select_choice,
                         },
                     },
                     'output': {
-                        ELEMENT_KEY: SuccessNotification,
-                        'message': 'The pipeline has been created successfully.',
+                        # ELEMENT_KEY: RowsToGraph,
+                        ELEMENT_KEY: GraphOutput,
+                        #'message': f'Edges created',
                     },
                 },
             },
-            # 'visualize_pipeline': {
-            #     NAME_KEY: 'Pipeline Visualization',
+            # 'chooser': {
+            #     NAME_KEY: 'chooser',
             #     'execution': {
             #         'inputs': {
-            #             'pipeline': {
-            #                 'value': b.selected_pipeline,
+            #             'dag': {
+            #                 ELEMENT_KEY: SelectBox,
+            #                 'value': b.selected_dag,
+            #                 'on_value_change': on_select_dag,
+            #             },
+            #             'inputs': {
+            #                 ELEMENT_KEY: ListSelect,
+            #                 'options': ['a', 'b', 'c', 'd'],
+            #                 'keys': b.names_for_dag(),
+            #                 # 'choices': list(mall[steps].values()),
+            #                 # 'callback': on_select_choice,
             #             },
             #         },
             #         'output': {
-            #             ELEMENT_KEY: GraphOutput,
-            #             NAME_KEY: 'Flow',
-            #             'use_container_width': True,
-            #         },
-            #     },
-            # },
-            # 'visualize_scores': {
-            #     NAME_KEY: 'Scores Visualization',
-            #     'execution': {
-            #         'output': {
-            #             ELEMENT_KEY: ArrayWithIntervalsPlotter,
-            #         },
-            #     },
-            # },
-            # 'simple_model': {
-            #     NAME_KEY: 'Learn model',
-            #     'execution': {
-            #         'output': {
-            #             ELEMENT_KEY: ArrayPlotter,
-            #         },
-            #     },
-            # },
-            # 'apply_fitted_model': {
-            #     NAME_KEY: 'Apply model',
-            #     'execution': {
-            #         'output': {
-            #             ELEMENT_KEY: ArrayPlotter,
+            #             ELEMENT_KEY: SuccessNotification,
+            #             'message': 'The step has been created successfully.',
             #         },
             #     },
             # },
         },
     }
 
-    funcs = [
-        # select_sessions,
-        # upload_sound,
-        # map_annotations_to_classes,
-        mk_funcnode,
-        # modify_step,
-        mk_dag,
-        # modify_pipeline,
-        # learn_outlier_model_crudified,
-        # apply_fitted_model_crudified,
-        # visualize_pipeline,
-        # visualize_scores,
-        # select_disabled,
-        debug_view,
-    ]
+    funcs = [add_edge, debug]
     app = mk_app(funcs, config=config)
 
     return app
 
 
-# Mall
-mall = dict(
-    # Factory Input Stores
-    step_factories=dict(
-        # ML
-        chunker=FuncFactory(simple_chunker),
-        featurizer=FuncFactory(simple_featurizer),
-    ),
-    # sessions_store={'my_saved_session': MOCK_SESSIONS},
-    # Output Store
-    funcnodes_store=dict(),
-    steps=dict(),
-    # mapped_annots=dict(),
-    # annotation_dict_store=dict(),
-    dags_store=dict(),
-    # exec_outputs=dict(),
-    # learned_models=dict(),
-    # models_scores=dict(),
-)
-
-
 if __name__ == '__main__':
 
-    app = mk_pipeline_maker_app_with_mall(
-        mall,
-        funcnodes_store='funcnodes_store',
-        step_factories='step_factories',
-        steps='steps',
-        dags_store='dags_store',
+    mall = dict(
+        # Output Store
+        # steps={'a': 'stepa', 'b': 'stepb'},
+        # edges_store=dict(),
+        dags_store=dict(),
     )
+
+    crudifier = partial(prepare_for_crude_dispatch, mall=mall)
+
+    app = mk_pipeline_maker_app_with_mall(mall)
 
     app()
