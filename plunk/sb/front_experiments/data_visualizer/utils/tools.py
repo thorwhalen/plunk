@@ -1,7 +1,8 @@
 import numpy as np
 from creek.tools import apply_func_to_index, fanout_and_flatten
 import umap
-import umap.plot
+
+# import umap.plot
 from functools import partial
 from odat.mdat.vacuum import (
     DFLT_CHUNKER,
