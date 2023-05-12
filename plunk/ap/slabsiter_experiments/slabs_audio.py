@@ -27,7 +27,7 @@ def plc_with_event(plc: AudioSegment):
         return plc
 
 
-plc_source = WavFileSourceReader(plc_file, frames_per_buffer=50, start_date=0)
+plc_source = WavFileSourceReader(plc_file, frames_per_buffer=5, start_date=0)
 accel_source = WavFileSourceReader(accel_file, frames_per_buffer=12800, start_date=0)
 
 print('plc info:')
@@ -47,7 +47,7 @@ with accel_source.stream_buffer(maxlen=None) as accel_buffer:
             wf_buffer=lambda: accel_reader,
             plc=next_plc,
             plc_event=plc_with_event,
-            wf_at_event=find_wf_at_event,
+            wf_at_event=find_wf_at_event, # needs to be changed
         )
 
         for s in slabs:
