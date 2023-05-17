@@ -35,6 +35,8 @@ import streamlit as st
 from functools import partial
 from meshed.makers import triples_to_fnodes
 from meshed import DAG
+from meshed.base import rebind_to_func
+
 
 from dataclasses import dataclass
 from front.elements import InputBase, ExecContainerBase, OutputBase
@@ -254,7 +256,7 @@ def mk_pipeline_maker_app_with_mall(
         output_store=dags_store,
     )
     def chooser(dag, inputs):
-        new_dag = dag.ch_funcs(ch_func_node_func2, **inputs)
+        new_dag = dag.ch_funcs(rebind_to_func, **inputs)
         st.write([node.func for node in new_dag.func_nodes])
         return new_dag
 

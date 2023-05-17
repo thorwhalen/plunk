@@ -1,6 +1,7 @@
 import numpy as np
 from creek.tools import apply_func_to_index, fanout_and_flatten
-import umap
+
+# import umap
 
 # import umap.plot
 from functools import partial
@@ -49,5 +50,6 @@ def preprocess(X_train):
 
 
 def plot_umap(X, y, show_legend=True):
-    mapper = umap.UMAP().fit(X)
-    umap.plot.points(mapper, labels=np.array(y), show_legend=show_legend)
+    pass
+    # mapper = umap.UMAP().fit(X)
+    # umap.plot.points(mapper, labels=np.array(y), show_legend=show_legend)

@@ -148,15 +148,20 @@ config_ = {
     RENDERING_KEY: {
         'classify': {
             'execution': {
-                'inputs': {
-                    'wf_src': {ELEMENT_KEY: SelectBox, 'options': mall['wfsource'],},
-                    'learner': {ELEMENT_KEY: SelectBox, 'options': mall['learner'],},
+                # 'inputs': {
+                #     'wf_src': {ELEMENT_KEY: SelectBox, 'options': mall['wfsource'],},
+                #     'learner': {ELEMENT_KEY: SelectBox, 'options': mall['learner'],},
+                'output': {
+                    ELEMENT_KEY: NumpyArrayDisplay,
                 },
-                'output': {ELEMENT_KEY: NumpyArrayDisplay,},
-            }
-        },
+            },
+        }
     },
 }
 
-app = mk_app([classify], config=config_,)
+
+app = mk_app(
+    [classify],
+    config=config_,
+)
 app()
